@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{b5c6af31-e025-433c-b74a-705a793d0fd6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\UnitTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\Proto\ClockTest\clock_info.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\..\Lib\e3\libcommon\test\LibCommon_BufferTest.inc">
+      <Filter>src</Filter>
+    </None>
+    <None Include="..\..\..\..\..\Lib\e3\libcommon\test\LibCommon_ProfilerTest.inc">
+      <Filter>src</Filter>
+    </None>
+    <None Include="..\..\..\..\..\Lib\e3\libcommon\test\LibCommon_AllTests.inc">
+      <Filter>src</Filter>
+    </None>
+    <None Include="..\..\Audio_AllTests.inc">
+      <Filter>src</Filter>
+    </None>
+    <None Include="..\..\..\..\..\Lib\e3\libcommon\test\LibCommon_MathTest.inc">
+      <Filter>src</Filter>
+    </None>
+    <None Include="..\..\Core_AllTests.inc">
+      <Filter>src</Filter>
+    </None>
+  </ItemGroup>
+</Project>

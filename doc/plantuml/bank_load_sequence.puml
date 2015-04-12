@@ -1,0 +1,22 @@
+
+@startuml
+
+!include skin.iuml
+
+title
+<font size=24 color=#000000>Bank load</font>
+endtitle
+
+participant BankSerializer
+participant Bank
+
+Bank -> Bank: path empty: \nnew bank
+Bank -> Bank: clear
+Bank -> BankSerializer: loadBank
+BankSerializer -> BankSerializer: parse
+note left: xml node \nfor every \nobject
+BankSerializer -> Bank: data:\n- xmlRoot\n- hash of current instrument
+
+
+
+@enduml

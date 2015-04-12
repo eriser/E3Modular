@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\UnitTests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\Proto\ClockTest\clock_info.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\..\Lib\e3\libcommon\test\LibCommon_BufferTest.inc" />
+    <None Include="..\..\..\..\..\Lib\e3\libcommon\test\LibCommon_AllTests.inc" />
+    <None Include="..\..\..\..\..\Lib\e3\libcommon\test\LibCommon_MathTest.inc" />
+    <None Include="..\..\..\..\..\Lib\e3\libcommon\test\LibCommon_ProfilerTest.inc" />
+    <None Include="..\..\Audio_AllTests.inc" />
+    <None Include="..\..\Core_AllTests.inc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\Lib\e3\libcommon\builds\msvc2013\libcommon.vcxproj">
+      <Project>{8eef5cb6-f417-4843-91da-35a24b57bac4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\Lib\juce\lib\builds\msvc2013\libjuce.vcxproj">
+      <Project>{4d29ee29-4f80-3ee7-50b5-b1adb986f073}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\builds\msvc2013\E3Modular.vcxproj">
+      <Project>{e70be7f8-1696-e094-9c6e-507e3a2b343d}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{094C65EE-9121-4127-A37A-3AF76F7A142D}</ProjectGuid>
+    <RootNamespace>E3ModularTest</RootNamespace>
+    <ProjectName>UnitTests</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);D:\Dev\C++\Lib\e3\libcommon\lib;D:\Dev\C++\Lib\gtest-1.7.0\msvc\gtest\Debug;$(ProjectDir)\..\..\..\builds\msvc2013\UT_Debug;D:\Dev\C++\Lib\juce\lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\Dev\C++\Lib\boost\boost_1_57_0;D:\Dev\C++\Lib\gtest-1.7.0\include;$(ProjectDir)\src;D:\Dev\C++\Lib\juce\builds\VisualStudio2013</IncludePath>
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)..\..\bin\</OutDir>
+    <TargetName>Test</TargetName>
+    <IntDir>$(OBJ_DIR)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);D:\Dev\C++\Lib\e3\libcommon\lib;D:\Dev\C++\Lib\gtest-1.7.0\msvc\gtest\Release;$(ProjectDir)\..\..\..\builds\msvc2013\UT_Release;D:\Dev\C++\Lib\juce\lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\Dev\C++\Lib\boost\boost_1_57_0;D:\Dev\C++\Lib\gtest-1.7.0\include;$(ProjectDir)\src;D:\Dev\C++\Lib\juce\builds\VisualStudio2013</IncludePath>
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)..\..\bin\</OutDir>
+    <TargetName>Test</TargetName>
+    <IntDir>$(OBJ_DIR)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_UNICODE;UNICODE;_TRACE;%(PreprocessorDefinitions);BUILD_TARGET_APP=1;UNITTEST</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>D:\Dev\C++\Lib\gallant_signal;D:\Dev\C++\Lib\e3\libcommon\include;D:\Dev\C++\Lib\e3\libcommon\test;D:\Dev\C++\Lib\e3\libaudio\include;D:\Dev\C++\Lib\e3\libaudio\test;D:\Dev\C++\Lib\vst\ASIOSDK2\common;D:\Dev\C++\Lib\juce\modules;$(ProjectDir)\..\..\..\juce;$(ProjectDir)\..\..\..\src;$(ProjectDir)\..\..\</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;gtestd.lib;libcommond.lib;E3Modular_d.lib;libjuce_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <OptimizeReferences>false</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MinSpace</Optimization>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_UNICODE;UNICODE;_TRACE;NDEBUG;%(PreprocessorDefinitions);BUILD_TARGET_APP=1;UNITTEST</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>D:\Dev\C++\Lib\gallant_signal;D:\Dev\C++\Lib\e3\libcommon\include;D:\Dev\C++\Lib\e3\libcommon\test;D:\Dev\C++\Lib\e3\libaudio\include;D:\Dev\C++\Lib\e3\libaudio\test;D:\Dev\C++\Lib\vst\ASIOSDK2\common;D:\Dev\C++\Lib\juce\modules;$(ProjectDir)\..\..\..\juce;$(ProjectDir)\..\..\..\src;$(ProjectDir)\..\..\</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;gtest.lib;libcommon.lib;E3Modular.lib;libjuce.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

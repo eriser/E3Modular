@@ -1,0 +1,42 @@
+@startuml
+scale 350 width
+skinparam backgroundColor LightYellow
+skinparam state {
+    StartColor MediumBlue
+    BackgroundColor Peru
+    BackgroundColor<<Superstate>> LightYellow
+    BorderColor Gray
+}
+skinparam note {
+    BackgroundColor Olive
+    BorderColor Gray
+}
+'left to right direction
+title ADSREnvelopeGenerator
+
+state STAGE_OFF
+STAGE_OFF: level: [0]
+[*] --> STAGE_OFF: ctor
+
+state Cycle <<Superstate>> {
+    state STAGE_ATTACK
+    state STAGE_DECAY
+    state STAGE_SUSTAIN
+    STAGE_ATTACK: level: [0..1]
+    STAGE_DECAY: level: [1..sustain]
+    STAGE_SUSTAIN: level: [sustain]
+
+    STAGE_OFF -> STAGE_ATTACK :  NoteOn
+    STAGE_ATTACK -> STAGE_DECAY : Timeout
+    STAGE_DECAY -> STAGE_SUSTAIN : Timeout
+}
+
+note left of Cycle : Signal: cycleStarting
+state STAGE_RELEASE
+STAGE_RELEASE: level [current..0]
+
+Cycle -right-> STAGE_RELEASE : NoteOff
+STAGE_RELEASE -up-> STAGE_OFF : Timeout
+note bottom of STAGE_RELEASE : Signal: cycleFinished
+
+@enduml

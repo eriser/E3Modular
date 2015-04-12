@@ -1,0 +1,95 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "E3Modular", "E3Modular.vcxproj", "{E70BE7F8-1696-E094-9C6E-507E3A2B343D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073} = {4D29EE29-4F80-3EE7-50B5-B1ADB986F073}
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4} = {8EEF5CB6-F417-4843-91DA-35A24B57BAC4}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcommon", "..\..\..\..\Lib\e3\libcommon\builds\msvc2013\libcommon.vcxproj", "{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTests", "..\..\test\builds\msvc2013\E3ModularTest.vcxproj", "{094C65EE-9121-4127-A37A-3AF76F7A142D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073} = {4D29EE29-4F80-3EE7-50B5-B1ADB986F073}
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2} = {BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4} = {8EEF5CB6-F417-4843-91DA-35A24B57BAC4}
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D} = {E70BE7F8-1696-E094-9C6E-507E3A2B343D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libaudio", "..\..\..\..\Lib\e3\libaudio\builds\msvc2013\libaudio.vcxproj", "{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libjuce", "..\..\..\..\Lib\juce\lib\builds\msvc2013\libjuce.vcxproj", "{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		App_Debug|Win32 = App_Debug|Win32
+		App_Release|Win32 = App_Release|Win32
+		UT_Debug|Win32 = UT_Debug|Win32
+		UT_Release|Win32 = UT_Release|Win32
+		VST_Debug|Win32 = VST_Debug|Win32
+		VST_Release|Win32 = VST_Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.App_Debug|Win32.ActiveCfg = App_Debug|Win32
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.App_Debug|Win32.Build.0 = App_Debug|Win32
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.App_Release|Win32.ActiveCfg = App_Release|Win32
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.App_Release|Win32.Build.0 = App_Release|Win32
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.UT_Debug|Win32.ActiveCfg = UT_Debug|Win32
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.UT_Debug|Win32.Build.0 = UT_Debug|Win32
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.UT_Release|Win32.ActiveCfg = UT_Release|Win32
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.UT_Release|Win32.Build.0 = UT_Release|Win32
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.VST_Debug|Win32.ActiveCfg = VST_Debug|Win32
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.VST_Debug|Win32.Build.0 = VST_Debug|Win32
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.VST_Release|Win32.ActiveCfg = VST_Release|Win32
+		{E70BE7F8-1696-E094-9C6E-507E3A2B343D}.VST_Release|Win32.Build.0 = VST_Release|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.App_Debug|Win32.ActiveCfg = Debug|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.App_Debug|Win32.Build.0 = Debug|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.App_Release|Win32.ActiveCfg = Release|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.App_Release|Win32.Build.0 = Release|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.UT_Debug|Win32.ActiveCfg = Debug|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.UT_Debug|Win32.Build.0 = Debug|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.UT_Release|Win32.ActiveCfg = Release|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.UT_Release|Win32.Build.0 = Release|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.VST_Debug|Win32.ActiveCfg = Debug|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.VST_Debug|Win32.Build.0 = Debug|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.VST_Release|Win32.ActiveCfg = Release|Win32
+		{8EEF5CB6-F417-4843-91DA-35A24B57BAC4}.VST_Release|Win32.Build.0 = Release|Win32
+		{094C65EE-9121-4127-A37A-3AF76F7A142D}.App_Debug|Win32.ActiveCfg = Debug|Win32
+		{094C65EE-9121-4127-A37A-3AF76F7A142D}.App_Release|Win32.ActiveCfg = Release|Win32
+		{094C65EE-9121-4127-A37A-3AF76F7A142D}.UT_Debug|Win32.ActiveCfg = Debug|Win32
+		{094C65EE-9121-4127-A37A-3AF76F7A142D}.UT_Debug|Win32.Build.0 = Debug|Win32
+		{094C65EE-9121-4127-A37A-3AF76F7A142D}.UT_Release|Win32.ActiveCfg = Release|Win32
+		{094C65EE-9121-4127-A37A-3AF76F7A142D}.UT_Release|Win32.Build.0 = Release|Win32
+		{094C65EE-9121-4127-A37A-3AF76F7A142D}.VST_Debug|Win32.ActiveCfg = Debug|Win32
+		{094C65EE-9121-4127-A37A-3AF76F7A142D}.VST_Release|Win32.ActiveCfg = Release|Win32
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}.App_Debug|Win32.ActiveCfg = Debug|Win32
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}.App_Debug|Win32.Build.0 = Debug|Win32
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}.App_Release|Win32.ActiveCfg = Release|Win32
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}.App_Release|Win32.Build.0 = Release|Win32
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}.UT_Debug|Win32.ActiveCfg = Debug|Win32
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}.UT_Debug|Win32.Build.0 = Debug|Win32
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}.UT_Release|Win32.ActiveCfg = Release|Win32
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}.VST_Debug|Win32.ActiveCfg = Debug|Win32
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}.VST_Debug|Win32.Build.0 = Debug|Win32
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}.VST_Release|Win32.ActiveCfg = Release|Win32
+		{BBFF8186-319F-4EB8-98F5-BA995CBBF2D2}.VST_Release|Win32.Build.0 = Release|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.App_Debug|Win32.ActiveCfg = App_Debug|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.App_Debug|Win32.Build.0 = App_Debug|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.App_Release|Win32.ActiveCfg = App_Release|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.App_Release|Win32.Build.0 = App_Release|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.UT_Debug|Win32.ActiveCfg = App_Debug|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.UT_Debug|Win32.Build.0 = App_Debug|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.UT_Release|Win32.ActiveCfg = VST_Release|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.UT_Release|Win32.Build.0 = VST_Release|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.VST_Debug|Win32.ActiveCfg = VST_Debug|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.VST_Debug|Win32.Build.0 = VST_Debug|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.VST_Release|Win32.ActiveCfg = VST_Release|Win32
+		{4D29EE29-4F80-3EE7-50B5-B1ADB986F073}.VST_Release|Win32.Build.0 = VST_Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,20 @@
+skinparam backgroundColor #eeeeee
+skinparam shadowing false
+
+skinparam note {
+    BackgroundColor LightSteelBlue
+    BorderColor LightSteelBlue
+}
+skinparam participant {
+    BackgroundColor Teal
+    BorderColor #eeeeee
+    FontColor Ivory
+}
+skinparam sequenceArrowColor black
+skinparam activityArrowColor black
+
+skinparam sequenceLifeLine {
+    BackgroundColor ivory
+    BorderColor black
+    BorderThickness 1
+}

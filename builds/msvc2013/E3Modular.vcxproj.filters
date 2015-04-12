@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{0298E8A4-EE13-2944-F4BD-1E3708929897}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core">
+      <UniqueIdentifier>{F3E47201-63CA-0330-8432-0743EDA2F2DE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="juce">
+      <UniqueIdentifier>{661a126b-0bf4-49fc-823e-bc310c8f12ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gui">
+      <UniqueIdentifier>{b088e817-72ad-4b4b-9775-24d626c027ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\app">
+      <UniqueIdentifier>{f644fdcd-bb51-4c59-b351-3a3284139438}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\modules">
+      <UniqueIdentifier>{66c8e72e-8410-463e-b3f0-7c128b987793}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\juce\JuceHeader.h">
+      <Filter>juce</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\GlobalHeader.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Profiler.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\ProfilerHelper.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\AudioEditor.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\app\Application.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\app\AppWindow.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\ParameterShaper.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Models.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Module.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\modules\Delay.h">
+      <Filter>src\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\modules\Envelopes.h">
+      <Filter>src\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\modules\Master.h">
+      <Filter>src\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\modules\MidiModules.h">
+      <Filter>src\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\modules\SineOscil.h">
+      <Filter>src\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Bank.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\ModelCatalog.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Ports.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\BankSerializer.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\app\AudioEngine.h">
+      <Filter>src\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Instrument.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Polyphony.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\SineWaveVoice.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Sink.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Voice.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Settings.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Processor.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\Skin.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\ColourIds.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\Resources.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\ToolPanel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\StackedPanel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\CommandTarget.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\EditorPanel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\BrowserPanel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\MidiMonitor.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\gui\AudioEditor.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\Application.cpp">
+      <Filter>src\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Lib\juce\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.cpp">
+      <Filter>juce</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\ParameterShaper.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Models.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Module.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Bank.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\ModelCatalog.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Ports.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\BankSerializer.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\AppWindow.cpp">
+      <Filter>src\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\AudioEngine.cpp">
+      <Filter>src\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Instrument.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Polyphony.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\modules\Delay.cpp">
+      <Filter>src\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\modules\Envelopes.cpp">
+      <Filter>src\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\modules\Master.cpp">
+      <Filter>src\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\modules\MidiModules.cpp">
+      <Filter>src\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\modules\SineOscil.cpp">
+      <Filter>src\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Sink.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Voice.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Settings.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Processor.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\Skin.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\Resources.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\ToolPanel.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\StackedPanel.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\CommandTarget.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\EditorPanel.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\BrowserPanel.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\MidiMonitor.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,8 @@
+@startuml
+Alice -> Bob: Authentication Request
+Bob --> Alice: Authentication Response
+rnote over Alice : I'm Alice
+
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: another authentication Response
+@enduml

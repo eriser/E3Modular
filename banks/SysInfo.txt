@@ -1,0 +1,32 @@
+System info
+
+Service Pack 2 (Build 6002)
+
+CPUID support	: YES (486 or later)
+Intel CPU	: YES
+Vendor String	: GenuineIntel
+Brand ID	: 0
+Brand Name	: Unsupported
+Type		: Original OEM processor	Type ID	: 0
+Family		: 6	Model	: 15	Stepping ID	: 10
+CPU Support MMX	: YES
+CPU Support SSE	: YES
+CPU Support SSE2: YES
+FPU onboard	: YES
+Clock Speed	: 1996.472286 MHz
+
+OS Support SSE	: YES
+OS Support SSE2	: YES
+Unmask Exceptn	: YES
+
+Total Phy MEM	: 2045 MB
+Total Avl MEM	: 0 MB
+Total Pg File	: 0 MB
+Avail Pg File	: -1940 MB
+Total Vrl MEM	: 2047 MB
+Total Avl Vrl	: 1308 MB
+Memory Load	: 56 percent
+
+High Memory Machine		: YES
+Accelerator Display Card	: YES
+Fast machine(>386)		: YES

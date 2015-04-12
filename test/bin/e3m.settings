@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Settings>
+  <Application Autosave="1" BankPath="D:\Dev\C++\Projects\Nexus2\test\bin\TestBank.nexus"/>
+  <AudioDeviceState DeviceType="ASIO" OutputDeviceName="GR-55" InputDeviceName="GR-55"
+                    SampleRate="44100" BufferSize="432"/>
+  <MidiInput name="QUNEO"/>
+  <MidiInput name="microKEY-25"/>
+</Settings>
