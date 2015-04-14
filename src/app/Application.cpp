@@ -43,7 +43,7 @@ namespace e3 {
 
         std::string windowState = getSettings()->getWindowState("Standalone");
         window_->restoreWindowStateFromString(windowState);
-        window_->setLookAndFeel(editor->skin_);
+        window_->setLookAndFeel(editor->style_);
         window_->setWantsKeyboardFocus(false);
         window_->setVisible(true);
     }

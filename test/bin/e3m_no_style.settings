@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<E3MSettings>
+  <Application Autosave="1" BankPath="" Style=""/>
+  <Standalone>
+    <Window state=""/>
+    <AudioDeviceState DeviceType="" OutputDeviceName="" InputDeviceName=""
+                      SampleRate="" BufferSize=""/>
+  </Standalone>
+  <Plugin>
+    <Window state=""/>
+  </Plugin>
+</E3MSettings>

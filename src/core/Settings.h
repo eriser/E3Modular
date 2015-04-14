@@ -23,6 +23,8 @@ namespace e3 {
         std::string getWindowState(const std::string& context) const;
         void setWindowState(const std::string& state, const std::string& context);
 
+        XmlElement* getStyle(const std::string& name = "Default");
+
 #ifdef BUILD_TARGET_APP
         void loadAudioDevices(AudioDeviceManager* manager, int numInputChannels, int numOutputChannels);
         void loadMidiDevices(AudioDeviceManager* manager);
@@ -31,8 +33,11 @@ namespace e3 {
 #endif
 
     protected:
+        bool checkValid();
         void parse(const File& file);
         void parse(const std::string& settings);
+
+        std::string getDefaultXml();
 
         static std::string createDefaultFilename();
 
@@ -41,15 +46,28 @@ namespace e3 {
         bool needsStore_ = false;
 
         const char* rootTagname_ = "E3MSettings";
-        std::string defaultXml_ = 
-            "<E3MSettings>"
-                "<Application Autosave='1' BankPath=''/>"
-                "<Standalone>"
-                    "<Window x='-1' y='-1' w='1000' h='700' />"
-                    "<AudioDeviceState DeviceType = '' OutputDeviceName = '' InputDeviceName = ''"
-                    "SampleRate = '' BufferSize = '' />"
-                "</Standalone>"
-                "<Plugin />"
-            "</ E3MSettings>";
+        std::string defaultXml_ =
+            "<Application Autosave='1' BankPath='' Style='Default' />"
+            "<Standalone>"
+            "<WindowState x='10' y='10' w='1000' h='700' />"
+            "<AudioDeviceState DeviceType = '' OutputDeviceName = '' InputDeviceName = ''"
+            "SampleRate = '' BufferSize = '' />"
+            "</Standalone>"
+            "<Plugin>"
+            "<WindowState x='10' y='10' w='1000' h='700' />"
+            "</Plugin>";
+
+        std::string defaultStyleXml_ =
+            "<Style name = 'Default'>"
+            "<Color name = 'background' argb = 'ff5f5f60' />"
+            "<Color name = 'contentBackground' argb = 'ffbebdbb' />"
+            "<Color name = 'darkText' argb = 'ffffffff' />"
+            "<Color name = 'lightText' argb = 'ffbdbcba' />"
+            "<Color name = 'highlight' argb = 'ffcf732f' />"
+            "<Color name = 'buttonOffBackground' argb = 'ff3e4042' />"
+            "<Color name = 'buttonOnBackground' argb = 'ffd08930' />"
+            "<Color name = 'buttonOffText' argb = 'ffbdbcba' />"
+            "<Color name = 'buttonOnText' argb = 'ff000000' />"
+            "</ Style>";
     };
 } // namespace e3 

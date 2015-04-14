@@ -12,7 +12,7 @@
 #include <memory>
 #include "JuceHeader.h"
 #include "gui/CommandTarget.h"
-#include "gui/Skin.h"
+#include "gui/Style.h"
 
 
 namespace e3 {
@@ -44,7 +44,7 @@ namespace e3 {
             kAudioPanel = 2
         };
 
-        ScopedPointer<Skin> skin_;
+        ScopedPointer<Style> style_;
         ScopedPointer<ToolPanel> toolPanel_;
         ScopedPointer<StackedPanel> stackedPanel_;
         ScopedPointer<EditorPanel>  editorPanel_;

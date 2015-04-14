@@ -108,12 +108,28 @@ namespace e3 {
             }
         }
 
-
         TEST_F(SettingsTest, invalidFile)
         {
             settings_.setPath("e3m_invalid.settings");
             settings_.load();
             EXPECT_TRUE(settings_.testValid());
+        }
+
+        TEST_F(SettingsTest, hasStyle)
+        {
+            settings_.load();
+            XmlElement* e = settings_.getStyle();
+            ASSERT_NE(nullptr, e);
+            EXPECT_TRUE(e->getStringAttribute("name") == "Default");
+        }
+
+        TEST_F(SettingsTest, useDefaultStyle)
+        {
+            settings_.setPath("e3m_no_style.settings");
+            settings_.load();
+            XmlElement* e = settings_.getStyle();
+            ASSERT_NE(nullptr, e);
+            EXPECT_TRUE(e->getStringAttribute("name") == "Default");
         }
 
 

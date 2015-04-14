@@ -33,7 +33,9 @@ namespace e3 {
         }
         else if (m.isPitchWheel())
         {
-            midiPitchbendSignal(m.getPitchWheelValue());
+            int value = m.getPitchWheelValue();
+            midiPitchbendSignal(value);
+            monitorPitchbendEvent(value);
         }
         else if (m.isAftertouch())
         {
@@ -41,14 +43,17 @@ namespace e3 {
         }
         else if (m.isController())
         {
-            midiControllerSignal(m.getControllerNumber(), m.getControllerValue());
+            int number = m.getControllerNumber();
+            int value  = m.getControllerValue();
+            midiControllerSignal(number, value);
+            monitorControllerEvent(number, value);
         }
     }
 
 
     void Polyphony::noteOn(double pitch, double gate)
     {
-        monitorNoteEvent(-1, pitch, gate, kMonitorPitch | kMonitorGate);
+        monitorNoteEvent(pitch, gate);
 
         gate /= ((numUnison_ > 1) ? (numUnison_ * 0.66f) : 1);
         int unisonGroup = tags_;
@@ -82,7 +87,6 @@ namespace e3 {
     
     void Polyphony::noteOff(double pitch)
     {
-        monitorNoteEvent(numSounding_, -1, -1, kMonitorAll);
         double basePitch = pitch + tuning_;
 
         int idxStack = -1;
@@ -147,7 +151,7 @@ namespace e3 {
         numSounding_++;
         numActive_++;
         updateSoundingVoices();
-        monitorNoteEvent(numSounding_, -1, -1, kMonitorVoices);
+        monitorVoiceEvent(numSounding_);
         ASSERT(numSounding_ <= (int16_t)numVoices_);
     }
 
@@ -158,7 +162,7 @@ namespace e3 {
         if (v.state_)
         {
             numSounding_--;
-            monitorNoteEvent(numSounding_, -1, -1, kMonitorVoices);
+            monitorVoiceEvent(numSounding_);
 
             v.reset();
             updateSoundingVoices();
@@ -190,7 +194,7 @@ namespace e3 {
         numActive_ = 0;
 
         updateSoundingVoices();
-        monitorNoteEvent(numSounding_, -1, -1, kMonitorAll);
+        monitorVoiceEvent(numSounding_);
     }
 
 
@@ -276,12 +280,6 @@ namespace e3 {
             endVoice(idxKill);
         }
         return idxKill;
-    }
-
-
-    void Polyphony::monitorNoteEvent(int16_t numSounding, double pitch, double gate, uint16_t flags) const
-    {
-        monitorSignal(numSounding, pitch, gate, flags);
     }
 
 } // namespace e3

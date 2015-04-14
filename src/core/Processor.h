@@ -22,7 +22,6 @@
 
 namespace e3 {
 
-    class Settings;
     class Polyphony;
     class Bank;
     class Instrument;

@@ -2,7 +2,7 @@
 #include <e3_Trace.h>
 #include <e3_Exception.h>
 
-#include "gui/ColourIds.h"
+#include "gui/Style.h"
 #include "gui/StackedPanel.h"
 
 
@@ -39,7 +39,7 @@ namespace e3 {
 
     void StackedPanel::paint(Graphics &g)
     {
-        Colour c = findColour(ColourIds::backgroundColourId);
+        Colour c = findColour(Style::kBackgroundColourId);
         g.fillAll(Colour(0xffbebdbb));
     }
 

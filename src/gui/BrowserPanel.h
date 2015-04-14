@@ -8,6 +8,13 @@ namespace e3
     {
     public:
         BrowserPanel();
+
+        void resized() override;
+
+    protected:
+        ScopedPointer<TabbedComponent> tabPanel_;
+        ScopedPointer<Component> bankBrowser_;
+        ScopedPointer<Component> instrumentBrowser_;
     };
 
 

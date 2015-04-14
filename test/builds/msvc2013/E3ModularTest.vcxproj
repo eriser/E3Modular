@@ -23,6 +23,7 @@
     <None Include="..\..\..\..\..\Lib\e3\libcommon\test\LibCommon_ProfilerTest.inc" />
     <None Include="..\..\Audio_AllTests.inc" />
     <None Include="..\..\Core_AllTests.inc" />
+    <None Include="..\..\Gui_AllTests.inc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\Lib\e3\libcommon\builds\msvc2013\libcommon.vcxproj">

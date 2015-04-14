@@ -16,7 +16,7 @@
 #define NUMPROGRAMS 128
 #define NUMINPUTS 0
 #define NUMOUTPUTS 2
-#define SKIN_FILENAME "e3mSkins.xml"
+
 
 namespace e3 {
 
@@ -75,14 +75,6 @@ namespace e3 {
         kBoxNothing = 0,
         kBoxVisible = 1,
         kBoxLabel = 2
-    };
-
-
-    enum MonitorFlags {
-        kMonitorVoices = 1,
-        kMonitorPitch  = 2,
-        kMonitorGate   = 4,
-        kMonitorAll    = 7
     };
 
 

@@ -102,12 +102,6 @@
     <ClInclude Include="..\..\src\core\Processor.h">
       <Filter>src\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\Skin.h">
-      <Filter>src\gui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\gui\ColourIds.h">
-      <Filter>src\gui</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\gui\Resources.h">
       <Filter>src\gui</Filter>
     </ClInclude>
@@ -126,7 +120,13 @@
     <ClInclude Include="..\..\src\gui\BrowserPanel.h">
       <Filter>src\gui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\MidiMonitor.h">
+    <ClInclude Include="..\..\src\gui\VoiceMonitor.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\VoiceMonitorCore.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\Style.h">
       <Filter>src\gui</Filter>
     </ClInclude>
   </ItemGroup>
@@ -200,9 +200,6 @@
     <ClCompile Include="..\..\src\core\Processor.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\Skin.cpp">
-      <Filter>src\gui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\gui\Resources.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
@@ -221,7 +218,13 @@
     <ClCompile Include="..\..\src\gui\BrowserPanel.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\MidiMonitor.cpp">
+    <ClCompile Include="..\..\src\gui\VoiceMonitor.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\VoiceMonitorCore.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\Style.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
   </ItemGroup>

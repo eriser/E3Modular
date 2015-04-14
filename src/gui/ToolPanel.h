@@ -7,7 +7,7 @@
 
 
 namespace e3 {
-    class MidiMonitor;
+    class VoiceMonitor;
 
     class ToolPanel : public Component, public Button::Listener
     {
@@ -17,7 +17,7 @@ namespace e3 {
         void addPanelButton(const std::string& buttonLabel, int indexToInsert);
         void selectPanel(int id);
 
-        void monitorNoteEvent(int numSounding, double pitch, double gate, int flags);
+        void monitorMidiEvent(VoiceMonitorEvent evt);
 
         void paint(Graphics& g) override;
         void resized() override;
@@ -28,7 +28,7 @@ namespace e3 {
         void buttonClicked(Button* button) override;
 
         OwnedArray<Button> panelButtons_;
-        ScopedPointer<MidiMonitor> midiMonitor_;
+        ScopedPointer<VoiceMonitor> midiMonitor_;
     };
 
 } // namespace e3

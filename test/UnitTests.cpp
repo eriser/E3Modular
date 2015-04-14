@@ -3,6 +3,7 @@
 
 #include "LibCommon_AllTests.inc"
 #include "Core_AllTests.inc"
+#include "Gui_AllTests.inc"
 
 
 int main(int argc, char **argv)

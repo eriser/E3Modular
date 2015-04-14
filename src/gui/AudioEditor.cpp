@@ -8,7 +8,6 @@
 
 #include "core/GlobalHeader.h"
 #include "gui/Resources.h"
-#include "gui/ColourIds.h"
 #include "gui/EditorPanel.h"
 #include "gui/BrowserPanel.h"
 #include "gui/ToolPanel.h"
@@ -44,6 +43,7 @@ namespace e3 {
 
         addAndMakeVisible(*toolPanel_);
         addAndMakeVisible(*stackedPanel_);
+        toolPanel_->selectPanel(kBrowserPanel);
 
         ApplicationCommandManager& commandManager = getCommandManager();
         commandManager.registerAllCommandsForTarget(this);
@@ -51,10 +51,11 @@ namespace e3 {
 
         setWantsKeyboardFocus(true);
 
-        skin_ = new Skin();
-        setLookAndFeel(skin_);
+        XmlElement* styleXml = processor_->getSettings()->getStyle();
+        style_ = new Style(styleXml);
+        setLookAndFeel(style_);
 
-        processor_->getPolyphony()->monitorSignal.Connect(toolPanel_.get(), &ToolPanel::monitorNoteEvent);
+        processor_->getPolyphony()->monitorUpdateSignal.Connect(toolPanel_.get(), &ToolPanel::monitorMidiEvent);
     }
 
 
@@ -68,7 +69,7 @@ namespace e3 {
 
     void AudioEditor::paint(Graphics& g)
     {
-        g.fillAll(findColour(backgroundColourId));
+        g.fillAll(findColour(Style::kBackgroundColourId));
     }
 
 

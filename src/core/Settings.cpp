@@ -1,4 +1,6 @@
 
+#include <sstream>
+
 #include "e3_Trace.h"
 #include "e3_Exception.h"
 #include "core/Settings.h"
@@ -13,7 +15,7 @@ namespace e3 {
             setPath("");
 
         if (file_.existsAsFile() == false)  {
-            parse(defaultXml_);
+            parse(getDefaultXml());
         } else {
             parse(file_);
         }
@@ -64,10 +66,8 @@ namespace e3 {
         XmlDocument doc(file);
         root_ = doc.getDocumentElement();
 
-        if (nullptr != root_) {
-            if (root_->getTagName() == rootTagname_) return;
-        }
-        parse(defaultXml_);
+        if (checkValid()) return;
+        parse(getDefaultXml());
     }
 
 
@@ -75,13 +75,24 @@ namespace e3 {
     {
         XmlDocument doc(settings);
         root_ = doc.getDocumentElement();
-        if (nullptr == root_) {
+        if (checkValid() == false) {
             THROW(std::invalid_argument, "XML error: %s", doc.getLastParseError().toUTF8());
         }
         storeIfNeeded();
         needsStore_ = true;
     }
 
+
+    bool Settings::checkValid()
+    {
+        if (root_ != nullptr) {
+            if (root_->getTagName() == rootTagname_) {
+                return true;
+            }
+        }
+        TRACE("Invalid settings file, using default settings");
+        return false;
+    }
 
     string Settings::createDefaultFilename()
     {
@@ -92,6 +103,19 @@ namespace e3 {
 
         return options.getDefaultFile().getFullPathName().toStdString();
     }
+
+
+    std::string Settings::getDefaultXml() 
+    {
+        std::ostringstream os;
+        os << "<" << rootTagname_ << ">" << std::endl;
+        os << defaultXml_ << std::endl;
+        os << defaultStyleXml_ << std::endl;
+        os << "</" << rootTagname_ << ">" << std::endl;
+
+        return os.str();
+    }
+
 
 
     std::string Settings::getWindowState(const std::string& context) const
@@ -192,5 +216,22 @@ namespace e3 {
     }
 #endif
 
+    XmlElement* Settings::getStyle(const std::string& name)
+    {
+        if (root_ != nullptr) 
+        {
+            forEachXmlChildElementWithTagName(*root_, e, "Style") {
+                if (e->getStringAttribute("name") == name) {
+                    return e;
+                }
+            }
+
+            XmlElement* e = XmlDocument::parse(defaultStyleXml_);
+            ASSERT(e);
+            root_->addChildElement(e);
+            return e;
+        }
+        return nullptr;
+    }
 
 } // namespace e3

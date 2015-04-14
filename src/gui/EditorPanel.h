@@ -8,8 +8,6 @@ namespace e3
     {
     public:
         EditorPanel();
-
-        void paint(Graphics& g) override;
     };
 
 

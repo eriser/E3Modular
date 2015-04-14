@@ -7,6 +7,7 @@
 #include "core/GlobalHeader.h"
 #include <e3_Buffer.h>
 #include "core/Voice.h"
+#include "core/VoiceMonitorCore.h"
 
 
 namespace e3 {
@@ -15,7 +16,7 @@ namespace e3 {
     // class Polyphony
     // Polyphonic voice managment
     //----------------------------------------------------------------------------------
-    class Polyphony
+    class Polyphony : public VoiceMonitorUpdater
     {
     public:
         Polyphony();
@@ -53,8 +54,6 @@ namespace e3 {
         Gallant::Signal2<double, int>               midiAftertouchSignal;     // double pitch, int value
         Gallant::Signal2<int, int>                  midiControllerSignal;     // uint16_t controllerNum, double value
 
-        Gallant::Signal4<int, double, double, int>  monitorSignal;
-
     protected:
 
         void noteOn(double pitch, double gate);
@@ -64,7 +63,7 @@ namespace e3 {
         int16_t getUnusedVoice();
         void combineVoices(double basePitch, double gate);
         void updateSoundingVoices();
-        void monitorNoteEvent(int16_t numSounding, double pitch, double gate, uint16_t flags) const;
+
         //void dumpStack(const string& msg);
 
         uint32_t tags_      = 0;
@@ -77,6 +76,7 @@ namespace e3 {
         double tuning_      = 0;
 
         std::vector< Voice > stack_;
+
     };
 
 } // namespace e3
