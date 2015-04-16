@@ -105,12 +105,6 @@
     <ClInclude Include="..\..\src\gui\Resources.h">
       <Filter>src\gui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\ToolPanel.h">
-      <Filter>src\gui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\gui\StackedPanel.h">
-      <Filter>src\gui</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\gui\CommandTarget.h">
       <Filter>src\gui</Filter>
     </ClInclude>
@@ -127,6 +121,12 @@
       <Filter>src\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\Style.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\TableComponent.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\TabComponent.h">
       <Filter>src\gui</Filter>
     </ClInclude>
   </ItemGroup>
@@ -203,12 +203,6 @@
     <ClCompile Include="..\..\src\gui\Resources.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\ToolPanel.cpp">
-      <Filter>src\gui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\gui\StackedPanel.cpp">
-      <Filter>src\gui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\gui\CommandTarget.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
@@ -225,6 +219,12 @@
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\Style.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\TableComponent.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\TabComponent.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
   </ItemGroup>

@@ -60,7 +60,8 @@ namespace e3 {
         std::string defaultStyleXml_ =
             "<Style name = 'Default'>"
             "<Color name = 'background' argb = 'ff5f5f60' />"
-            "<Color name = 'contentBackground' argb = 'ffbebdbb' />"
+            "<Color name = 'contentBackground1' argb = 'ffbebdbb' />"
+            "<Color name = 'contentBackground2' argb = 'ff808080' / >"
             "<Color name = 'darkText' argb = 'ffffffff' />"
             "<Color name = 'lightText' argb = 'ffbdbcba' />"
             "<Color name = 'highlight' argb = 'ffcf732f' />"

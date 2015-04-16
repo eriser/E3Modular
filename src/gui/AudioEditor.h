@@ -18,10 +18,10 @@
 namespace e3 {
 
     class Processor;
-    class ToolPanel;
-    class StackedPanel;
+    class TabComponent;
     class EditorPanel;
     class BrowserPanel;
+    class VoiceMonitor;
 
 
     class AudioEditor : public AudioProcessorEditor, public CommandTarget
@@ -41,19 +41,19 @@ namespace e3 {
         enum PanelIds {
             kEditorPanel = 0,
             kBrowserPanel = 1,
-            kAudioPanel = 2
+            kSetupPanel = 2
         };
 
         ScopedPointer<Style> style_;
-        ScopedPointer<ToolPanel> toolPanel_;
-        ScopedPointer<StackedPanel> stackedPanel_;
+        ScopedPointer<TabComponent> tabPanel_;
         ScopedPointer<EditorPanel>  editorPanel_;
         ScopedPointer<BrowserPanel> browserPanel_;
+        ScopedPointer<VoiceMonitor> voiceMonitor_;
 #ifdef BUILD_TARGET_APP
-        ScopedPointer<AudioDeviceSelectorComponent>  audioPanel_;
+        ScopedPointer<AudioDeviceSelectorComponent>  setupPanel_;
 #endif
     private:
-        bool restoreWindowStateFromString(const std::string& s);
+        void restoreWindowState();
         void createComponents();
 
         Processor* processor_;

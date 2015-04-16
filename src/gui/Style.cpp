@@ -15,7 +15,7 @@ namespace e3 {
             buttonType_(buttonType)
         {}
 
-        void paintButton(Graphics& g, bool isMouseOverButton, bool isButtonDown) override
+        void paintButton(Graphics& g, bool isMouseOver, bool isButtonDown) override
         {
             ResizableWindow* parent = findParentComponentOfClass<ResizableWindow>();
             Colour highlight = parent ? parent->getBackgroundColour() : Colour(0xffbebdbb);
@@ -32,7 +32,7 @@ namespace e3 {
             const float y = getHeight() * 0.3f;
             const float w = jmin(getWidth(), getHeight()) * (isButtonDown ? 0.65f : 0.7f);
 
-            if (isMouseOverButton) {
+            if (isMouseOver) {
                 g.setColour(highlight.brighter());
                 g.fillRect(0, 0, getWidth(), getHeight());
             }
@@ -86,42 +86,46 @@ namespace e3 {
     Style::Style(XmlElement* styleXml)
     {
         ASSERT(styleXml);
-        std::map<std::string, Colour> colors;
+        std::map<std::string, Colour> colorMap;
         forEachXmlChildElementWithTagName(*styleXml, e, "Color")
         {
             std::string name = e->getStringAttribute("name").toStdString();
             std::string hex  = e->getStringAttribute("argb").toStdString();
 
-            colors.insert(std::make_pair(name, Colour(common::HexToInt(hex))));
+            colorMap.insert(std::make_pair(name, Colour(common::HexToInt(hex))));
         }
 
-        //Colour backgroundColour(0xff5f5f60);
-        //Colour contentBackgroundColour(0xffbebdbb);
-        //Colour darkTextColour(0xffffffff);
-        //Colour lightTextColour(0xffbdbcba);
-        //Colour highlightColour(0xffcf732f);
-        //Colour buttonOffBackgroundColour(0xff3e4042);
-        //Colour buttonOnBackgroundColour(0xffd08930);
-        //Colour buttonOffTextColour(0xffbdbcba);
-        //Colour buttonOnTextColour(0xff000000);
-
-
         // juce components
-        setColour(ResizableWindow::backgroundColourId, colors["background"]);
-        setColour(DocumentWindow::textColourId, colors["lightText"]);
+        setColour(ResizableWindow::backgroundColourId, colorMap["background"]);
+        setColour(DocumentWindow::textColourId, colorMap["lightText"]);
 
-        setColour(TextButton::buttonColourId, colors["buttonOffBackground"]);
-        setColour(TextButton::buttonOnColourId, colors["buttonOnBackground"]);
-        setColour(TextButton::textColourOffId, colors["buttonOffText"]);
-        setColour(TextButton::textColourOnId, colors["buttonOnText"]);
+        setColour(TextButton::buttonColourId, colorMap["buttonOffBackground"]);
+        setColour(TextButton::buttonOnColourId, colorMap["buttonOnBackground"]);
+        setColour(TextButton::textColourOffId, colorMap["buttonOffText"]);
+        setColour(TextButton::textColourOnId, colorMap["buttonOnText"]);
+
+        //setColour(TabbedComponent::backgroundColourId, colorMap["contentBackground2"]);
+        setColour(TabbedComponent::backgroundColourId, Colours::transparentBlack);
+        setColour(TabbedComponent::outlineColourId, Colours::transparentBlack);
+        //setColour(TabbedComponent::outlineColourId, colorMap["contentBackground2"]);
         
+        setColour(TabbedButtonBar::tabOutlineColourId, Colours::transparentBlack);
+        setColour(TabbedButtonBar::tabTextColourId, colorMap["buttonOffText"]);
+        setColour(TabbedButtonBar::frontOutlineColourId, Colours::transparentBlack);
+        setColour(TabbedButtonBar::frontTextColourId, colorMap["buttonOnText"]);
+
+        setColour(ListBox::backgroundColourId, colorMap["contentBackground1"]);
+        setColour(ListBox::outlineColourId, Colours::transparentBlack);
+        setColour(ListBox::textColourId, colorMap["lightText"]);
+
         // custom colours
-        setColour(kBackgroundColourId, colors["background"]);
-        setColour(kContentBackgroundColourId, colors["contentBackground"]);
-        setColour(kTabButtonOffBackgroundColourId, colors["buttonOffBackground"]);
-        setColour(kTabButtonOnBackgroundColourId, colors["buttonOnBackground"]);
-        setColour(kTabButtonOffTextColourId, colors["buttonOffText"]);
-        setColour(kTabButtonOnTextColourId, colors["buttonOnText"]);
+        setColour(kBackgroundColourId, colorMap["background"]);
+        setColour(kContentBackground1ColourId, colorMap["contentBackground1"]);
+        setColour(kContentBackground2ColourId, colorMap["contentBackground2"]);
+        setColour(kTabButtonOffBackgroundColourId, colorMap["buttonOffBackground"]);
+        setColour(kTabButtonOnBackgroundColourId, colorMap["buttonOnBackground"]);
+        setColour(kTabButtonOffTextColourId, colorMap["buttonOffText"]);
+        setColour(kTabButtonOnTextColourId, colorMap["buttonOnText"]);
     }
 
 
@@ -177,16 +181,17 @@ namespace e3 {
     }
 
 
-    void Style::drawButtonBackground(Graphics& g, Button& button, const Colour& backgroundColour,
-        bool isMouseOverButton, bool isButtonDown)
+    void Style::drawButtonBackground(Graphics& g, Button& button, const Colour& color,
+        bool isMouseOver, bool isMouseDown)
     {
-        Colour baseColour(backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
-            .withMultipliedAlpha(button.isEnabled() ? 0.9f : 0.5f));
+        //Colour baseColour(backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 1.f)
+        //    .withMultipliedAlpha(button.isEnabled() ? 1.f : 0.5f));
 
-        if (isButtonDown || isMouseOverButton)
-            baseColour = baseColour.contrasting(isButtonDown ? 0.2f : 0.1f);
+        //if (isButtonDown || isMouseOver)
+        //    baseColour = baseColour.contrasting(isButtonDown ? 0.2f : 0.1f);
 
-        g.setColour(baseColour);
+        Colour c = modifyButtonBackgroundColour(color, isMouseOver, isMouseDown, button.isEnabled(), button.hasKeyboardFocus(true));
+        g.setColour(c);
         g.fillRect(button.getLocalBounds());
     }
 
@@ -196,86 +201,163 @@ namespace e3 {
         return 100 + tabDepth / 3;
     }
 
+
+    int Style::getTabButtonOverlap(int /*tabDepth*/)            
+    { 
+        return -10; 
+    }
+
+
+    Colour Style::modifyButtonBackgroundColour(
+        const Colour& colour, bool isMouseOver, bool isMouseDown, bool isEnabled, bool hasFocus)
+    {
+        Colour c = colour.withMultipliedSaturation(hasFocus ? 1.3f : 1.f).withMultipliedAlpha(isEnabled ? 1.f : 0.5f);
+
+        if (isMouseDown || isMouseOver)
+            c = c.contrasting(isMouseDown ? 0.2f : 0.1f);
+
+        return c;
+    }
+
+
     void Style::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
     { 
-        const Rectangle<int> activeArea(button.getActiveArea());
-        const TabbedButtonBar::Orientation o = button.getTabbedButtonBar().getOrientation();
-        
-        //const Colour bkgnd(button.getTabBackgroundColour());
-        int id = button.getToggleState() ? kTabButtonOnBackgroundColourId : kTabButtonOffBackgroundColourId;
-        const Colour bkgndColour = findColour(id);
+        // draw background
+        //
+        int colourId = button.getToggleState() ? kTabButtonOnBackgroundColourId : kTabButtonOffBackgroundColourId;
+        Colour colour = modifyButtonBackgroundColour(findColour(colourId),
+            isMouseOver, isMouseDown, button.isEnabled(), button.hasKeyboardFocus(true));
+        g.setColour(colour);
 
-        //if (button.getToggleState()) {
-        //    g.setColour(bkgnd);
-        //}
-        //else
-        //{
-            //Point<int> p1, p2;
+        Rectangle<int> bounds = button.getLocalBounds();
+        g.fillRect(bounds.reduced(0, 1));
 
-            //switch (o)
-            //{
-            //case TabbedButtonBar::TabsAtBottom:   p1 = activeArea.getBottomLeft(); p2 = activeArea.getTopLeft();    break;
-            //case TabbedButtonBar::TabsAtTop:      p1 = activeArea.getTopLeft();    p2 = activeArea.getBottomLeft(); break;
-            //case TabbedButtonBar::TabsAtRight:    p1 = activeArea.getTopRight();   p2 = activeArea.getTopLeft();    break;
-            //case TabbedButtonBar::TabsAtLeft:     p1 = activeArea.getTopLeft();    p2 = activeArea.getTopRight();   break;
-            //default:                              jassertfalse; break;
-            //}
+        // draw text
+        //
+        const TabbedButtonBar& bar = button.getTabbedButtonBar();
+        const TabbedButtonBar::Orientation o = bar.getOrientation();
 
-            //g.setGradientFill(ColourGradient(bkgnd.brighter(0.2f), (float)p1.x, (float)p1.y,
-            //    bkgnd.darker(0.1f), (float)p2.x, (float)p2.y, false));
-        //}
+        colourId = button.isFrontTab() ? TabbedButtonBar::frontTextColourId : TabbedButtonBar::tabTextColourId;
+        Colour textColor = bar.findColour(colourId);
 
-        g.setColour(bkgndColour);
-        g.fillRect(activeArea);
+        const Rectangle<float> textArea(button.getTextArea().toFloat());
 
-        g.setColour(button.findColour(TabbedButtonBar::tabOutlineColourId));
+        float length = textArea.getWidth();
+        float depth  = textArea.getHeight();
 
-        Rectangle<int> r(activeArea);
-
-        if (o != TabbedButtonBar::TabsAtBottom)   g.fillRect(r.removeFromTop(1));
-        if (o != TabbedButtonBar::TabsAtTop)      g.fillRect(r.removeFromBottom(1));
-        if (o != TabbedButtonBar::TabsAtRight)    g.fillRect(r.removeFromLeft(1));
-        if (o != TabbedButtonBar::TabsAtLeft)     g.fillRect(r.removeFromRight(1));
-
-        const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
-
-        Colour col(bkgndColour.contrasting().withMultipliedAlpha(alpha));
-
-        if (TabbedButtonBar* bar = button.findParentComponentOfClass<TabbedButtonBar>())
-        {
-            TabbedButtonBar::ColourIds colID = button.isFrontTab() ? TabbedButtonBar::frontTextColourId
-                : TabbedButtonBar::tabTextColourId;
-
-            if (bar->isColourSpecified(colID))
-                col = bar->findColour(colID);
-            else if (isColourSpecified(colID))
-                col = findColour(colID);
-        }
-
-        const Rectangle<float> area(button.getTextArea().toFloat());
-
-        float length = area.getWidth();
-        float depth = area.getHeight();
-
-        if (button.getTabbedButtonBar().isVertical())
+        if (bar.isVertical())
             std::swap(length, depth);
 
-        TextLayout textLayout;
-        createTabTextLayout(button, length, depth, col, textLayout);
-
         AffineTransform t;
+        TextLayout textLayout;
+        createTabTextLayout(button, length, depth, textColor, textLayout);
 
         switch (o)
         {
-        case TabbedButtonBar::TabsAtLeft:   t = t.rotated(float_Pi * -0.5f).translated(area.getX(), area.getBottom()); break;
-        case TabbedButtonBar::TabsAtRight:  t = t.rotated(float_Pi *  0.5f).translated(area.getRight(), area.getY()); break;
+        case TabbedButtonBar::TabsAtLeft:   t = t.rotated(float_Pi * -0.5f).translated(textArea.getX(), textArea.getBottom()); break;
+        case TabbedButtonBar::TabsAtRight:  t = t.rotated(float_Pi *  0.5f).translated(textArea.getRight(), textArea.getY()); break;
         case TabbedButtonBar::TabsAtTop:
-        case TabbedButtonBar::TabsAtBottom: t = t.translated(area.getX(), area.getY()); break;
+        case TabbedButtonBar::TabsAtBottom: t = t.translated(textArea.getX(), textArea.getY()); break;
         default:                            jassertfalse; break;
         }
 
         g.addTransform(t);
         textLayout.draw(g, Rectangle<float>(length, depth));
+    }
+
+
+    void Style::drawTabbedButtonBarBackground(TabbedButtonBar&, Graphics&) 
+    {
+        //Rectangle<int> content = buttonBar.getLocalBounds();
+        //Colour col = findColour(kBackgroundColourId);
+        //g.setColour(col);
+        ////g.fillRect(content.reduced(0, -1));
+    }
+
+
+    void Style::drawTabAreaBehindFrontButton(TabbedButtonBar&, Graphics&, int, int)
+    {
+        //Rectangle<int> line;
+        //switch (bar.getOrientation())
+        //{
+        //case TabbedButtonBar::TabsAtLeft:   line.setBounds(w - 1, 0, 1, h); break;
+        //case TabbedButtonBar::TabsAtRight:  line.setBounds(0, 0, 1, h); break;
+        //case TabbedButtonBar::TabsAtTop:    line.setBounds(0, h - 1, w, 1); break;
+        //case TabbedButtonBar::TabsAtBottom: line.setBounds(0, 0, w, 1); break;
+        //default: break;
+        //}
+        //g.setColour(bar.findColour(TabbedButtonBar::tabOutlineColourId));
+        //g.fillRect(line);
+    }
+
+
+    void Style::drawCornerResizer(Graphics& g, int w, int h, bool, bool)
+    {
+        const float lineThickness = jmin(w, h) * 0.075f;
+
+        for (float i = 0.1f; i <= 1.0f; i += 0.3f)
+        {
+            g.setColour(Colour(0xffd08930));  // TODO: use style
+
+            g.drawLine(w * i + lineThickness,
+                h - 1.f,
+                w - 1.f,
+                h * i + lineThickness,
+                lineThickness);
+        }
+    }
+
+
+    void Style::drawTableHeaderBackground(Graphics& g, TableHeaderComponent& header)
+    {
+        Rectangle<int> r(header.getLocalBounds());
+
+        Colour bkgndColour = findColour(TextButton::buttonColourId);
+        Colour lineColour  = findColour(kBackgroundColourId);
+
+        // background
+        g.setColour(bkgndColour);
+        g.fillRect(r);
+
+        // bottom separator
+        g.setColour(lineColour);
+        g.fillRect(r.removeFromBottom(1));
+
+        // separators
+        for (int i = header.getNumColumns(true) - 1; --i >= 0;)
+            g.fillRect(header.getColumnPosition(i).removeFromRight(1));
+    }
+
+
+    void Style::drawTableHeaderColumn(Graphics& g, const String& columnName, int /*columnId*/,
+        int width, int height, bool isMouseOver, bool isMouseDown,
+        int columnFlags)
+    {
+        Colour colour = findColour(TextButton::buttonColourId);
+        if (isMouseDown || isMouseOver) {
+            colour = colour.contrasting(isMouseDown ? 0.2f : 0.1f);
+            g.fillAll(colour);
+        }
+
+        Rectangle<int> area(width, height);
+        area.reduce(4, 0);
+
+        colour = findColour(TextButton::textColourOffId);
+
+        if ((columnFlags & (TableHeaderComponent::sortedForwards | TableHeaderComponent::sortedBackwards)) != 0)
+        {
+            Path sortArrow;
+            sortArrow.addTriangle(0.0f, 0.0f,
+                0.5f, (columnFlags & TableHeaderComponent::sortedForwards) != 0 ? -0.8f : 0.8f,
+                1.0f, 0.0f);
+
+            g.setColour(colour);
+            g.fillPath(sortArrow, sortArrow.getTransformToScaleToFit(area.removeFromRight(height / 2).reduced(2).toFloat(), true));
+        }
+
+        g.setColour(colour);
+        g.setFont(Font(height * 0.5f, Font::plain));
+        g.drawFittedText(columnName, area, Justification::centredLeft, 1);
     }
 
 

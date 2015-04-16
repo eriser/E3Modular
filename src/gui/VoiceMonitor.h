@@ -14,7 +14,7 @@ namespace e3 {
         VoiceMonitor();
 
         void resized() override;
-        void monitor(const VoiceMonitorEvent& event);
+        void monitor(VoiceMonitorEvent e);
 
     private:
         enum LabelIds {

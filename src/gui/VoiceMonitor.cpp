@@ -40,14 +40,14 @@ namespace e3 {
     }
 
 
-    void VoiceMonitor::monitor(const VoiceMonitorEvent& evt)
+    void VoiceMonitor::monitor(VoiceMonitorEvent e)
     {
         std::ostringstream stream;
 
-        switch (evt.type)
+        switch (e.type)
         {
             case kMonitorVoices: {
-                stream << evt.numVoices;
+                stream << e.numVoices;
                 labels_[kVoices]->setText(stream.str(), dontSendNotification);
                 break;
             }
@@ -56,15 +56,15 @@ namespace e3 {
                 labels_[kType]->setText("Note", dontSendNotification);
 
                 double intpart;
-                if (modf(evt.value1, &intpart) == 0)
-                    stream << (int)evt.value1;
+                if (modf(e.value1, &intpart) == 0)
+                    stream << (int)e.value1;
                 else
-                    stream << std::setprecision(2) << std::fixed << evt.value1;
+                    stream << std::setprecision(2) << std::fixed << e.value1;
                 labels_[kValue1]->setText(stream.str(), dontSendNotification);
             
                 stream.str("");
                 //stream << std::setprecision(2) << std::fixed << evt.value2;
-                stream << (int)(evt.value2 * 128);
+                stream << (int)(e.value2 * 128);
                 labels_[kValue2]->setText(stream.str(), dontSendNotification);
                 break;
             }
@@ -72,11 +72,11 @@ namespace e3 {
             {
                 labels_[kType]->setText("CC", dontSendNotification);
 
-                stream << (int)evt.value1;
+                stream << (int)e.value1;
                 labels_[kValue1]->setText(stream.str(), dontSendNotification);
 
                 stream.str("");
-                stream << evt.value2;
+                stream << e.value2;
                 labels_[kValue2]->setText(stream.str(), dontSendNotification);
                 break;
             }
@@ -84,7 +84,7 @@ namespace e3 {
             {
                 labels_[kType]->setText("PB", dontSendNotification);
 
-                stream << evt.value1 - 8192;
+                stream << e.value1 - 8192;
                 labels_[kValue1]->setText(stream.str(), dontSendNotification);
                 labels_[kValue2]->setText("", dontSendNotification);
                 break;

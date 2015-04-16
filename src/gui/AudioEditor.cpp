@@ -10,8 +10,8 @@
 #include "gui/Resources.h"
 #include "gui/EditorPanel.h"
 #include "gui/BrowserPanel.h"
-#include "gui/ToolPanel.h"
-#include "gui/StackedPanel.h"
+#include "gui/TabComponent.h"
+#include "gui/VoiceMonitor.h"
 
 #include "gui/AudioEditor.h"
 #include "core/Processor.h"
@@ -26,36 +26,20 @@ namespace e3 {
         AudioProcessorEditor(owner),
         processor_(owner)
     {
-        createComponents();
-
-        if (processor_->isPlugin())  {
-            addAndMakeVisible(resizer_ = new ResizableCornerComponent(this, &resizeLimits_));
-            Rectangle<int> r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
-            resizeLimits_.setSizeLimits(640, 480, r.getWidth(), r.getHeight());
-        }
-
-        std::string context = processor_->isPlugin() ? "Plugin" : "Standalone";
-        std::string windowState = processor_->getSettings()->getWindowState("Plugin");
-
-        if (restoreWindowStateFromString(windowState) == false) {
-            setSize(1000, 800);
-        }
-
-        addAndMakeVisible(*toolPanel_);
-        addAndMakeVisible(*stackedPanel_);
-        toolPanel_->selectPanel(kBrowserPanel);
+        setWantsKeyboardFocus(true);
 
         ApplicationCommandManager& commandManager = getCommandManager();
         commandManager.registerAllCommandsForTarget(this);
         addKeyListener(commandManager.getKeyMappings());
 
-        setWantsKeyboardFocus(true);
+        createComponents();
+        restoreWindowState();
 
         XmlElement* styleXml = processor_->getSettings()->getStyle();
         style_ = new Style(styleXml);
         setLookAndFeel(style_);
 
-        processor_->getPolyphony()->monitorUpdateSignal.Connect(toolPanel_.get(), &ToolPanel::monitorMidiEvent);
+        processor_->getPolyphony()->monitorUpdateSignal.Connect(voiceMonitor_.get(), &VoiceMonitor::monitor);
     }
 
 
@@ -78,9 +62,13 @@ namespace e3 {
         if (resizer_ != nullptr)
             resizer_->setBounds(getWidth() - 16, getHeight() - 16, 16, 16);
 
+        int indent = 15;
+
         Rectangle<int> r = getLocalBounds();
-        stackedPanel_->setBounds(Rectangle<int>(r.getX() + 10, 10, r.getWidth() - 20, r.getHeight() - 70));
-        toolPanel_->setBounds(Rectangle<int>(r.getX() + 10, r.getHeight() - 60, r.getWidth() - 20, 50));
+        tabPanel_->setBounds(r.reduced(indent, indent));
+
+        r = Rectangle<int>(r.getWidth() - 142 - indent, r.getHeight() - 25 - indent, 142, 25);
+        voiceMonitor_->setBounds(r);
 
         std::string bounds = getScreenBounds().toString().toStdString();
         processor_->getSettings()->setWindowState(bounds, "Plugin");
@@ -91,42 +79,47 @@ namespace e3 {
     {
         switch (info.commandID)
         {
-        case showEditor:     toolPanel_->selectPanel(kEditorPanel); break;
-        case showBrowser:    toolPanel_->selectPanel(kBrowserPanel);  break;
-        case showAudioSetup: toolPanel_->selectPanel(kAudioPanel); break;
+        case showEditor:     tabPanel_->setCurrentTabIndex(kEditorPanel); break;
+        case showBrowser:    tabPanel_->setCurrentTabIndex(kBrowserPanel);  break;
+        case showAudioSetup: tabPanel_->setCurrentTabIndex(kSetupPanel); break;
         default: return false;
         }
         return true;
     }
     
     
-    bool AudioEditor::restoreWindowStateFromString(const std::string& s)
-    {
-        StringArray tokens;
-        tokens.addTokens(StringRef(s), false);
-        tokens.removeEmptyStrings();
-        tokens.trim();
-
-        const int firstCoord = 0;
-
-        if (tokens.size() != firstCoord + 4)
-            return false;
-
-        Rectangle<int> newPos(tokens[firstCoord].getIntValue(),
-            tokens[firstCoord + 1].getIntValue(),
-            tokens[firstCoord + 2].getIntValue(),
-            tokens[firstCoord + 3].getIntValue());
-
-        setBounds(newPos);
-        return true;
-    }
-
-
     void AudioEditor::createIcon(Image& image)
     {
         MemoryInputStream stream(resources::e3m_icon_small_png, resources::e3m_icon_small_pngSize, false);
         image = ImageFileFormat::loadFrom(stream);
     }
+
+
+    void AudioEditor::restoreWindowState()
+    {
+        std::string context     = processor_->isPlugin() ? "Plugin" : "Standalone";
+        std::string windowState = processor_->getSettings()->getWindowState(context);
+
+        StringArray tokens;
+        tokens.addTokens(StringRef(windowState), false);
+        tokens.removeEmptyStrings();
+        tokens.trim();
+
+        if (tokens.size() == 4)
+        {
+            Rectangle<int> content(
+                tokens[0].getIntValue(),
+                tokens[1].getIntValue(),
+                tokens[2].getIntValue(),
+                tokens[3].getIntValue());
+
+            setBounds(content);
+        }
+        else {
+            setSize(1000, 800);
+        }
+    }
+
 
 
 #ifdef BUILD_TARGET_APP
@@ -147,19 +140,26 @@ namespace e3 {
 
         editorPanel_  = new EditorPanel();
         browserPanel_ = new BrowserPanel();
-        audioPanel_   = selector;
-        stackedPanel_ = new StackedPanel();
-        toolPanel_    = new ToolPanel();
+        setupPanel_   = selector;
 
-        stackedPanel_->insertPanel(editorPanel_, kEditorPanel);
-        stackedPanel_->insertPanel(browserPanel_, kBrowserPanel);
-        stackedPanel_->insertPanel(audioPanel_, kAudioPanel);
+        tabPanel_ = new TabComponent(TabbedButtonBar::TabsAtBottom, 10);
+        tabPanel_->addTab("Editor", Colours::transparentBlack, editorPanel_, false, kEditorPanel);
+        tabPanel_->addTab("Browser", Colours::transparentBlack, browserPanel_, false, kBrowserPanel);
+        tabPanel_->addTab("Setup", Colours::transparentBlack, setupPanel_, false, kSetupPanel);
 
-        toolPanel_->addPanelButton("Editor", kEditorPanel);
-        toolPanel_->addPanelButton("Browser", kBrowserPanel);
-        toolPanel_->addPanelButton("Setup", kAudioPanel);
+        addAndMakeVisible(tabPanel_);
+        tabPanel_->setCurrentTabIndex(kBrowserPanel);
 
-        toolPanel_->panelSelectedSignal.Connect(stackedPanel_.get(), &StackedPanel::showPanel);
+        voiceMonitor_ = new VoiceMonitor();
+        addAndMakeVisible(voiceMonitor_);
+
+        if (processor_->isPlugin()) 
+        {
+            resizer_ = new ResizableCornerComponent(this, &resizeLimits_);
+            addAndMakeVisible(resizer_);
+            Rectangle<int> r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+            resizeLimits_.setSizeLimits(640, 480, r.getWidth(), r.getHeight());
+        }
     }
 #endif
 
@@ -188,7 +188,5 @@ namespace e3 {
 
         return *commandManager_;
     }
-
-
 
 } // namespace e3

@@ -24,17 +24,33 @@ namespace e3 {
             bool isMouseOverButton, bool isButtonDown) override;
 
         int getTabButtonBestWidth(TabBarButton &, int tabDepth) override;
+        int getTabButtonOverlap(int tabDepth) override;
         void drawTabButton(TabBarButton &, Graphics &, bool isMouseOver, bool isMouseDown) override;
+        void drawTabbedButtonBarBackground(TabbedButtonBar& buttonBar, Graphics& g) override;
+        void drawTabAreaBehindFrontButton(TabbedButtonBar& bar, Graphics& g, int w, int h) override;
+
+        void drawCornerResizer(Graphics& g, int w, int h, bool isMouseOver, bool isMouseDragging) override;
+
+        void drawTableHeaderBackground(Graphics& g, TableHeaderComponent& header) override;
+        void drawTableHeaderColumn(Graphics& g, const String& columnName, int columnId,
+            int width, int height, bool isMouseOver, bool isMouseDown,
+            int columnFlags) override;
+
 
         enum ColourIds
         {
             kBackgroundColourId             = 0x2000000,
-            kContentBackgroundColourId      = 0x2000001,
+            kContentBackground1ColourId     = 0x2000001,
+            kContentBackground2ColourId     = 0x2000002,
             kTabButtonOffBackgroundColourId = 0x2000010,
             kTabButtonOnBackgroundColourId  = 0x2000011,
             kTabButtonOffTextColourId       = 0x2000012,
             kTabButtonOnTextColourId        = 0x2000013,
         };
+
+    protected:
+        Colour modifyButtonBackgroundColour(
+            const Colour& colour, bool isMouseOver, bool isMouseDown, bool isEnabled, bool hasFocus);
     };
 
 } // namespace e3
