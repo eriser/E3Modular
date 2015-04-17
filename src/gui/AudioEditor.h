@@ -21,7 +21,8 @@ namespace e3 {
     class TabComponent;
     class EditorPanel;
     class BrowserPanel;
-    class VoiceMonitor;
+    class SetupPanel;
+    class Monitor;
 
 
     class AudioEditor : public AudioProcessorEditor, public CommandTarget
@@ -32,11 +33,16 @@ namespace e3 {
 
         void paint(Graphics&) override;
         void resized() override;
-
         void createIcon(Image& image);
 
         bool perform(const InvocationInfo& info) override;      // Implementation for ApplicationCommandTarget
         static ApplicationCommandManager& getCommandManager();
+
+        ScopedPointer<Style> style_;
+
+    private:
+        void restoreWindowState();
+        void createComponents();
 
         enum PanelIds {
             kEditorPanel = 0,
@@ -44,21 +50,15 @@ namespace e3 {
             kSetupPanel = 2
         };
 
-        ScopedPointer<Style> style_;
+        Processor* processor_;
+
         ScopedPointer<TabComponent> tabPanel_;
         ScopedPointer<EditorPanel>  editorPanel_;
         ScopedPointer<BrowserPanel> browserPanel_;
-        ScopedPointer<VoiceMonitor> voiceMonitor_;
-#ifdef BUILD_TARGET_APP
-        ScopedPointer<AudioDeviceSelectorComponent>  setupPanel_;
-#endif
-    private:
-        void restoreWindowState();
-        void createComponents();
-
-        Processor* processor_;
-
+        ScopedPointer<SetupPanel> setupPanel_;
+        ScopedPointer<Monitor> monitor_;
         ScopedPointer<ResizableCornerComponent> resizer_;
+
         ComponentBoundsConstrainer resizeLimits_;
 
         static ScopedPointer<ApplicationCommandManager> commandManager_;

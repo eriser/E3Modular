@@ -1,5 +1,7 @@
+#include <Windows.h>
 
 #include <set>
+#include <thread>
 
 #include <e3_CommonMacros.h>
 #include <core/Settings.h>
@@ -12,6 +14,7 @@
 #include <core/Instrument.h>
 #include <core/Bank.h>
 #include <core/BankSerializer.h>
+#include <core/CpuMeter.h>
 
 
 namespace e3 {
@@ -958,7 +961,7 @@ namespace e3 {
             EXPECT_EQ(hash, instrument->hash_);
         }
 
-        TEST_F(BankTest, connectModules)
+        TEST_F(BankTest, connect_modules)
         {
             bank_.load(testBank);
             TestableInstrument* instrument = static_cast<TestableInstrument*>(bank_.loadInstrument());
@@ -976,5 +979,126 @@ namespace e3 {
             //checkConnections(instrument);
         }
 
+
+        //--------------------------------------------------------
+        // class CpuMeterTest
+        //--------------------------------------------------------
+        //
+        class CpuMeterTest : public ::testing::Test
+        {
+        public:
+            CpuMeterTest() : sampleRate_(44100) {}
+
+            void sleepMicros(int64_t micros) {
+                std::this_thread::sleep_for(std::chrono::microseconds(micros));
+            }
+
+        protected:
+            uint32_t sampleRate_;
+            CpuMeter cpuMeter_;
+        };
+
+
+        TEST_F(CpuMeterTest, elapsed_time_1_second)
+        {
+            int64_t expected = 1000000;     // 1 second
+
+            cpuMeter_.start();
+            sleepMicros(expected);
+            double elapsed = cpuMeter_.getElapsedSeconds() * 1000000;
+
+            EXPECT_GE(elapsed, expected);
+            EXPECT_LE(elapsed, expected + 20000);
+        }
+
+
+        TEST_F(CpuMeterTest, elapsed_time_10_milliseconds)
+        {
+            double expected = 10000;     // 10 milliseconds
+
+            cpuMeter_.start();
+            sleepMicros((int64_t)expected);
+            double elapsed = cpuMeter_.getElapsedSeconds() * 1000000;
+
+            EXPECT_GE(elapsed, expected);
+            EXPECT_NEAR(elapsed, expected, 1000);  // error within 1 millisecond
+        }
+
+        TEST_F(CpuMeterTest, elapsed_time_1_millisecond)
+        {
+            double expected = 1000;     // 1 millisecond
+
+            cpuMeter_.start();
+            sleepMicros((int64_t)expected);
+            double elapsed = cpuMeter_.getElapsedSeconds() * 1000000;
+
+            EXPECT_GE(elapsed, expected);
+            EXPECT_NEAR(elapsed, expected, 1000);  // error within 1 millisecond
+        }
+
+        //TEST_F(CpuMeterTest, cpu_percentage_50)
+        //{
+        //    cpuMeter_.setRunsPerCycle(1);
+        //    cpuMeter_.start();
+        //    sleepMicros(500000);    // 0.5 seconds
+        //    cpuMeter_.stop(sampleRate_);
+        //    double percent = cpuMeter_.getPercent();
+
+        //    EXPECT_NEAR(50, percent, 2);
+        //}
+
+        TEST_F(CpuMeterTest, cpu_percent_short_time)
+        {
+            bool ready;
+            int runs = 1;
+            int runsPerCycle = 1;
+            int framesPerRun = sampleRate_ / runs;
+            int microSeconds = 1000;
+            cpuMeter_.setRunsPerCycle(runsPerCycle);
+
+            for (int i = 0; i < runs; i++) {
+                cpuMeter_.start();
+                sleepMicros(microSeconds);
+                ready = cpuMeter_.stop(framesPerRun);
+            }
+            double percent = ready ? cpuMeter_.getPercent() : 0;
+
+            EXPECT_NEAR(0.1, percent, 0.1);
+        }
+
+        TEST_F(CpuMeterTest, cpu_percent_multiple_runs)
+        {
+            bool ready;
+            int runs = 100;
+            int runsPerCycle = 1;
+            int framesPerRun = sampleRate_ / runs;
+            int microSeconds = 500000 / runs;
+            cpuMeter_.setRunsPerCycle(runsPerCycle);
+
+            for (int i = 0; i < runs; i++) {
+                cpuMeter_.start();
+                sleepMicros(microSeconds);
+                ready = cpuMeter_.stop(framesPerRun);
+            }
+            double percent = ready? cpuMeter_.getPercent() : 0;
+
+            EXPECT_NEAR(50, percent, 15);
+        }
+
+        //TEST_F(CpuMeterTest, cpu_percentage_50_multiple_cycles)
+        //{
+        //    int runs = 500;
+        //    int framesPerRun = sampleRate_ / runs;
+        //    cpuMeter_.setRunsPerCycle(50);
+
+        //    for (int i = 0; i < runs; i++) {
+        //        cpuMeter_.start();
+        //        sleepMicros(1000);
+        //        cpuMeter_.stop(framesPerRun);
+        //    }
+        //    double percent = cpuMeter_.getCpuPercentage();
+
+        //    EXPECT_NEAR(50, percent, 5);
+        //}
     } // namespace testing
 } // namespace e3

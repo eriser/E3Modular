@@ -1,13 +1,10 @@
 
 #pragma once
 
-#include "core/GlobalHeader.h"
 #include "JuceHeader.h"
 
 namespace e3
 {
-    //class StackedPanel;
-    //class TabButtonGroup;
     class TabComponent;
     class TableComponent;
 
@@ -25,8 +22,7 @@ namespace e3
             kBankTab,
             kInstrumentTab
         };
-        ScopedPointer<TabbedComponent> tabPanel_;
-        //ScopedPointer<TabButtonGroup> tabButtons_;
+        ScopedPointer<TabComponent> tabPanel_;
         ScopedPointer<TableComponent> bankBrowser_;
         ScopedPointer<Component> instrumentBrowser_;
     };

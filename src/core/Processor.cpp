@@ -1,6 +1,7 @@
 
+
 #include "gui/AudioEditor.h"
-#include "core/SineWaveVoice.h"
+#include "core/CpuMeter.h"
 #include "core/Polyphony.h"
 #include "core/Bank.h"
 #include "core/Instrument.h"
@@ -9,7 +10,6 @@
 
 
 #ifdef BUILD_TARGET_VST
-
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new e3::Processor();
@@ -19,19 +19,13 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 
 namespace e3 {
 
-
     Processor::Processor() : AudioProcessor(),
         polyphony_(new Polyphony()),
-        bank_(new Bank())
+        bank_(new Bank()),
+        cpuMeter_(new CpuMeter())
     {
         settings_.load();
         bank_->setSettings(&settings_);
-
-        // Initialise the synth...
-        for (int i = 4; --i >= 0;)
-            juceSynth_.addVoice(new SineWaveVoice());   // These voices will play our custom sine-wave sounds..
-
-        juceSynth_.addSound(new SineWaveSound());
     }
 
     Processor::~Processor()
@@ -46,9 +40,8 @@ namespace e3 {
             loadBank();
         }
 
-        juceSynth_.setCurrentPlaybackSampleRate(sampleRate);
         sink_.setSampleRate(sampleRate);
-        profiler_.setSampleRate((uint32_t)sampleRate);
+        cpuMeter_->setSampleRate((uint32_t)sampleRate);
     }
 
 
@@ -80,11 +73,13 @@ namespace e3 {
         }
     }
 
+
     bool Processor::isPlugin() const
     {
         ASSERT(wrapperType != wrapperType_Undefined);
         return wrapperType != wrapperType_Standalone;
     }
+
 
     AudioProcessorEditor* Processor::createEditor()
     {
@@ -94,16 +89,13 @@ namespace e3 {
 
     void Processor::processBlock(AudioSampleBuffer& audioBuffer, MidiBuffer& midiBuffer)
     {
-        // temporary
-        //juceProcessBlock(audioBuffer, midiBuffer);
-        //return;
-
-        //profiler_.start();
         const ScopedLock scopedLock(lock_);
-        audioBuffer.clear(); // no input
+        cpuMeter_->start();
+        audioBuffer.clear();    // input not implemented
 
-        int startSample = 0;
-        int numSamples = audioBuffer.getNumSamples();
+        int startSample  = 0;
+        int totalSamples = audioBuffer.getNumSamples();
+        int numSamples   = totalSamples;
 
         MidiBuffer::Iterator midiIterator(midiBuffer);
         midiIterator.setNextSamplePosition(startSample);
@@ -130,9 +122,9 @@ namespace e3 {
             numSamples  -= numSamplesNow;
         }
 
-
-        //double percent = profiler_.measureCpuPercentage(numSamples);
-        //profilerHelper_.trace(percent);     // TODO: send to GUI thread
+        if (cpuMeter_->stop(totalSamples)) {
+            polyphony_->monitorCpuMeterEvent(cpuMeter_->getPercent());
+        }
     }
 
 

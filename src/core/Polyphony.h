@@ -7,7 +7,7 @@
 #include "core/GlobalHeader.h"
 #include <e3_Buffer.h>
 #include "core/Voice.h"
-#include "core/VoiceMonitorCore.h"
+#include "core/MonitorCore.h"
 
 
 namespace e3 {
@@ -16,7 +16,7 @@ namespace e3 {
     // class Polyphony
     // Polyphonic voice managment
     //----------------------------------------------------------------------------------
-    class Polyphony : public VoiceMonitorUpdater
+    class Polyphony : public MonitorUpdater
     {
     public:
         Polyphony();

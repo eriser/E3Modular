@@ -10,6 +10,7 @@ namespace e3 {
     {
         setNumVoices(1);
         stack_.reserve(100);
+        monitorVoiceEvent(0);
     }
 
 
@@ -137,9 +138,6 @@ namespace e3 {
     
     void Polyphony::startVoice(uint16_t voice, double pitch, double gate)
     {
-        //if (numSounding_ == 0)
-            //synth_->beginProfiling();
-
         uint16_t state = Voice::kNoteOn | (hold_ ? Voice::kNoteHold : 0);
         voices_[voice].init(voice, state, pitch, gate, tags_);
 

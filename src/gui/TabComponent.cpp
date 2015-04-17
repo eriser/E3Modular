@@ -8,26 +8,30 @@ namespace e3 {
     {
         TabbedComponent::resized();
 
-        Rectangle<int> contentArea(getLocalBounds());
-        Rectangle<int> tabArea;
-        int tabDepth = getTabBarDepth();
+        TabbedButtonBar::Orientation o = getOrientation();
+        if (o == TabbedButtonBar::TabsAtTop || o == TabbedButtonBar::TabsAtBottom)
+        {
+            Rectangle<int> contentArea(getLocalBounds());
+            Rectangle<int> tabArea;
+            int tabDepth = getTabBarDepth();
 
-        switch (getOrientation()) {
-        case TabbedButtonBar::TabsAtTop: 
-            tabArea = contentArea.removeFromTop(tabDepth);
-            contentArea = contentArea.withTrimmedTop(gap_);
-            break;
-        case TabbedButtonBar::TabsAtBottom: 
-            tabArea = contentArea.removeFromBottom(tabDepth);
-            contentArea = contentArea.withTrimmedBottom(gap_);
-            break;
-        }
+            switch (o) {
+            case TabbedButtonBar::TabsAtTop:
+                tabArea = contentArea.removeFromTop(tabDepth);
+                contentArea = contentArea.withTrimmedTop(gap_);
+                tabs->setBounds(tabArea);
+                break;
+            case TabbedButtonBar::TabsAtBottom:
+                tabArea = contentArea.removeFromBottom(tabDepth);
+                contentArea = contentArea.withTrimmedBottom(gap_);
+                tabs->setBounds(tabArea);
+                break;
+            }
 
-        tabs->setBounds(tabArea);
-
-        for (int i = 0; i < getNumTabs(); i++) {
-            Component* c = getTabContentComponent(i);
-            c->setBounds(contentArea);
+            for (int i = 0; i < getNumTabs(); i++) {
+                Component* c = getTabContentComponent(i);
+                c->setBounds(contentArea);
+            }
         }
     }
 

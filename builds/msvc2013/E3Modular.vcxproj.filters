@@ -27,12 +27,6 @@
     <ClInclude Include="..\..\src\core\GlobalHeader.h">
       <Filter>src\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\core\Profiler.h">
-      <Filter>src\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\ProfilerHelper.h">
-      <Filter>src\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\gui\AudioEditor.h">
       <Filter>src\gui</Filter>
     </ClInclude>
@@ -87,9 +81,6 @@
     <ClInclude Include="..\..\src\core\Polyphony.h">
       <Filter>src\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\core\SineWaveVoice.h">
-      <Filter>src\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\core\Sink.h">
       <Filter>src\core</Filter>
     </ClInclude>
@@ -114,12 +105,6 @@
     <ClInclude Include="..\..\src\gui\BrowserPanel.h">
       <Filter>src\gui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\VoiceMonitor.h">
-      <Filter>src\gui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\VoiceMonitorCore.h">
-      <Filter>src\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\gui\Style.h">
       <Filter>src\gui</Filter>
     </ClInclude>
@@ -128,6 +113,21 @@
     </ClInclude>
     <ClInclude Include="..\..\src\gui\TabComponent.h">
       <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\SetupPanel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\PreferencesPanel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\Monitor.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\MonitorCore.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\CpuMeter.h">
+      <Filter>src\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -212,12 +212,6 @@
     <ClCompile Include="..\..\src\gui\BrowserPanel.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\VoiceMonitor.cpp">
-      <Filter>src\gui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\VoiceMonitorCore.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\gui\Style.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
@@ -226,6 +220,21 @@
     </ClCompile>
     <ClCompile Include="..\..\src\gui\TabComponent.cpp">
       <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\SetupPanel.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\PreferencesPanel.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\Monitor.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\MonitorCore.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\CpuMeter.cpp">
+      <Filter>src\core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

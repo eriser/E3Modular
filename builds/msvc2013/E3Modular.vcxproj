@@ -410,8 +410,7 @@ copy $(OutDir)\$(TargetName).pdb F:\Devices\Vstplugins\test\$(TargetName).pdb</C
       <Command>@echo off
 echo Copying $(OutDir)\$(TargetFileName) as F:\Devices\Vstplugins\test\$(TargetFileName)
 copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
-echo Copying $(OutDir)\%(ProgramDatabaseFile) as F:\Devices\Vstplugins\test\%(ProgramDatabaseFile)
-copy $(OutDir)\%(ProgramDatabaseFile) F:\Devices\Vstplugins\test\%(ProgramDatabaseFile)</Command>
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -437,29 +436,29 @@ copy $(OutDir)\%(ProgramDatabaseFile) F:\Devices\Vstplugins\test\%(ProgramDataba
     <ClInclude Include="..\..\src\core\Bank.h" />
     <ClInclude Include="..\..\src\core\BankSerializer.h" />
     <ClInclude Include="..\..\src\core\GlobalHeader.h" />
-    <ClInclude Include="..\..\src\core\VoiceMonitorCore.h" />
+    <ClInclude Include="..\..\src\core\MonitorCore.h" />
     <ClInclude Include="..\..\src\core\Module.h" />
     <ClInclude Include="..\..\src\core\ModelCatalog.h" />
     <ClInclude Include="..\..\src\core\Processor.h" />
+    <ClInclude Include="..\..\src\core\CpuMeter.h" />
     <ClInclude Include="..\..\src\core\Settings.h" />
     <ClInclude Include="..\..\src\core\Polyphony.h" />
     <ClInclude Include="..\..\src\core\Ports.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="..\..\src\core\Profiler.h" />
-    <ClInclude Include="..\..\src\core\ProfilerHelper.h" />
     <ClInclude Include="..\..\src\core\ParameterShaper.h" />
     <ClInclude Include="..\..\src\core\Models.h" />
     <ClInclude Include="..\..\src\core\Instrument.h" />
-    <ClInclude Include="..\..\src\core\SineWaveVoice.h" />
     <ClInclude Include="..\..\src\core\Sink.h" />
     <ClInclude Include="..\..\src\core\Voice.h" />
     <ClInclude Include="..\..\src\gui\AudioEditor.h" />
     <ClInclude Include="..\..\src\gui\BrowserPanel.h" />
     <ClInclude Include="..\..\src\gui\CommandTarget.h" />
+    <ClInclude Include="..\..\src\gui\PreferencesPanel.h" />
+    <ClInclude Include="..\..\src\gui\SetupPanel.h" />
     <ClInclude Include="..\..\src\gui\TabComponent.h" />
     <ClInclude Include="..\..\src\gui\TableComponent.h" />
-    <ClInclude Include="..\..\src\gui\VoiceMonitor.h" />
+    <ClInclude Include="..\..\src\gui\Monitor.h" />
     <ClInclude Include="..\..\src\gui\Resources.h" />
     <ClInclude Include="..\..\src\gui\Style.h" />
     <ClInclude Include="..\..\src\gui\EditorPanel.h" />
@@ -498,6 +497,7 @@ copy $(OutDir)\%(ProgramDatabaseFile) F:\Devices\Vstplugins\test\%(ProgramDataba
     </ClCompile>
     <ClCompile Include="..\..\src\core\Bank.cpp" />
     <ClCompile Include="..\..\src\core\BankSerializer.cpp" />
+    <ClCompile Include="..\..\src\core\CpuMeter.cpp" />
     <ClCompile Include="..\..\src\core\Module.cpp" />
     <ClCompile Include="..\..\src\core\ModelCatalog.cpp">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='UT_Debug|Win32'">
@@ -514,14 +514,16 @@ copy $(OutDir)\%(ProgramDatabaseFile) F:\Devices\Vstplugins\test\%(ProgramDataba
     <ClCompile Include="..\..\src\core\Instrument.cpp" />
     <ClCompile Include="..\..\src\core\Sink.cpp" />
     <ClCompile Include="..\..\src\core\Voice.cpp" />
-    <ClCompile Include="..\..\src\core\VoiceMonitorCore.cpp" />
+    <ClCompile Include="..\..\src\core\MonitorCore.cpp" />
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp" />
     <ClCompile Include="..\..\src\gui\BrowserPanel.cpp" />
     <ClCompile Include="..\..\src\gui\CommandTarget.cpp" />
     <ClCompile Include="..\..\src\gui\EditorPanel.cpp" />
+    <ClCompile Include="..\..\src\gui\PreferencesPanel.cpp" />
+    <ClCompile Include="..\..\src\gui\SetupPanel.cpp" />
     <ClCompile Include="..\..\src\gui\TabComponent.cpp" />
     <ClCompile Include="..\..\src\gui\TableComponent.cpp" />
-    <ClCompile Include="..\..\src\gui\VoiceMonitor.cpp" />
+    <ClCompile Include="..\..\src\gui\Monitor.cpp" />
     <ClCompile Include="..\..\src\gui\Resources.cpp" />
     <ClCompile Include="..\..\src\gui\Style.cpp" />
     <ClCompile Include="..\..\src\modules\Delay.cpp" />

@@ -1,20 +1,15 @@
 
-#ifdef BUILD_TARGET_APP
-#include "app/AudioEngine.h"
-#include "app/Application.h"
+#include "core/GlobalHeader.h"
 #include "core/Processor.h"
 #include "core/Polyphony.h"
-#endif
-
-#include "core/GlobalHeader.h"
 #include "gui/Resources.h"
 #include "gui/EditorPanel.h"
 #include "gui/BrowserPanel.h"
+#include "gui/SetupPanel.h"
 #include "gui/TabComponent.h"
-#include "gui/VoiceMonitor.h"
+#include "gui/Monitor.h"
 
 #include "gui/AudioEditor.h"
-#include "core/Processor.h"
 
 
 namespace e3 {
@@ -39,13 +34,14 @@ namespace e3 {
         style_ = new Style(styleXml);
         setLookAndFeel(style_);
 
-        processor_->getPolyphony()->monitorUpdateSignal.Connect(voiceMonitor_.get(), &VoiceMonitor::monitor);
+        processor_->getPolyphony()->monitorUpdateSignal.Connect(monitor_.get(), &Monitor::monitor);
     }
 
 
     AudioEditor::~AudioEditor()
     {
         //processor_->getSettings()->store();
+        processor_->getPolyphony()->monitorUpdateSignal.Disconnect(monitor_.get(), &Monitor::monitor);
         removeKeyListener(getCommandManager().getKeyMappings());
         commandManager_ = nullptr;
     }
@@ -67,8 +63,8 @@ namespace e3 {
         Rectangle<int> r = getLocalBounds();
         tabPanel_->setBounds(r.reduced(indent, indent));
 
-        r = Rectangle<int>(r.getWidth() - 142 - indent, r.getHeight() - 25 - indent, 142, 25);
-        voiceMonitor_->setBounds(r);
+        r = Rectangle<int>(r.getWidth() - 190 - indent, r.getHeight() - 25 - indent, 190, 25);
+        monitor_->setBounds(r);
 
         std::string bounds = getScreenBounds().toString().toStdString();
         processor_->getSettings()->setWindowState(bounds, "Plugin");
@@ -121,26 +117,11 @@ namespace e3 {
     }
 
 
-
-#ifdef BUILD_TARGET_APP
     void AudioEditor::createComponents()
     {
-        AudioEngine* engine         = Application::getApp()->getAudioEngine();
-        AudioDeviceManager* manager = engine->getDeviceManager();
-        Processor* processor        = engine->getProcessor();
-
-        AudioDeviceSelectorComponent* selector = new AudioDeviceSelectorComponent(
-            *manager,
-            processor->getNumInputChannels(),
-            processor->getNumInputChannels(),
-            processor->getNumOutputChannels(),
-            processor->getNumOutputChannels(),
-            true, false,
-            true, false);
-
         editorPanel_  = new EditorPanel();
         browserPanel_ = new BrowserPanel();
-        setupPanel_   = selector;
+        setupPanel_   = new SetupPanel();
 
         tabPanel_ = new TabComponent(TabbedButtonBar::TabsAtBottom, 10);
         tabPanel_->addTab("Editor", Colours::transparentBlack, editorPanel_, false, kEditorPanel);
@@ -150,8 +131,8 @@ namespace e3 {
         addAndMakeVisible(tabPanel_);
         tabPanel_->setCurrentTabIndex(kBrowserPanel);
 
-        voiceMonitor_ = new VoiceMonitor();
-        addAndMakeVisible(voiceMonitor_);
+        monitor_ = new Monitor();
+        addAndMakeVisible(monitor_);
 
         if (processor_->isPlugin()) 
         {
@@ -161,25 +142,6 @@ namespace e3 {
             resizeLimits_.setSizeLimits(640, 480, r.getWidth(), r.getHeight());
         }
     }
-#endif
-
-#ifdef BUILD_TARGET_VST
-    void AudioEditor::createComponents()
-    {
-        editorPanel_  = new EditorPanel();
-        browserPanel_ = new BrowserPanel();
-        stackedPanel_ = new StackedPanel();
-        toolPanel_    = new ToolPanel();
-
-        stackedPanel_->insertPanel(editorPanel_, kEditorPanel);
-        stackedPanel_->insertPanel(browserPanel_, kBrowserPanel);
-
-        toolPanel_->addPanelButton("Editor", kEditorPanel);
-        toolPanel_->addPanelButton("Browser", kBrowserPanel);
-
-        toolPanel_->panelSelectedSignal.Connect(stackedPanel_.get(), &StackedPanel::showPanel);
-    }
-#endif
 
     ApplicationCommandManager& AudioEditor::getCommandManager()
     {

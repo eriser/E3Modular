@@ -12,16 +12,14 @@
 
 #include <memory>
 #include "JuceHeader.h"
-#include "e3_Profiler.h"
 #include "core/GlobalHeader.h"
-#include "core/ProfilerHelper.h"
 #include "core/Settings.h"
 #include "core/Sink.h"
 
 
-
 namespace e3 {
 
+    class CpuMeter;
     class Polyphony;
     class Bank;
     class Instrument;
@@ -104,32 +102,11 @@ namespace e3 {
         std::unique_ptr<Bank> bank_;
         Instrument* instrument_ = nullptr;
 
-        Synthesiser juceSynth_;  // temporary
-
-        e3::common::Profiler profiler_;
-        e3::ProfilerHelper profilerHelper_;
+        ScopedPointer<CpuMeter> cpuMeter_;
 
         CriticalSection lock_;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Processor)
     };
-
-
-
-    // temporary method. Will be removed when modular processing is implemented
-    inline void Processor::juceProcessBlock(AudioSampleBuffer& audioBuffer, MidiBuffer& midiBuffer)
-    {
-        const int numSamples = audioBuffer.getNumSamples();
-        int channel = 0;
-
-        // Go through the incoming data, and apply our gain to it...
-        for (channel = 0; channel < getNumInputChannels(); ++channel)
-            audioBuffer.applyGain(channel, 0, numSamples, gain_);
-
-        // and now get the synth to process these midi events and generate its output.
-        //synth_.renderNextBlock(buffer, midiMessages, 0, numSamples);
-        juceSynth_.renderNextBlock(audioBuffer, midiBuffer, 0, numSamples);
-    }
-
 
 }  // namespace e3

@@ -26,7 +26,8 @@ namespace e3 {
         TEST_F(StyleTest, FindColours)
         {
             EXPECT_NE(Colours::black, style_->findColour(Style::kBackgroundColourId));
-            EXPECT_NE(Colours::black, style_->findColour(Style::kContentBackgroundColourId));
+            EXPECT_NE(Colours::black, style_->findColour(Style::kContentBackground1ColourId));
+            EXPECT_NE(Colours::black, style_->findColour(Style::kContentBackground2ColourId));
             EXPECT_NE(Colours::black, style_->findColour(Style::kTabButtonOffBackgroundColourId));
             EXPECT_NE(Colours::black, style_->findColour(Style::kTabButtonOnBackgroundColourId));
             EXPECT_NE(Colours::black, style_->findColour(Style::kTabButtonOffTextColourId));
