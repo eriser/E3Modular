@@ -1,6 +1,13 @@
 
+#define USE_JUCE_TIME
+
 #include <cmath>
+#ifdef USE_JUCE_TIME
+#include "JuceHeader.h"
+#endif
+#ifdef USE_WINDOWS_TIME
 #include <Windows.h>
+#endif
 #include "core/CpuMeter.h"
 
 
@@ -10,6 +17,23 @@ namespace e3 {
     // class CpuTime
     //------------------------------------------------------------------------
 
+#ifdef USE_JUCE_TIME
+    CpuTime::CpuTime() {}
+
+
+    int_least64_t CpuTime::getTicks() const
+    {
+        return Time::getHighResolutionTicks();;
+    }
+
+
+    double CpuTime::ticksToSeconds(int_least64_t ticks) const
+    {
+        return Time::highResolutionTicksToSeconds(ticks);
+    }
+#endif
+
+#ifdef USE_WINDOWS_TIME
     CpuTime::CpuTime()
     {
         if (!::QueryPerformanceFrequency((LARGE_INTEGER*)&frequency_)) {
@@ -31,6 +55,7 @@ namespace e3 {
     {
         return ticks / (double)frequency_;
     }
+#endif
 
 
     //------------------------------------------------------------------------

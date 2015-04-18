@@ -99,6 +99,21 @@ namespace e3 {
         setColour(ResizableWindow::backgroundColourId, colorMap["background"]);
         setColour(DocumentWindow::textColourId, colorMap["lightText"]);
 
+        setColour(Label::backgroundColourId, Colours::transparentBlack);
+        setColour(Label::textColourId, colorMap["darkText"]);
+        setColour(Label::outlineColourId, Colours::transparentBlack);
+        setColour(Label::backgroundWhenEditingColourId, Colours::white);
+        setColour(Label::textWhenEditingColourId, colorMap["darkText"]);
+        setColour(Label::outlineWhenEditingColourId, colorMap["contentBackground2"]);
+
+        setColour(TextEditor::backgroundColourId, Colours::white);
+        setColour(TextEditor::textColourId, colorMap["darkText"]);
+        setColour(TextEditor::highlightColourId, colorMap["highlight"].withAlpha(0.5f));
+        setColour(TextEditor::highlightedTextColourId, colorMap["darkText"]);
+        setColour(TextEditor::outlineColourId, colorMap["contentBackground1"]);
+        setColour(TextEditor::focusedOutlineColourId, colorMap["highlight"]);
+        setColour(TextEditor::shadowColourId, colorMap["darkText"]);
+
         setColour(TextButton::buttonColourId, colorMap["buttonOffBackground"]);
         setColour(TextButton::buttonOnColourId, colorMap["buttonOnBackground"]);
         setColour(TextButton::textColourOffId, colorMap["buttonOffText"]);
@@ -114,7 +129,7 @@ namespace e3 {
         setColour(TabbedButtonBar::frontOutlineColourId, Colours::transparentBlack);
         setColour(TabbedButtonBar::frontTextColourId, colorMap["buttonOnText"]);
 
-        setColour(ListBox::backgroundColourId, colorMap["contentBackground1"]);
+        setColour(ListBox::backgroundColourId, colorMap["contentBackground2"]);
         setColour(ListBox::outlineColourId, Colours::transparentBlack);
         setColour(ListBox::textColourId, colorMap["lightText"]);
 
@@ -122,6 +137,7 @@ namespace e3 {
         setColour(kBackgroundColourId, colorMap["background"]);
         setColour(kContentBackground1ColourId, colorMap["contentBackground1"]);
         setColour(kContentBackground2ColourId, colorMap["contentBackground2"]);
+        setColour(kHighlightColourId, colorMap["highlight"]);
         setColour(kTabButtonOffBackgroundColourId, colorMap["buttonOffBackground"]);
         setColour(kTabButtonOnBackgroundColourId, colorMap["buttonOnBackground"]);
         setColour(kTabButtonOffTextColourId, colorMap["buttonOffText"]);

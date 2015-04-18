@@ -10,57 +10,26 @@
 
 namespace e3 {
 
-    Bank::~Bank()
+    XmlElement* Bank::open(const std::string& path)
     {
-        deleteInstruments();
-    }
-
-
-    void Bank::close(bool doStore, bool makeBackup)
-    {
-        if (doStore) {
-            store(path_, true, makeBackup);
-        }
-        deleteInstruments();
-    }
-
-
-    void Bank::deleteInstruments()
-    {
-        //instrument_.resetModules();
-
-        for (uint32_t i = 0; i < getNumInstruments(); i++)
-        {
-            Instrument* instrument = instrumentList_[i];
-            if (instrument) delete instrument;
-        }
-        instrumentList_.clear();
-    }
-
-    
-    void Bank::load(const std::string& filepath, bool append)
-    {
-        XmlElement* e = settings_->getElement("Application");
-        std::string path = filepath.empty() ? e->getStringAttribute("BankPath").toStdString() : filepath;
-
         if (path.empty()) {
-            createNewBank(path); // TODO: path
+            return createNewBank();
         }
         else {
-            if (append == false) {
-                deleteInstruments();
+            XmlElement* root = BankSerializer::openBank(path);
+            if (root != nullptr) {
+                setXmlRoot(root);
+                setPath(path);
             }
-            path_ = path;
-            BankSerializer::loadBank(*this, append);
-            e->setAttribute("BankPath", path_);
+            return root;
         }
     }
 
 
     void Bank::store(const std::string& path, bool saveCurrent, bool makeBackup)
     {
-        if (path.empty())
-            return;
+        std::string p = path.empty() ? getPath() : path;
+        ASSERT(p.empty() == false);
 
         UNUSED(saveCurrent);
         UNUSED(makeBackup);
@@ -70,22 +39,18 @@ namespace e3 {
         //if (makeBackup)
             //makeBackup();
 
-        BankSerializer::storeBank(*this, path.c_str());
+        BankSerializer::storeBank(p, getXmlRoot());
+        setPath(p);
     }
 
 
-    void Bank::createNewBank(const std::string& path)
+    XmlElement* Bank::createNewBank()
     {
-        deleteInstruments();
+        XmlElement* root = BankSerializer::createNewBank();
+        setXmlRoot(root);
+        setPath("");
 
-        path_ = path;
-        name_ = "New Bank";
-        //currentInstrumentId_ = -1;
-
-        //Instrument* instrument = BankSerializer::generateDefaultInstrument(0);
-        //append(instrument);
-        //
-        //setCurrentInstrument(0, false);
+        return root;
     }
 
 
@@ -94,23 +59,19 @@ namespace e3 {
         bool isNull = (nullptr == instrument);
         ASSERT(!isNull);
 
-        if (!isNull) instrumentList_.push_back(instrument);
+        //if (!isNull) instrumentList_.push_back(instrument);
     }
     
 
     Instrument* Bank::loadInstrument(int hash)
     { 
-        hash = (hash == 0) ? instrumentHash_ : hash;
+        hash = (hash == 0) ? getInstrumentHash() : hash;
 
-        for (InstrumentList::const_iterator it = instrumentList_.begin(); it != instrumentList_.end(); it++)
-        {
-            Instrument* i = *it;
-            if (i->hash_ == hash) {
-                instrumentHash_ = hash;
-                return i;
-            }
+        Instrument* instrument = BankSerializer::loadInstrument(getXmlRoot(), hash);
+        if (instrument != nullptr) {
+            setInstrumentHash(instrument->hash_);
         }
-        return nullptr;
+        return instrument;
     }
 
 
@@ -132,15 +93,57 @@ namespace e3 {
 
     XmlElement* Bank::getXmlRoot()
     {
-        //xmlRoot_.reset(xmlDocument_->getDocumentElement());
         return xmlRoot_.get();
     }
 
 
-    XmlElement* Bank::resetXmlRoot(XmlElement* newRoot)
+    void Bank::setXmlRoot(XmlElement* newRoot)
     {
         xmlRoot_.reset(newRoot);
-        return getXmlRoot();
     }
+
+
+    void Bank::setInstrumentHash(int hash)             
+    { 
+        if (xmlRoot_ != nullptr) {
+            xmlRoot_->setAttribute("instrument", hash);
+        }
+    }
+
+
+    int Bank::getInstrumentHash() const
+    {
+        return (xmlRoot_ != nullptr) ? xmlRoot_->getIntAttribute("instrument") : 0;
+    }
+
+
+    void Bank::setPath(const std::string& path)
+    {
+        XmlElement* e = settings_->getElement("Application");
+        e->setAttribute("RecentBank", path);
+    }
+
+
+    std::string Bank::getPath()
+    {
+        XmlElement* e = settings_->getElement("Application");
+        return e->getStringAttribute("RecentBank").toStdString();
+    }
+
+
+    const std::string Bank::getName() const           
+    {
+        return (xmlRoot_ != nullptr) ? xmlRoot_->getStringAttribute("name").toStdString() : "";
+    }
+
+
+    void Bank::setName(const std::string& name)        
+    { 
+        if (xmlRoot_ != nullptr) {
+            xmlRoot_->setAttribute("name", name);
+        }
+    }
+
+
 
 } // namespace e3

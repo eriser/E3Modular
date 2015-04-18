@@ -10,63 +10,58 @@
 
 namespace e3 {
 
-    void BankSerializer::loadBank(Bank& bank, bool append)
+    std::string BankSerializer::defaultBankXml =
+        "<bank name='New Bank' instrument='1'>"
+        "<instrument name='Default Instrument' hash='1' category='' comment='' voices='32'>"
+        "</instrument>"
+        "</bank>";
+
+    
+    XmlElement* BankSerializer::openBank(const std::string& path)
     {
-        File file = checkPath(bank.getPath());
-        XmlElement* root = bank.resetXmlRoot(parse(file));
-        
-        if (append == false)
-        {
-            bank.name_ = root->getStringAttribute("name", "").toStdString();
-            bank.instrumentHash_ = root->getIntAttribute("instrument");
-        }
-                
-        Instrument* instrument = nullptr;
-        forEachXmlChildElementWithTagName(*root, e, "instrument")
-        {
-            try {
-                instrument = new Instrument;
-                readInstrument(e, instrument);
-                bank.append(instrument);
-            }
-            catch (const std::exception& e) {       // parse error, skip instrument
-                if (instrument) delete instrument;
-                TRACE(e.what());
-            }
-        }
+        File file = checkPath(path);
+        XmlElement* root = XmlDocument::parse(file);
+        checkRoot(root);
+
+        return root;
     }
 
 
-    void BankSerializer::storeBank(Bank& bank, const char* path)
+    XmlElement* BankSerializer::createNewBank()
     {
-        File file = File::getCurrentWorkingDirectory().getChildFile(path);
+        XmlElement* root = XmlDocument::parse(defaultBankXml);
+        checkRoot(root);
 
-        XmlElement* root = bank.getXmlRoot();
-        root->setAttribute("instrument", bank.getInstrumentHash());
-        //XmlElement doc("bank");
-        //writeBank(&doc, &bank);
+        return root;
+    }
 
-        if (root->writeToFile(file, "", "UTF-8", 1000) == false) {
+
+    void BankSerializer::storeBank(const std::string& path, XmlElement* root)
+    {
+        if (root->writeToFile(File(path), "", "UTF-8", 1000) == false) {
             THROW(std::runtime_error, "error writing bank file");
         }
     }
 
 
-    void BankSerializer::loadInstrument(XmlElement* root, const std::string& hash, Instrument* instrument)
+    Instrument* BankSerializer::loadInstrument(XmlElement* root, int hash)
     {
         forEachXmlChildElementWithTagName(*root, e, "instrument")
         {
-            std::string h = e->getStringAttribute("hash").toStdString();
+            int h = e->getIntAttribute("hash");
             if (h == hash) {
                 try {
+                    Instrument* instrument = new Instrument;    // processor will be owner of the instrument
                     readInstrument(e, instrument);
-                    return;
+                    return instrument;
                 }
                 catch (const std::exception& e) {       // parse error, skip instrument
                     TRACE(e.what());
+                    return nullptr;
                 }
             }
         }
+        return nullptr;
     }
 
 
@@ -192,22 +187,6 @@ namespace e3 {
     //--------------------------------------------------------------------------------
     // BankSerializer write methods
     //--------------------------------------------------------------------------------
-
-    void BankSerializer::writeBank(XmlElement* const e, const Bank* bank)
-    {
-        e->setAttribute("name", bank->getName());
-        e->setAttribute("instrument", bank->getInstrumentHash());
-        
-        for (uint32_t i = 0; i < bank->getNumInstruments(); i++)
-        {
-            //Instrument* const instrument = bank->getInstrument(i);
-            //if (instrument->empty() == false)
-            //{
-            //    XmlElement* const ep = e->createNewChildElement("instrument");
-            //    writeInstrument(ep, instrument, instrument->hash_);
-            //}
-        }
-    }
 
     void BankSerializer::writeInstrument(XmlElement* const e, const Instrument* instrument, int& hash)
     {
@@ -349,15 +328,12 @@ namespace e3 {
     }
 
 
-    XmlElement* BankSerializer::parse(const File& file)
+    void BankSerializer::checkRoot(XmlElement* root)
     {
-        XmlElement* root = XmlDocument::parse(file);
-
         if (root == nullptr || root->hasTagName("bank") == false) {
             if (root) delete root;
-            THROW(std::runtime_error, "invalid bank file: %s", file.getFullPathName());
+            THROW(std::runtime_error, "Bank file contains errors");
         }
-        return root;
     }
 
     
@@ -366,16 +342,5 @@ namespace e3 {
         String xml = e->createDocument("", false, true, "UTF-8", 1000);
         return xml.hashCode();
     }
-
-
-    //void BankSerializer::toString(const Bank& bank, std::string& result)
-    //{
-    //    XmlElement doc("bank");
-    //    writeBank(&doc, &bank);
-
-    //    result = doc.createDocument("", false, true, "UTF-8", 1000).toStdString();
-    //}
-
-
 
 } // namespace e3

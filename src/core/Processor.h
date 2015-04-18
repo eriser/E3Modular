@@ -11,6 +11,8 @@
 #pragma once
 
 #include <memory>
+#include <string>
+
 #include "JuceHeader.h"
 #include "core/GlobalHeader.h"
 #include "core/Settings.h"
@@ -38,10 +40,7 @@ namespace e3 {
         Polyphony* getPolyphony()  { return polyphony_.get(); }
 
         void prepareToPlay(double sampleRate, int samplesPerBlock) override;
-
         void processBlock(AudioSampleBuffer&, MidiBuffer&) override;
-        // temporary
-        void juceProcessBlock(AudioSampleBuffer&, MidiBuffer&);
 
         AudioProcessorEditor* createEditor() override;
         bool hasEditor() const override                                     { return true; }
@@ -75,11 +74,15 @@ namespace e3 {
         void getStateInformation(MemoryBlock& destData) override;
         void setStateInformation(const void* data, int sizeInBytes) override;
 
-        void suspend();
-        void resume();
+        bool suspend();
+        void resume(bool nested = false);
 
         void releaseResources() override                                    {}
 
+        XmlElement* openBank(const std::string& path);
+        XmlElement* newBank();
+        void saveBank(const std::string& path = "");
+        void loadInstrument(int hash = 0, bool saveCurrent = true);
 
         //enum Parameters
         //{
@@ -92,16 +95,13 @@ namespace e3 {
         float gain_ = 0.75;
 
     private:
-        void loadBank();
-        void loadInstrument(int hash=0);
-
         Settings settings_;
         
         Sink sink_;
         std::unique_ptr<Polyphony> polyphony_;
         std::unique_ptr<Bank> bank_;
-        Instrument* instrument_ = nullptr;
 
+        ScopedPointer<Instrument> instrument_;
         ScopedPointer<CpuMeter> cpuMeter_;
 
         CriticalSection lock_;

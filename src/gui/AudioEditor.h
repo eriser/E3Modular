@@ -36,13 +36,18 @@ namespace e3 {
         void createIcon(Image& image);
 
         bool perform(const InvocationInfo& info) override;      // Implementation for ApplicationCommandTarget
-        static ApplicationCommandManager& getCommandManager();
 
         ScopedPointer<Style> style_;
 
     private:
         void restoreWindowState();
         void createComponents();
+        void openBank(File file);
+
+        void onOpenBank();
+        void onSaveBank(bool askForFilename);
+        void onNewBank();
+        void onLoadInstrument();
 
         enum PanelIds {
             kEditorPanel = 0,
@@ -60,8 +65,6 @@ namespace e3 {
         ScopedPointer<ResizableCornerComponent> resizer_;
 
         ComponentBoundsConstrainer resizeLimits_;
-
-        static ScopedPointer<ApplicationCommandManager> commandManager_;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioEditor)
     };

@@ -3,28 +3,35 @@
 
 #include "JuceHeader.h"
 
+
 namespace e3
 {
     class TabComponent;
     class TableComponent;
 
-    class BrowserPanel : public Component, public Button::Listener
+    class BrowserPanel : public Component
     {
     public:
         BrowserPanel();
 
         void resized() override;
 
-    protected:
-        void buttonClicked(Button*) override {}
+        void updateInstruments(XmlElement* root);
+        XmlElement* getSelectedInstrument();
 
-        enum TabIds {
+    protected:
+        enum TabIds { 
             kBankTab,
             kInstrumentTab
         };
         ScopedPointer<TabComponent> tabPanel_;
-        ScopedPointer<TableComponent> bankBrowser_;
-        ScopedPointer<Component> instrumentBrowser_;
+        ScopedPointer<TableComponent> instrumentBrowser_;
+        ScopedPointer<Component> presetBrowser_;
+
+        ScopedPointer<TextButton> openButton_;
+        ScopedPointer<TextButton> saveButton_;
+        ScopedPointer<TextButton> saveAsButton_;
+        ScopedPointer<TextButton> newButton_;
     };
 
 

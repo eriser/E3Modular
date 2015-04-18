@@ -23,6 +23,9 @@ namespace e3 {
         std::string getWindowState(const std::string& context) const;
         void setWindowState(const std::string& state, const std::string& context);
 
+        std::string getRecentBankPath() const;
+        void setRecentBankPath(const std::string& path);
+
         XmlElement* getStyle(const std::string& name = "Default");
 
 #ifdef BUILD_TARGET_APP

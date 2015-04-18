@@ -129,6 +129,9 @@
     <ClInclude Include="..\..\src\core\CpuMeter.h">
       <Filter>src\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\gui\EditableTableCell.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp">
@@ -235,6 +238,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\core\CpuMeter.cpp">
       <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\EditableTableCell.cpp">
+      <Filter>src\gui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

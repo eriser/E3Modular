@@ -42,10 +42,11 @@ namespace e3 {
             kBackgroundColourId             = 0x2000000,
             kContentBackground1ColourId     = 0x2000001,
             kContentBackground2ColourId     = 0x2000002,
-            kTabButtonOffBackgroundColourId = 0x2000010,
-            kTabButtonOnBackgroundColourId  = 0x2000011,
-            kTabButtonOffTextColourId       = 0x2000012,
-            kTabButtonOnTextColourId        = 0x2000013,
+            kHighlightColourId              = 0x2000010,
+            kTabButtonOffBackgroundColourId = 0x2000020,
+            kTabButtonOnBackgroundColourId  = 0x2000021,
+            kTabButtonOffTextColourId       = 0x2000022,
+            kTabButtonOnTextColourId        = 0x2000023,
         };
 
     protected:

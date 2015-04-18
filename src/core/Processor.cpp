@@ -36,27 +36,34 @@ namespace e3 {
 
     void Processor::prepareToPlay(double sampleRate, int)
     {
-        if (nullptr == instrument_) {
-            loadBank();
-        }
-
         sink_.setSampleRate(sampleRate);
         cpuMeter_->setSampleRate((uint32_t)sampleRate);
     }
 
 
-    void Processor::loadBank()
+    XmlElement* Processor::openBank(const std::string& path)
     {
-        suspend();
-        bank_->load();
-        loadInstrument();
-        resume();
+        return bank_->open(path);
     }
 
-    
-    void Processor::loadInstrument(int hash)
+
+    XmlElement* Processor::newBank()
     {
-        if (instrument_ != nullptr) {
+        return bank_->createNewBank();
+    }
+
+
+    void Processor::saveBank(const std::string& path)
+    {
+        bank_->store(path);
+    }
+
+
+    void Processor::loadInstrument(int hash, bool saveCurrent)
+    {
+        suspend();
+
+        if (instrument_ != nullptr && saveCurrent) {
             instrument_->resetModules();
             bank_->storeInstrument(instrument_);
         }
@@ -71,6 +78,8 @@ namespace e3 {
             instrument_->updateModules(getSampleRate(), numVoices);
             sink_.compile(instrument_);
         }
+
+        resume();
     }
 
 
@@ -147,19 +156,26 @@ namespace e3 {
     // Processing
     //------------------------------------------------------------------------------
 
-    void Processor::suspend()
+    bool Processor::suspend()
     {
-        if (!isSuspended()) {
+        bool nested = isSuspended();
+
+        if (!nested) 
+        {
             suspendProcessing(true);
             if (instrument_) {
                 instrument_->suspendModules();
             }
         }
+        return nested;
     }
 
 
-    void Processor::resume()
+    void Processor::resume(bool nested)
     {
+        if (nested) {
+            return;
+        }
         if (isSuspended()) {
             suspendProcessing(false);
             if (instrument_) {

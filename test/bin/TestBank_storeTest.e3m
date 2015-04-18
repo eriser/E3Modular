@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<bank name="test" instrument="-986722484">
-  <instrument name="instrument_0" hash="-986722484" category="default" comment="" voices="32"/>
-  <instrument name="instrument_1" hash="2" category="default" comment="" voices="1"/>
-</bank>

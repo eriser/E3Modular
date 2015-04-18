@@ -1036,17 +1036,6 @@ namespace e3 {
             EXPECT_NEAR(elapsed, expected, 1000);  // error within 1 millisecond
         }
 
-        //TEST_F(CpuMeterTest, cpu_percentage_50)
-        //{
-        //    cpuMeter_.setRunsPerCycle(1);
-        //    cpuMeter_.start();
-        //    sleepMicros(500000);    // 0.5 seconds
-        //    cpuMeter_.stop(sampleRate_);
-        //    double percent = cpuMeter_.getPercent();
-
-        //    EXPECT_NEAR(50, percent, 2);
-        //}
-
         TEST_F(CpuMeterTest, cpu_percent_short_time)
         {
             bool ready;
@@ -1085,20 +1074,5 @@ namespace e3 {
             EXPECT_NEAR(50, percent, 15);
         }
 
-        //TEST_F(CpuMeterTest, cpu_percentage_50_multiple_cycles)
-        //{
-        //    int runs = 500;
-        //    int framesPerRun = sampleRate_ / runs;
-        //    cpuMeter_.setRunsPerCycle(50);
-
-        //    for (int i = 0; i < runs; i++) {
-        //        cpuMeter_.start();
-        //        sleepMicros(1000);
-        //        cpuMeter_.stop(framesPerRun);
-        //    }
-        //    double percent = cpuMeter_.getCpuPercentage();
-
-        //    EXPECT_NEAR(50, percent, 5);
-        //}
     } // namespace testing
 } // namespace e3

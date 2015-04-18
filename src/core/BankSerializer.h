@@ -21,10 +21,12 @@ namespace e3 {
     class BankSerializer
     {
     public:
-        static void loadBank(Bank& bank, bool append);
-        static void storeBank(Bank& bank, const char* path);
+        static XmlElement* openBank(const std::string& path);
+        static XmlElement* createNewBank();
+        static void storeBank(const std::string& path, XmlElement* root);
 
-        static void loadInstrument(XmlElement* root, const std::string& hash, Instrument* instrument);
+        static Instrument* loadInstrument(XmlElement* root, int hash);
+
         static void storeInstrument(XmlElement* root, Instrument* instrument);
 
         //static void toString(const Bank& bank, std::string& result);
@@ -44,8 +46,10 @@ namespace e3 {
         static void writeLinks(XmlElement* const e, const ModuleModel* module);
 
         static File checkPath(const std::string& path);
-        static XmlElement* parse(const File& file);
+        static void checkRoot(XmlElement* root);
         static int createHash(XmlElement* e);
+
+        static std::string defaultBankXml;
     };
 
 

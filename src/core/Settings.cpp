@@ -136,6 +136,20 @@ namespace e3 {
     }
 
 
+    std::string Settings::getRecentBankPath() const
+    {
+        XmlElement* e = getElement("Application");
+        return e->getStringAttribute("RecentBank", "").toStdString();
+    }
+
+
+    void Settings::setRecentBankPath(const std::string& path)
+    {
+        XmlElement* e = getElement("Application");
+        e->setAttribute("RecentBank", path);
+    }
+
+
 #ifdef BUILD_TARGET_APP
 
     void Settings::loadAudioDevices(AudioDeviceManager* manager, int numInputChannels, int numOutputChannels)

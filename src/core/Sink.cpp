@@ -6,6 +6,7 @@
 #include "modules/Master.h"
 #include "core/Sink.h"
 
+
 namespace e3 {
 
     Sink::Sink() : ModuleList()

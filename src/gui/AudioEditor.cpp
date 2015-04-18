@@ -1,4 +1,6 @@
 
+#include <e3_Trace.h>
+
 #include "core/GlobalHeader.h"
 #include "core/Processor.h"
 #include "core/Polyphony.h"
@@ -14,27 +16,27 @@
 
 namespace e3 {
 
-    ScopedPointer<ApplicationCommandManager> AudioEditor::commandManager_;
-
-
     AudioEditor::AudioEditor(Processor* owner) :
         AudioProcessorEditor(owner),
         processor_(owner)
     {
         setWantsKeyboardFocus(true);
 
-        ApplicationCommandManager& commandManager = getCommandManager();
-        commandManager.registerAllCommandsForTarget(this);
-        addKeyListener(commandManager.getKeyMappings());
-
         createComponents();
         restoreWindowState();
+
+        ApplicationCommandManager* commandManager = getCommandManager();
+        commandManager->registerAllCommandsForTarget(this);
+        addKeyListener(commandManager->getKeyMappings());
 
         XmlElement* styleXml = processor_->getSettings()->getStyle();
         style_ = new Style(styleXml);
         setLookAndFeel(style_);
 
         processor_->getPolyphony()->monitorUpdateSignal.Connect(monitor_.get(), &Monitor::monitor);
+
+        std::string path = processor_->getSettings()->getRecentBankPath();
+        openBank(File(path));
     }
 
 
@@ -42,8 +44,7 @@ namespace e3 {
     {
         //processor_->getSettings()->store();
         processor_->getPolyphony()->monitorUpdateSignal.Disconnect(monitor_.get(), &Monitor::monitor);
-        removeKeyListener(getCommandManager().getKeyMappings());
-        commandManager_ = nullptr;
+        removeKeyListener(getCommandManager()->getKeyMappings());
     }
 
 
@@ -75,9 +76,15 @@ namespace e3 {
     {
         switch (info.commandID)
         {
-        case showEditor:     tabPanel_->setCurrentTabIndex(kEditorPanel); break;
-        case showBrowser:    tabPanel_->setCurrentTabIndex(kBrowserPanel);  break;
-        case showAudioSetup: tabPanel_->setCurrentTabIndex(kSetupPanel); break;
+        case cmdShowEditor:     tabPanel_->setCurrentTabIndex(kEditorPanel); break;
+        case cmdShowBrowser:    tabPanel_->setCurrentTabIndex(kBrowserPanel);  break;
+        case cmdShowSetup:      tabPanel_->setCurrentTabIndex(kSetupPanel); break;
+        case cmdOpen:           onOpenBank(); break;
+        case cmdSave:           onSaveBank(false); break;
+        case cmdSaveAs:         onSaveBank(true); break;
+        case cmdNew:            onNewBank(); break;
+        case cmdLoadInstrument: onLoadInstrument(); break;
+
         default: return false;
         }
         return true;
@@ -143,12 +150,67 @@ namespace e3 {
         }
     }
 
-    ApplicationCommandManager& AudioEditor::getCommandManager()
-    {
-        if (commandManager_ == nullptr)
-            commandManager_ = new ApplicationCommandManager();
 
-        return *commandManager_;
+    void AudioEditor::openBank(File file)
+    {
+        XmlElement* root = processor_->openBank(file.getFullPathName().toStdString());
+        browserPanel_->updateInstruments(root);
+        processor_->loadInstrument();
     }
+
+
+    void AudioEditor::onOpenBank()
+    {
+        FileChooser fc("Open Bank",
+            File::getCurrentWorkingDirectory(),
+            "*.e3mb",
+            true);
+
+        if (fc.browseForFileToOpen())
+        {
+            openBank(fc.getResult());
+        }
+    }
+
+
+    void AudioEditor::onSaveBank(bool askForFilename)
+    {
+        if (askForFilename) 
+        {
+            FileChooser fc("Save Bank As",
+                File::getCurrentWorkingDirectory(),
+                "*.e3mb",
+                true);
+
+            if (fc.browseForFileToSave(true))
+            {
+                File file = fc.getResult();
+                processor_->saveBank(file.getFullPathName().toStdString());
+            }
+        }
+        else {
+            processor_->saveBank();
+        }
+    }
+
+
+    void AudioEditor::onNewBank()
+    {
+        XmlElement* root = processor_->newBank();
+        browserPanel_->updateInstruments(root);
+        processor_->loadInstrument();
+    }
+
+
+    void AudioEditor::onLoadInstrument()
+    {
+        XmlElement* e = browserPanel_->getSelectedInstrument();
+        if (e != nullptr)
+        {
+            int hash = e->getIntAttribute("hash");
+            processor_->loadInstrument(hash);
+        }
+    }
+
 
 } // namespace e3

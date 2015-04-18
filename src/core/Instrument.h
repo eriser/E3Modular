@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "JuceHeader.h"
 #include "core/Module.h"
 
 
@@ -14,10 +15,10 @@ namespace e3 {
     {
     public:
         Instrument();
-        Instrument(const Instrument& other) = delete;
+        //Instrument(const Instrument& other) = delete;
         ~Instrument();
 
-        void operator=(const Instrument& other) = delete;
+        //void operator=(const Instrument& other) = delete;
 
         void deleteModules();
         void initModules(Polyphony* polyphony);
@@ -54,5 +55,7 @@ namespace e3 {
         bool hasMaster()    { return nullptr != findModule(kModuleMaster); }
         void connectModule(Module* target);
         uint16_t createModuleId(ModuleType type);
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Instrument)
     };
 }  // namespace e3

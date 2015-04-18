@@ -454,6 +454,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\gui\AudioEditor.h" />
     <ClInclude Include="..\..\src\gui\BrowserPanel.h" />
     <ClInclude Include="..\..\src\gui\CommandTarget.h" />
+    <ClInclude Include="..\..\src\gui\EditableTableCell.h" />
     <ClInclude Include="..\..\src\gui\PreferencesPanel.h" />
     <ClInclude Include="..\..\src\gui\SetupPanel.h" />
     <ClInclude Include="..\..\src\gui\TabComponent.h" />
@@ -518,6 +519,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp" />
     <ClCompile Include="..\..\src\gui\BrowserPanel.cpp" />
     <ClCompile Include="..\..\src\gui\CommandTarget.cpp" />
+    <ClCompile Include="..\..\src\gui\EditableTableCell.cpp" />
     <ClCompile Include="..\..\src\gui\EditorPanel.cpp" />
     <ClCompile Include="..\..\src\gui\PreferencesPanel.cpp" />
     <ClCompile Include="..\..\src\gui\SetupPanel.cpp" />
