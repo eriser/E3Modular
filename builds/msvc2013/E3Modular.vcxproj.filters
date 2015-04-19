@@ -39,9 +39,6 @@
     <ClInclude Include="..\..\src\core\ParameterShaper.h">
       <Filter>src\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\core\Models.h">
-      <Filter>src\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\core\Module.h">
       <Filter>src\core</Filter>
     </ClInclude>
@@ -61,9 +58,6 @@
       <Filter>src\modules</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\Bank.h">
-      <Filter>src\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\ModelCatalog.h">
       <Filter>src\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\Ports.h">
@@ -132,6 +126,15 @@
     <ClInclude Include="..\..\src\gui\EditableTableCell.h">
       <Filter>src\gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\core\ModuleBase.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\ModuleCatalog.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\Wire.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp">
@@ -146,16 +149,10 @@
     <ClCompile Include="..\..\src\core\ParameterShaper.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\Models.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\core\Module.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\Bank.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\ModelCatalog.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\Ports.cpp">
@@ -240,6 +237,15 @@
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\EditableTableCell.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\ModuleBase.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\ModuleCatalog.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\Wire.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
   </ItemGroup>

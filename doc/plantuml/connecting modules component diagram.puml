@@ -1,0 +1,28 @@
+
+@startuml
+
+!include skin.iuml
+
+title
+<font size=24 color=#000000>Component Diagram: Connecting Modules</font>
+
+endtitle
+
+frame "Left Module" {
+[OutPort] - targets
+}
+frame "Right Module" {
+targets -right- InPort
+InPort - [RightModule]
+}
+
+'node "Left Module" {
+'interface "OutPort" as op
+'}
+'
+'node "Right Module" {
+'interface "InPort" as ip
+'op -> ip
+'}
+
+@enduml

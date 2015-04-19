@@ -47,6 +47,8 @@ namespace e3 {
             kTabButtonOnBackgroundColourId  = 0x2000021,
             kTabButtonOffTextColourId       = 0x2000022,
             kTabButtonOnTextColourId        = 0x2000023,
+            kWire1ColourId                  = 0x2000030,
+            kWire2ColourId                  = 0x2000031,
         };
 
     protected:

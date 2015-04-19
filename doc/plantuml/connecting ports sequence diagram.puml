@@ -1,0 +1,35 @@
+
+@startuml
+
+!include skin.iuml
+
+title
+<font size=24 color=#000000>Sequence Diagram: Connecting Module Ports</font>
+
+endtitle
+
+participant Instrument
+participant SourceModule
+participant OutPort
+participant TargetModule
+participant InPort
+
+loop all modules
+loop all links
+
+Instrument -> Instrument: get SourceModule
+Instrument -> SourceModule: connectPort
+SourceModule -> SourceModule: getOutPort
+SourceModule -> OutPort: connect
+OutPort -> OutPort: addTarget
+note right: realloc: adapterBuffer, \nmodulationBuffer (->numVoices!), \naudioOutBuffer
+OutPort -> TargetModule: connect
+TargetModule -> TargetModule: get inPort
+TargetModule -> InPort: connect
+InPort -> InPort: numSources++
+
+end
+end
+
+
+@enduml

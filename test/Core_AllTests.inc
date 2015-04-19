@@ -6,8 +6,8 @@
 #include <e3_CommonMacros.h>
 #include <core/Settings.h>
 #include <core/ParameterShaper.h>
-#include <core/Models.h>
-#include <core/ModelCatalog.h>
+#include <core/ModuleBase.h>
+#include <core/ModuleCatalog.h>
 #include <core/Module.h>
 #include <core/Sink.h>
 #include <core/Polyphony.h>
@@ -20,9 +20,9 @@
 namespace e3 {
     namespace testing {
 
-        const char* testBank                  = "TestBank.e3m";
-        const char* testBank_invalid_xml      = "TestBank_invalid_xml.e3m";
-        const char* testBank_incompatible_xml = "TestBank_incompatible_xml.e3m";
+        const char* testBank_valid_filename            = "TestBank.e3mb";
+        const char* testBank_invalid_xml_filename      = "TestBank_invalid_xml.e3mb";
+        const char* testBank_incompatible_xml_filename = "TestBank_incompatible_xml.e3mb";
 
         class TestableSettings : public Settings
         {
@@ -45,7 +45,7 @@ namespace e3 {
         {
         public:
             SettingsTest() {
-                settings_.setPath("e3m.settings");   // load settings file from current dir
+                settings_.setPath("e3m_valid.settings");   // load settings file from current dir
             }
 
             TestableSettings settings_;
@@ -53,7 +53,7 @@ namespace e3 {
 
         TEST_F(SettingsTest, setPathAbsoluteOrRelative)
         {
-            const char* filename = "e3m.settings";
+            const char* filename = "e3m_valid.settings";
             File f1, f2;
             String path = File::getCurrentWorkingDirectory().getChildFile(filename).getFullPathName();
 
@@ -114,7 +114,7 @@ namespace e3 {
         TEST_F(SettingsTest, invalidFile)
         {
             settings_.setPath("e3m_invalid.settings");
-            settings_.load();
+            settings_.load();   // parsing fails, but uses default settings
             EXPECT_TRUE(settings_.testValid());
         }
 
@@ -297,35 +297,35 @@ namespace e3 {
         //}
 
         //----------------------------------------------------------------------------------------
-        // ParameterModelMapTest
+        // ParameterMapTest
         //----------------------------------------------------------------------------------------
 
-        class ParameterModelMapTest : public ::testing::Test
+        class ParameterMapTest : public ::testing::Test
         {
         public:
-            ParameterModelMapTest() {
-                ParameterModel model;
+            ParameterMapTest() {
+                Parameter model;
                 model.id_ = id_;
                 map_.add(model);
             }
 
-            ParameterModelMap map_;
+            ParameterMap map_;
             uint16_t id_ = 17;
         };
 
-        TEST_F(ParameterModelMapTest, InsertAndGet)
+        TEST_F(ParameterMapTest, InsertAndGet)
         {
-            ParameterModel& p = map_.at(id_);
+            Parameter& p = map_.at(id_);
 
             EXPECT_EQ(id_, p.id_);
             EXPECT_THROW(map_.at(0), std::out_of_range);
         }
 
-        TEST_F(ParameterModelMapTest, SetModel)
+        TEST_F(ParameterMapTest, SetModel)
         {
             std::string label = "testing";
 
-            ParameterModel model;
+            Parameter model;
             model.id_ = id_;
             model.label_ = label;
             map_.update(model);
@@ -338,33 +338,33 @@ namespace e3 {
 
 
         //----------------------------------------------------------------------------------------
-        // LinkModelTest
+        // LinkTest
         //----------------------------------------------------------------------------------------
 
-        class LinkModelTest : public ::testing::Test
+        class LinkTest : public ::testing::Test
         {
         public:
-            LinkModelTest() {
+            LinkTest() {
                 link_.leftModule_  = 12;
                 link_.rightModule_ = 45;
                 link_.rightPort_   = 67;
                 link_.leftPort_    = 89;
             }
 
-            LinkModel link_;
+            Link link_;
         };
 
-        TEST_F(LinkModelTest, ConstructionAndAssignment)
+        TEST_F(LinkTest, ConstructionAndAssignment)
         {
             EXPECT_EQ(12, link_.leftModule_);
             
-            LinkModel l1 = link_;
+            Link l1 = link_;
             EXPECT_EQ(12, l1.leftModule_);
         }
 
-        TEST_F(LinkModelTest, OperatorEquals)
+        TEST_F(LinkTest, OperatorEquals)
         {
-            LinkModel l1 = link_;
+            Link l1 = link_;
             EXPECT_EQ(link_, l1);
             EXPECT_EQ(link_, &l1);
 
@@ -372,9 +372,9 @@ namespace e3 {
             EXPECT_NE(link_, l1);
         }
 
-        TEST_F(LinkModelTest, OperatorLess)
+        TEST_F(LinkTest, OperatorLess)
         {
-            LinkModel l1 = link_;
+            Link l1 = link_;
             l1.rightModule_ = 44;
             EXPECT_LT(l1, link_);
             EXPECT_GT(link_, l1);
@@ -386,56 +386,56 @@ namespace e3 {
 
 
         //----------------------------------------------------------------------------------------
-        // LinkModelListTest
+        // LinkListTest
         //----------------------------------------------------------------------------------------
-        class LinkModelListTest : public ::testing::Test
+        class LinkListTest : public ::testing::Test
         {
         public:
-            LinkModelListTest() 
+            LinkListTest()
             {
                 link_.leftModule_ = link_.rightModule_ = link_.rightPort_ = link_.leftPort_ = 3;
 
-                LinkModel l;
+                Link l;
                 for (int i = 1; i <= 4; i++) {
                     l.leftModule_ = l.rightModule_ = l.rightPort_ = l.leftPort_ = i;
                     list_.push_back(l);
                 }
             }
-            LinkModelList list_;
-            LinkModel link_;
+            LinkList list_;
+            Link link_;
         };
 
-        TEST_F(LinkModelListTest, get)
+        TEST_F(LinkListTest, get)
         {
-            LinkModel l1 = list_.get(link_);
+            Link l1 = list_.get(link_);
             EXPECT_EQ(link_, l1);
         }
 
 
-        TEST_F(LinkModelListTest, contains)
+        TEST_F(LinkListTest, contains)
         {
             EXPECT_TRUE(list_.contains(link_));
         }
 
-        TEST_F(LinkModelListTest, update)
+        TEST_F(LinkListTest, update)
         {
             link_.id_ = 117;
             list_.update(link_);
             EXPECT_TRUE(list_.contains(link_));
         }
 
-        TEST_F(LinkModelListTest, remove)
+        TEST_F(LinkListTest, remove)
         {
             list_.remove(link_);
             EXPECT_FALSE(list_.contains(link_));
         }
 
-        TEST_F(LinkModelListTest, getIndex)
+        TEST_F(LinkListTest, getIndex)
         {
             EXPECT_EQ(2, list_.getIndex(link_));
         }
 
-        TEST_F(LinkModelListTest, hasLeftModule)
+        TEST_F(LinkListTest, hasLeftModule)
         {
             EXPECT_TRUE(list_.hasLeftModule(link_.leftModule_));
             EXPECT_FALSE(list_.hasLeftModule(117));
@@ -475,7 +475,7 @@ namespace e3 {
 
             void testEqualsCatalog(ModuleType moduleType)
             {
-                const ModelCatalog& catalog = ModelCatalog::instance();
+                const ModuleCatalog& catalog = ModuleCatalog::instance();
                 const ModuleModel& model = catalog.getModuleModel(moduleType);
                 std::vector<int>& expected = moduleTestMap[moduleType];
 
@@ -496,9 +496,9 @@ namespace e3 {
             }
         }
 
-        TEST_F(ModuleCatalogTest, ParameterModel_ConstructAndCopy)
+        TEST_F(ModuleCatalogTest, Parameter_ConstructAndCopy)
         {
-            ParameterModel p1, p2;
+            Parameter p1, p2;
             EXPECT_EQ(p1.id_, 0);
             EXPECT_EQ(p1.defaultValue_, 0);
 
@@ -510,12 +510,12 @@ namespace e3 {
             EXPECT_EQ(p1.defaultValue_, p2.defaultValue_);
         }
 
-        TEST_F(ModuleCatalogTest, ParameterModelMap_setDefaultValues)
+        TEST_F(ModuleCatalogTest, ParameterMap_setDefaultValues)
         {
-            ModuleModel model = ModelCatalog::instance().getModuleModel(kModuleMaster);
+            ModuleModel model = ModuleCatalog::instance().getModuleModel(kModuleMaster);
             model.parameters_.setDefaultValues();
 
-            ParameterModel& param = model.parameters_.at(0);
+            Parameter& param = model.parameters_.at(0);
             EXPECT_EQ(param.defaultValue_, param.value_);
         }
 
@@ -580,7 +580,7 @@ namespace e3 {
         {
             TestableModule module(kModuleMaster);
             module.id_ = 17;
-            LinkModel link;
+            Link link;
             link.id_ = 19;
             module.addLink(link);
 
@@ -724,7 +724,7 @@ namespace e3 {
         {
         public:
             using BankSerializer::checkPath;
-            using BankSerializer::parse;
+            using BankSerializer::checkRoot;
         };
 
         class BankSerializerTest : public ::testing::Test
@@ -736,10 +736,10 @@ namespace e3 {
             File file;
             std::string path;
             
-            file = TestableBankSerializer::checkPath(testBank);
+            file = TestableBankSerializer::checkPath(testBank_valid_filename);
             EXPECT_TRUE(file.existsAsFile());
 
-            path = File::getCurrentWorkingDirectory().getChildFile(testBank).getFullPathName().toStdString();
+            path = File::getCurrentWorkingDirectory().getChildFile(testBank_valid_filename).getFullPathName().toStdString();
             file = TestableBankSerializer::checkPath(path);
             EXPECT_TRUE(file.existsAsFile());
 
@@ -754,22 +754,23 @@ namespace e3 {
         {
             std::unique_ptr<XmlElement> xml;
 
-            File file = File::getCurrentWorkingDirectory().getChildFile(testBank);
-            xml.reset(TestableBankSerializer::parse(file));
+            File file = File::getCurrentWorkingDirectory().getChildFile(testBank_valid_filename);
+            xml.reset(XmlDocument::parse(file));
             EXPECT_NE(nullptr, xml.get());
+            TestableBankSerializer::checkRoot(xml.get());
         }
 
 
         TEST_F(BankSerializerTest, parse_error)
         {
             File file = File::getCurrentWorkingDirectory().getChildFile("BankSerializerTest_parse_nofile");
-            EXPECT_THROW(TestableBankSerializer::parse(file), std::runtime_error);
+            EXPECT_THROW(TestableBankSerializer::checkPath(file.getFullPathName().toStdString()), std::invalid_argument);
 
-            file = File::getCurrentWorkingDirectory().getChildFile(testBank_incompatible_xml);
-            EXPECT_THROW(TestableBankSerializer::parse(file), std::runtime_error);
+            file = File::getCurrentWorkingDirectory().getChildFile(testBank_incompatible_xml_filename);
+            EXPECT_THROW(TestableBankSerializer::readBank(file.getFullPathName().toStdString()), std::runtime_error);
 
-            file = File::getCurrentWorkingDirectory().getChildFile(testBank_invalid_xml);
-            EXPECT_THROW(TestableBankSerializer::parse(file), std::runtime_error);
+            file = File::getCurrentWorkingDirectory().getChildFile(testBank_invalid_xml_filename);
+            EXPECT_THROW(TestableBankSerializer::readBank(file.getFullPathName().toStdString()), std::runtime_error);
         }
 
         //---------------------------------------------------
@@ -778,9 +779,6 @@ namespace e3 {
         class TestableBank : public Bank
         {
         public:
-            using Bank::isValidId;
-            //using Bank::path_;
-            //using Bank::xmlDocument_;
         };
 
         class BankTest : public ::testing::Test
@@ -797,8 +795,6 @@ namespace e3 {
             void checkBank(Bank& bank)
             {
                 EXPECT_EQ("test", bank.getName());
-                EXPECT_EQ(0, bank.getInstrumentId());
-                EXPECT_EQ(2, bank.getNumInstruments());
    
                 //TestableInstrument* instrument = static_cast<TestableInstrument*>(bank.getInstrument(1));
                 //ASSERT_NE(nullptr, instrument);
@@ -811,8 +807,8 @@ namespace e3 {
                 TestableInstrument* instrument = static_cast<TestableInstrument*>(i);
                 Polyphony polyphony;
                 polyphony.setNumVoices(32);
-                instrument->initModules(&polyphony);
-                instrument->updateModules(44100, polyphony.getNumVoices());
+                instrument->initModules(&polyphony, 44100);
+                //instrument->updateModules(44100, polyphony.getNumVoices());
 
                 EXPECT_EQ("instrument_0", instrument->name_);
                 EXPECT_EQ(32, instrument->numVoices_);
@@ -880,7 +876,7 @@ namespace e3 {
                 checkMidiParameters(adsr->links_[1]);
             }
 
-            void checkMidiParameters(const ParameterModel& model)
+            void checkMidiParameters(const Parameter& model)
             {
                 EXPECT_EQ(-1,    model.midiShaper_.getControllerId());
                 EXPECT_EQ(0,     model.midiShaper_.getControllerMin());
@@ -891,38 +887,38 @@ namespace e3 {
 
         TEST_F(BankTest, load_nofile)
         {
-            EXPECT_THROW(bank_.load("BankTest_load_error"), std::invalid_argument);
+            EXPECT_THROW(bank_.open("BankTest_load_error"), std::invalid_argument);
         }
 
         TEST_F(BankTest, load_invalid_xml)
         {
-            EXPECT_THROW(bank_.load(testBank_invalid_xml), std::runtime_error);
+            EXPECT_THROW(bank_.open(testBank_invalid_xml_filename), std::runtime_error);
         }
 
         TEST_F(BankTest, load_incompatible_xml)
         {
-            EXPECT_THROW(bank_.load(testBank_incompatible_xml), std::runtime_error);
+            EXPECT_THROW(bank_.open(testBank_incompatible_xml_filename), std::runtime_error);
         }
 
         TEST_F(BankTest, load_ok)
         {
-            bank_.load(testBank);
+            bank_.open(testBank_valid_filename);
             checkBank(bank_);
         }
 
         TEST_F(BankTest, load_multiple)
         {
             for (int i = 0; i < 10; i++) {
-                bank_.load(testBank);
+                bank_.open(testBank_valid_filename);
                 checkBank(bank_);
             }
         }
 
         TEST_F(BankTest, load_instrument)
         {
-            bank_.load(testBank);
+            bank_.open(testBank_valid_filename);
             int hash = bank_.getInstrumentHash();
-            Instrument* instrument = bank_.loadInstrument(hash);
+            ScopedPointer<Instrument> instrument = bank_.loadInstrument(hash);
             ASSERT_NE(nullptr, instrument);
             checkInstrument(instrument);
             //delete i;
@@ -930,9 +926,9 @@ namespace e3 {
 
         TEST_F(BankTest, store_instrument)
         {
-            bank_.load(testBank);
+            bank_.open(testBank_valid_filename);
             int hash = bank_.getInstrumentHash();
-            Instrument* instrument = bank_.loadInstrument();
+            ScopedPointer<Instrument> instrument = bank_.loadInstrument();
             bank_.storeInstrument(instrument);
             EXPECT_EQ(hash, instrument->hash_);
 
@@ -943,18 +939,18 @@ namespace e3 {
 
         TEST_F(BankTest, store)
         {
-            bank_.load(testBank);
+            bank_.open(testBank_valid_filename);
             bank_.store("TestBank_storeTest.e3m", false, false);
-            bank_.load("TestBank_storeTest.e3m");
+            bank_.open("TestBank_storeTest.e3m");
             checkBank(bank_);
 
-            Instrument* instrument = bank_.loadInstrument();
+            ScopedPointer<Instrument> instrument = bank_.loadInstrument();
             instrument->deleteModules();
             bank_.storeInstrument(instrument);
             int hash = instrument->hash_;
             bank_.setInstrumentHash(hash);
             bank_.store("TestBank_storeTest.e3m", false, false);
-            bank_.load("TestBank_storeTest.e3m");
+            bank_.open("TestBank_storeTest.e3m");
             EXPECT_EQ(hash, bank_.getInstrumentHash());
 
             instrument = bank_.loadInstrument();
@@ -963,20 +959,17 @@ namespace e3 {
 
         TEST_F(BankTest, connect_modules)
         {
-            bank_.load(testBank);
-            TestableInstrument* instrument = static_cast<TestableInstrument*>(bank_.loadInstrument());
+            bank_.open(testBank_valid_filename);
+            ScopedPointer<Instrument> instrument = bank_.loadInstrument();
 
             Polyphony polyphony;
             polyphony.setNumVoices(4);
 
-            instrument->initModules(&polyphony);
-            instrument->updateModules(44100, polyphony.getNumVoices());
+            instrument->initModules(&polyphony, 44100);
 
             Sink sink;
             sink.compile(instrument);
             EXPECT_EQ(4, sink.size());
-            //instrument->connectModules();
-            //checkConnections(instrument);
         }
 
 

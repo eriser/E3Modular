@@ -166,6 +166,7 @@ namespace e3 {
     void TableComponent::setActiveItem(int rowNumber)
     {
         activeItem_ = data_->getChildElement(rowNumber);
+        repaint();
         AudioEditor::getCommandManager()->invokeDirectly(AudioEditor::cmdLoadInstrument, false);
     }
 

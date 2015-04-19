@@ -3,7 +3,7 @@
 
 #include "core/GlobalHeader.h"
 #include "core/Ports.h"
-#include "core/Models.h"
+#include "core/ModuleBase.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4100) 
@@ -54,13 +54,21 @@ namespace e3 {
         ProcessFunctionPointer processFunction_ = nullptr;
 
     protected:
-        virtual void init(Polyphony* polyphony);
+        // Constructs all member and initializes them with the current sample rate and number of voices.
+        // No links are created.
+        virtual void init(Polyphony* polyphony, double sampleRate);
+
+        // Updates all members with the current sample rate and number of voices.
+        // Links remain valid.
+        virtual void update();
+
+        // Deletes all members and links. After reset the module is in the same state as before init().
         virtual void reset();
 
         virtual void initSignals() {}
         virtual void initProcess() {}
         virtual void initPorts() {}
-        virtual void initData()  {}
+        virtual void initVoices() {}
         virtual void initParameters();
 
         virtual void resetSignals() {}
@@ -68,14 +76,12 @@ namespace e3 {
         virtual void resetData()  {}
         virtual void resetParameters()  {}
 
-        virtual void update();
         virtual void updatePorts();
         virtual void updateInPorts();
         virtual void updateOutPorts();
-        virtual void updateData()  {}
         virtual void updateParameters();
 
-        void connectPort(Module* target, LinkModel* link);
+        void connectPort(Module* target, Link* link);
         PortAdapterType chooseAdapter(VoicingType otherVoicingType) const;
 
         double sampleRate_   = INITIAL_SAMPLERATE;

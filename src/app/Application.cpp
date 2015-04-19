@@ -35,17 +35,21 @@ namespace e3 {
         window_->setTitleBarButtonsRequired(DocumentWindow::allButtons, false);
         window_->setResizable(true, true);
 
-        Image icon;
-        editor->createIcon(icon);
-        window_->setIcon(icon);
+        //Image icon;
+        //editor->createIcon(icon);
+        //window_->setIcon(icon);
 
         window_->setContentOwned(editor, true);
 
         std::string windowState = getSettings()->getWindowState("Standalone");
         window_->restoreWindowStateFromString(windowState);
         window_->setLookAndFeel(editor->style_);
-        window_->setWantsKeyboardFocus(false);
+        window_->setUsingNativeTitleBar(false);
         window_->setVisible(true);
+
+        Image icon;
+        editor->createIcon(icon);
+        window_->setIcon(icon);
     }
 
 

@@ -17,11 +17,9 @@ namespace e3 {
     public:
         //void close(bool doStore, bool makeBackup);
 
-        XmlElement* open(const std::string& path);
-        XmlElement* createNewBank();
-        //void load(const std::string& filepath="", bool append=false);
+        void open(const std::string& path);
+        void createNewBank();
         void store(const std::string& path, bool saveCurrent=true, bool makeBackup=true);
-
 
         const std::string getName() const;    
         void setName(const std::string& name); 
@@ -39,15 +37,15 @@ namespace e3 {
 
         void setSettings(Settings* settings);
 
-        XmlElement* getXmlRoot();
-        void setXmlRoot(XmlElement* newRoot);
+        XmlElement* getXml();
+        void setXml(XmlElement* e);
 
     protected:
         Settings* settings_ = nullptr;
         bool autosave_      = true;
         bool makeBackup_    = false;
 
-        std::unique_ptr<XmlElement> xmlRoot_ = nullptr;
+        std::unique_ptr<XmlElement> xml_ = nullptr;
         std::unique_ptr<XmlDocument> xmlDocument_ = nullptr;
     };
 }  // namespace e3

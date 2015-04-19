@@ -17,11 +17,16 @@ namespace e3 {
     }
 
 
-    void Delay::initData()
+    void Delay::initVoices()
     {
-        bufferSize_ = (uint32_t)sampleRate_;
-        buffer_     = delayBuffer_.resize(numVoices_ * bufferSize_);
-        cursor_     = cursorBuffer_.resize( numVoices_ );
+        updateBuffer();
+    }
+
+
+    void Delay::setSampleRate(double sampleRate)
+    {
+        Module::setSampleRate(sampleRate);
+        updateBuffer();
     }
 
 
@@ -41,6 +46,14 @@ namespace e3 {
     }
 
 
+    void Delay::updateBuffer()
+    {
+        bufferSize_          = (uint32_t)sampleRate_;
+        delayBufferPointer_  = delayBuffer_.resize(numVoices_ * bufferSize_);  
+        cursorBufferPointer_ = cursorBuffer_.resize(numVoices_);
+    }
+
+
     void Delay::resume()
     {
         delayBuffer_.set( 0 );
@@ -55,16 +68,16 @@ namespace e3 {
         
         for( v = 0; v < numVoices_; v++ )
         {
-            input          = audioInPortPointer_[v];
+            input = audioInPortPointer_[v];
             audioInPortPointer_[v] = 0.f;
 
-            index          = v * bufferSize_ + cursor_[v];
-            output         = buffer_[index];
+            index  = v * bufferSize_ + cursorBufferPointer_[v];
+            output = delayBufferPointer_[index];
 
-            buffer_[index] = input + output * feedback_;
+            delayBufferPointer_[index] = input + output * feedback_;
 
-            if( ++cursor_[v] >= delayTime_ ) {
-                cursor_[v] = 0;
+            if( ++cursorBufferPointer_[v] >= delayTime_ ) {
+                cursorBufferPointer_[v] = 0;
             }
             audioOutPort_.putAudio( input + output * gain_, v );
         }

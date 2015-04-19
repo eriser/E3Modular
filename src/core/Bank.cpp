@@ -10,18 +10,17 @@
 
 namespace e3 {
 
-    XmlElement* Bank::open(const std::string& path)
+    void Bank::open(const std::string& path)
     {
         if (path.empty()) {
-            return createNewBank();
+            createNewBank();
         }
         else {
-            XmlElement* root = BankSerializer::openBank(path);
+            XmlElement* root = BankSerializer::readBank(path);
             if (root != nullptr) {
-                setXmlRoot(root);
+                setXml(root);
                 setPath(path);
             }
-            return root;
         }
     }
 
@@ -39,18 +38,16 @@ namespace e3 {
         //if (makeBackup)
             //makeBackup();
 
-        BankSerializer::storeBank(p, getXmlRoot());
+        BankSerializer::storeBank(p, getXml());
         setPath(p);
     }
 
 
-    XmlElement* Bank::createNewBank()
+    void Bank::createNewBank()
     {
         XmlElement* root = BankSerializer::createNewBank();
-        setXmlRoot(root);
+        setXml(root);
         setPath("");
-
-        return root;
     }
 
 
@@ -67,7 +64,7 @@ namespace e3 {
     { 
         hash = (hash == 0) ? getInstrumentHash() : hash;
 
-        Instrument* instrument = BankSerializer::loadInstrument(getXmlRoot(), hash);
+        Instrument* instrument = BankSerializer::loadInstrument(getXml(), hash);
         if (instrument != nullptr) {
             setInstrumentHash(instrument->hash_);
         }
@@ -77,7 +74,7 @@ namespace e3 {
 
     void Bank::storeInstrument(Instrument* instrument)
     {
-        BankSerializer::storeInstrument(getXmlRoot(), instrument);
+        BankSerializer::storeInstrument(getXml(), instrument);
     }
 
 
@@ -91,29 +88,29 @@ namespace e3 {
     }
 
 
-    XmlElement* Bank::getXmlRoot()
+    XmlElement* Bank::getXml()
     {
-        return xmlRoot_.get();
+        return xml_.get();
     }
 
 
-    void Bank::setXmlRoot(XmlElement* newRoot)
+    void Bank::setXml(XmlElement* e)
     {
-        xmlRoot_.reset(newRoot);
+        xml_.reset(e);
     }
 
 
     void Bank::setInstrumentHash(int hash)             
     { 
-        if (xmlRoot_ != nullptr) {
-            xmlRoot_->setAttribute("instrument", hash);
+        if (xml_ != nullptr) {
+            xml_->setAttribute("instrument", hash);
         }
     }
 
 
     int Bank::getInstrumentHash() const
     {
-        return (xmlRoot_ != nullptr) ? xmlRoot_->getIntAttribute("instrument") : 0;
+        return (xml_ != nullptr) ? xml_->getIntAttribute("instrument") : 0;
     }
 
 
@@ -133,14 +130,14 @@ namespace e3 {
 
     const std::string Bank::getName() const           
     {
-        return (xmlRoot_ != nullptr) ? xmlRoot_->getStringAttribute("name").toStdString() : "";
+        return (xml_ != nullptr) ? xml_->getStringAttribute("name").toStdString() : "";
     }
 
 
     void Bank::setName(const std::string& name)        
     { 
-        if (xmlRoot_ != nullptr) {
-            xmlRoot_->setAttribute("name", name);
+        if (xml_ != nullptr) {
+            xml_->setAttribute("name", name);
         }
     }
 

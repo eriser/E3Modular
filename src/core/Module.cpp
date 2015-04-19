@@ -5,20 +5,21 @@
 #include <e3_Trace.h> // TODO remove this line
 
 #include "core/GlobalHeader.h"
-#include "core/ModelCatalog.h"
+#include "core/ModuleCatalog.h"
 #include "core/Polyphony.h"
 #include "modules/Master.h"
 #include "modules/MidiModules.h"
 #include "modules/Envelopes.h"
 #include "modules/SineOscil.h"
 #include "modules/Delay.h"
+#include "core/Module.h"
 
 
 
 namespace e3 {
 
     Module::Module(ModuleType type) : 
-        ModuleModel(ModelCatalog::instance().getModuleModel(type))
+        ModuleModel(ModuleCatalog::instance().getModuleModel(type))
     {
         mono_ = (voicingType_ == kMonophonic);
     }
@@ -47,15 +48,24 @@ namespace e3 {
     }
 
 
-    void Module::init(Polyphony* polyphony)
+    void Module::init(Polyphony* polyphony, double sampleRate)
     {
         polyphony_  = polyphony;
 
+        setSampleRate(sampleRate);
+        setNumVoices(polyphony->getNumVoices());
+
+        ASSERT(sampleRate_ > 0);
+        ASSERT(numVoices_ > 0);
+
         initPorts();
         initProcess();
-        initData();
+        initVoices();
         initParameters();
         initSignals();
+
+        updateParameters();
+        updatePorts();
     }
 
 
@@ -83,9 +93,9 @@ namespace e3 {
     void Module::update() 
     {
         ASSERT(sampleRate_ > 0);
-        ASSERT(numVoices_ > 0 && numVoices_ < 1000); // debug only
+        ASSERT(numVoices_ > 0 );
 
-        updateData();
+        initVoices();
         updateParameters();
         updatePorts();
     }
@@ -116,9 +126,9 @@ namespace e3 {
 
     void Module::initParameters()
     {
-        for (ParameterModelMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
+        for (ParameterMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
         {
-            ParameterModel& param = it->second;
+            Parameter& param = it->second;
             if (param.midiShaper_.getControllerId() >= 0) {
                 polyphony_->midiControllerSignal.Connect(this, &Module::onMidiController);
             }
@@ -129,20 +139,15 @@ namespace e3 {
 
     void Module::updateParameters()
     {
-        for (ParameterModelMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
+        for (ParameterMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
         {
-            ParameterModel& param = it->second;
+            Parameter& param = it->second;
             setParameter(it->first, param.value_, 0, -1);  // set all parameters to zero
         }
     }
 
 
-    void Module::onMidiController(int controllerNum, int value)
-    {
-        UNUSED(value);
-        UNUSED(controllerNum);
-        //TRACE("Module::onMidiController cc=%d\n", controllerNum);
-    }
+    void Module::onMidiController(int, int)  {}
 
     
     void Module::setSampleRate(double sampleRate)
@@ -152,9 +157,9 @@ namespace e3 {
 
 
     void Module::setNumVoices(uint16_t numVoices)
-   {
+    {
         numVoices_ = mono_ ? 1 : numVoices;
-   }
+    }
 
 
     OutPort* Module::getOutPort(uint16_t portId)
@@ -186,7 +191,7 @@ namespace e3 {
     }
 
 
-    void Module::connectPort(Module* target, LinkModel* link)
+    void Module::connectPort(Module* target, Link* link)
     {
         ASSERT(target);
 

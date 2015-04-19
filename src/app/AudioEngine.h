@@ -29,9 +29,6 @@ namespace e3 {
         void setupDevices();
         void shutdownDevices();
         void storeAudioSettings();
-        //void loadDevices();
-        //void loadAudioDevices(Settings* settings);
-        //void loadMidiDevices(Settings* settings);
         void createProcessor();
         void deleteProcessor();
 

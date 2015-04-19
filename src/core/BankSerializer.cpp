@@ -2,7 +2,7 @@
 #include "JuceHeader.h"
 #include <e3_Trace.h>
 
-#include "core/ModelCatalog.h"
+#include "core/ModuleCatalog.h"
 #include "core/Instrument.h"
 #include "core/Bank.h"
 #include "core/BankSerializer.h"
@@ -17,7 +17,7 @@ namespace e3 {
         "</bank>";
 
     
-    XmlElement* BankSerializer::openBank(const std::string& path)
+    XmlElement* BankSerializer::readBank(const std::string& path)
     {
         File file = checkPath(path);
         XmlElement* root = XmlDocument::parse(file);
@@ -125,7 +125,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readParameters(XmlElement* parent, ModuleModel* module)
+    void BankSerializer::readParameters(XmlElement* parent, Module* module)
     {
         forEachXmlChildElementWithTagName(*parent, e, "param")
         {
@@ -133,7 +133,7 @@ namespace e3 {
 
             try
             {
-                ParameterModel p = ModelCatalog::instance().getParameterModel(module->moduleType_, id);
+                Parameter p = ModuleCatalog::instance().getParameter(module->moduleType_, id);
                 readParameter(e, p);
                 module->parameters_.update(p);
             }
@@ -144,11 +144,11 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readLinks(XmlElement* parent, ModuleModel* module)
+    void BankSerializer::readLinks(XmlElement* parent, Module* module)
     {
         forEachXmlChildElementWithTagName(*parent, e, "link")
         {
-            LinkModel link;
+            Link link;
             link.leftModule_ = (uint16_t)e->getIntAttribute("left_module");
             link.leftPort_   = (uint16_t)e->getIntAttribute("left_port");
             link.rightPort_  = (uint16_t)e->getIntAttribute("right_port");
@@ -159,7 +159,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readParameter(XmlElement* e, ParameterModel& p)
+    void BankSerializer::readParameter(XmlElement* e, Parameter& p)
     {
         p.value_        = e->getDoubleAttribute("value", p.value_);
         p.defaultValue_ = e->getDoubleAttribute("default", p.defaultValue_);
@@ -218,7 +218,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writeModule(XmlElement* const e, const ModuleModel* module)
+    void BankSerializer::writeModule(XmlElement* const e, const Module* module)
     {
         e->setAttribute("id", module->id_);
         e->setAttribute("label", module->label_);
@@ -234,19 +234,19 @@ namespace e3 {
 
     }
 
-    void BankSerializer::writeParameters(XmlElement* const e, const ModuleModel* module)
+    void BankSerializer::writeParameters(XmlElement* const e, const Module* module)
     {
-        const ParameterModelMap& params = module->parameters_;
+        const ParameterMap& params = module->parameters_;
 
-        for (ParameterModelMap::const_iterator it = params.begin(); it != params.end(); it++)
+        for (ParameterMap::const_iterator it = params.begin(); it != params.end(); it++)
         {
-            const ParameterModel& param = it->second;
+            const Parameter& param = it->second;
             if (param.controlType_ > kControlHidden)
             {
                 XmlElement* const ep = e->createNewChildElement("param");
                 ep->setAttribute("id", param.id_);
 
-                const ParameterModel& defaultParam = ModelCatalog::instance().getParameterModel(module->moduleType_, param.id_);
+                const Parameter& defaultParam = ModuleCatalog::instance().getParameter(module->moduleType_, param.id_);
                 writeParameter(ep, param, defaultParam);
             }
         }
@@ -254,24 +254,24 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writeLinks(XmlElement* const e, const ModuleModel* module)
+    void BankSerializer::writeLinks(XmlElement* const e, const Module* module)
     {
-        const LinkModelList& links = module->links_;
-        for (LinkModelList::const_iterator it = links.begin(); it != links.end(); it++)
+        const LinkList& links = module->links_;
+        for (LinkList::const_iterator it = links.begin(); it != links.end(); it++)
         {
-            const LinkModel& link = *it;
+            const Link& link = *it;
             XmlElement* const el = e->createNewChildElement("link");
             el->setAttribute("left_module", link.leftModule_);
             el->setAttribute("left_port",   link.leftPort_);
             el->setAttribute("right_port",  link.rightPort_);
 
-            ParameterModel defaultParam;
+            Parameter defaultParam;
             writeParameter(el, link, defaultParam);
         }
     }
 
 
-    void BankSerializer::writeParameter(XmlElement* const e, const ParameterModel& param, const ParameterModel& defaultParam)
+    void BankSerializer::writeParameter(XmlElement* const e, const Parameter& param, const Parameter& defaultParam)
     {
         e->setAttribute("value", param.value_);
 

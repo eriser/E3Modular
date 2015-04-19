@@ -55,7 +55,7 @@ namespace e3
     }
 
 
-    void BrowserPanel::updateInstruments(XmlElement* root)
+    void BrowserPanel::updateContents(XmlElement* root)
     {
         instrumentBrowser_->loadData(root);
     }

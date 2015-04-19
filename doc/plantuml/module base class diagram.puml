@@ -1,0 +1,65 @@
+
+
+@startuml
+
+!include skin.iuml
+
+title
+<font size=24 color=#000000>Class Diagram: ModuleModel</font>
+
+endtitle
+
+class PortModel {
+    uint16_t id_
+    ControlType controlType_
+    string label_
+}
+
+class PortModelList
+
+class Link {
+    uint16_t leftModule_
+    uint16_t rightModule_
+    uint16_t leftPort_
+    uint16_t rightPort_
+}
+
+class LinkList {
+}
+
+class Parameter {
+    uint16_t id_
+    ControlType controlType_
+    ...
+}
+
+class ParameterMap {
+}
+
+class ModuleModel {
+    int16_t id_
+    ModuleType moduleType_
+    ProcessingType processingType_
+    VoicingType voicingType_
+
+    std::string label_
+    PortList inPortModels_
+    PortList outPortModels_
+    ParameterMap parameters_
+    LinkList links_
+    LinkList removedLinks_
+
+    void addLink(LinkModel& link)
+    void removeLink(const LinkModel& link)
+    LinkModel& getLink(uint16_t index)
+}
+
+
+PortModel o-- PortModelList
+Parameter o-- ParameterMap
+Link o-- LinkList
+ParameterMap o-- ModuleModel
+LinkList o-- ModuleModel
+PortModelList o-- ModuleModel
+
+@enduml

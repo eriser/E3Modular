@@ -26,12 +26,12 @@ namespace e3 {
         MidiPitch() : Module(kModuleMidiPitch) {}
         MidiPitch(ModuleType type) : Module(type) {}
 
-        void init(Polyphony* polyphony) override;
+        //void init(Polyphony* polyphony, double sampleRate) override;
         void initSignals() override;
         void resetSignals() override;
 
         void initPorts() override;
-        void updateData() override;
+        void initVoices() override;
         void setParameter( uint16_t paramId, double value, double modulation=0.f, int16_t voice=-1 );
         void onMidiNote( double pitch, double gate, uint16_t voice );
         void onMidiPitchbend(int value);

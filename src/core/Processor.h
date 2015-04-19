@@ -10,21 +10,20 @@
 
 #pragma once
 
-#include <memory>
 #include <string>
 
 #include "JuceHeader.h"
 #include "core/GlobalHeader.h"
-#include "core/Settings.h"
-#include "core/Sink.h"
 
 
 namespace e3 {
 
+    class Settings;
     class CpuMeter;
     class Polyphony;
     class Bank;
     class Instrument;
+    class Sink;
 
     //-----------------------------------------------------------------
     //
@@ -36,7 +35,7 @@ namespace e3 {
         Processor();
         ~Processor();
 
-        Settings* getSettings()    { return &settings_; }
+        Settings* getSettings()    { return settings_.get(); }
         Polyphony* getPolyphony()  { return polyphony_.get(); }
 
         void prepareToPlay(double sampleRate, int samplesPerBlock) override;
@@ -79,10 +78,12 @@ namespace e3 {
 
         void releaseResources() override                                    {}
 
-        XmlElement* openBank(const std::string& path);
-        XmlElement* newBank();
+        void openBank(const std::string& path);
+        void newBank();
         void saveBank(const std::string& path = "");
         void loadInstrument(int hash = 0, bool saveCurrent = true);
+
+        XmlElement* getBankXml() const;
 
         //enum Parameters
         //{
@@ -95,12 +96,10 @@ namespace e3 {
         float gain_ = 0.75;
 
     private:
-        Settings settings_;
-        
-        Sink sink_;
-        std::unique_ptr<Polyphony> polyphony_;
-        std::unique_ptr<Bank> bank_;
-
+        ScopedPointer<Settings> settings_;
+        ScopedPointer<Sink> sink_;
+        ScopedPointer<Polyphony> polyphony_;
+        ScopedPointer<Bank> bank_;
         ScopedPointer<Instrument> instrument_;
         ScopedPointer<CpuMeter> cpuMeter_;
 

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<E3MSettings>
+  <Application Autosave="1" RecentBank=""  Style="Default"/>
+  <Standalone>
+    <Window state="109 30 944 668"/>
+    <AudioDeviceState DeviceType="" OutputDeviceName="" InputDeviceName=""
+                      SampleRate="44100" BufferSize="512"/>
+    <MidiInput name=""/>
+  </Standalone>
+  <Plugin>
+    <Window state="110 58 942 640"/>
+  </Plugin>
+  <Style name="Default">
+    <Color name="background" argb="ff5f5f60"/>
+    <Color name="contentBackground1" argb="ffbebdbb"/>
+    <Color name="contentBackground2" argb="ff808080"/>
+    <Color name="darkText" argb="ff000000"/>
+    <Color name="lightText" argb="ffbdbcba"/>
+    <Color name="highlight" argb="ffd08930"/>
+    <Color name="buttonOffBackground" argb="ff3e4042"/>
+    <Color name="buttonOnBackground" argb="ffd08930"/>
+    <Color name="buttonOffText" argb="ffbdbcba"/>
+    <Color name="buttonOnText" argb="ff000000"/>
+  </Style>
+</E3MSettings>

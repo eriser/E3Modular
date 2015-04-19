@@ -42,10 +42,10 @@ namespace e3 {
     // class MidiPitch
     //--------------------------------------------------------
 
-    void MidiPitch::init(Polyphony* polyphony)
-    {
-        Module::init(polyphony);
-    }
+    //void MidiPitch::init(Polyphony* polyphony, double sampleRate)
+    //{
+    //    Module::init(polyphony, sampleRate);
+    //}
 
 
     void MidiPitch::initSignals()
@@ -68,7 +68,7 @@ namespace e3 {
     }
 
 
-    void MidiPitch::updateData()
+    void MidiPitch::initVoices()
     {
         glideDelta_   = glideDeltaBuffer_.resize( numVoices_ );
         glideTarget_  = glideTargetBuffer_.resize( numVoices_ );

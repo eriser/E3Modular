@@ -10,7 +10,7 @@ namespace e3 {
     // class OutPort
     //-------------------------------------------------------
 
-    uint16_t OutPort::addTarget(LinkModel* link, PortAdapterType adapter)
+    uint16_t OutPort::addTarget(Link* link, PortAdapterType adapter)
     {
         targets_.push_back(link);
         numTargets_++;
@@ -23,7 +23,7 @@ namespace e3 {
     }
 
 
-    int16_t OutPort::removeTarget(LinkModel* link)
+    int16_t OutPort::removeTarget(Link* link)
     {
         int16_t idx = getIndex(link);
         VERIFY(idx >= 0);
@@ -60,7 +60,7 @@ namespace e3 {
     }
 
 
-    void OutPort::setModulation(LinkModel* link)
+    void OutPort::setModulation(Link* link)
     {
         int16_t idx = getIndex(link);
         ASSERT(idx >= 0);
@@ -76,9 +76,9 @@ namespace e3 {
         modulationBuffer_.set(0);
         modulationBuffer_.resize(numTargets_ * numVoices_);
 
-        for (uint16_t i = 0; i<targets_.size(); i++)
+        for (uint16_t i = 0; i < targets_.size(); i++)
         {
-            LinkModel* link = targets_[i];
+            Link* link = targets_[i];
             setModulation(i, link->value_);
         }
     }
@@ -88,7 +88,7 @@ namespace e3 {
     {
         for (uint16_t i = 0; i<targets_.size(); i++)
         {
-            LinkModel* link = targets_[i];
+            Link* link = targets_[i];
             if (link->veloSens_)
             {
                 double value = link->valueShaper_.exponential(link->value_);
@@ -107,7 +107,7 @@ namespace e3 {
         
         for (uint16_t i = 0; i<targets_.size(); i++)
         {
-            //LinkModel* link = targets_[i];
+            //Link* link = targets_[i];
             //if (link->scaleController(controllerId, value))
             //{
             //    link->value_ = value;
@@ -118,11 +118,11 @@ namespace e3 {
 
 
 
-    int16_t OutPort::getIndex(LinkModel* link)
+    int16_t OutPort::getIndex(Link* link)
     {
         for (uint16_t i = 0; i<targets_.size(); i++)
         {
-            const LinkModel& next = *targets_.at(i);
+            const Link& next = *targets_.at(i);
             if (next == link) {
                 return i;
             }
@@ -136,7 +136,7 @@ namespace e3 {
     // class AudioOutPort
     //-------------------------------------------------------
 
-    void AudioOutPort::connect(LinkModel* link, Module* target, PortAdapterType adapter)
+    void AudioOutPort::connect(Link* link, Module* target, PortAdapterType adapter)
     {
         VERIFY(target);
         addTarget(link, adapter);
@@ -146,7 +146,7 @@ namespace e3 {
     }
 
 
-    void AudioOutPort::disconnect(LinkModel* link, Module* target)
+    void AudioOutPort::disconnect(Link* link, Module* target)
     {
         VERIFY(target);
 
@@ -201,7 +201,7 @@ namespace e3 {
     // class EventOutPort
     //-------------------------------------------------------
 
-    void EventOutPort::connect(LinkModel* link, Module* target, PortAdapterType adapter)
+    void EventOutPort::connect(Link* link, Module* target, PortAdapterType adapter)
     {
         VERIFY(target);
 
@@ -216,7 +216,7 @@ namespace e3 {
     }
 
 
-    void EventOutPort::disconnect(LinkModel* link, Module*)
+    void EventOutPort::disconnect(Link* link, Module*)
     {
         int16_t idx = removeTarget(link);
         erase(begin() + idx);

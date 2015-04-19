@@ -1,0 +1,26 @@
+
+@startuml
+
+!include skin.iuml
+
+title
+<font size=24 color=#000000>Sequence Diagram: Processor load instrument (obsolet)</font>
+
+endtitle
+
+participant Instrument
+participant Processor
+participant Bank
+participant BankSerializer
+
+
+Processor -> Bank: storeInstrument()
+Bank -> BankSerializer: store previous \ninstrument
+BankSerializer -> BankSerializer: create \nxml nodes
+Processor -> Bank: loadInstrument()
+Bank -> Bank: find instrument
+Bank -> Processor: instrument*
+Processor -> Instrument: compile
+
+
+@enduml

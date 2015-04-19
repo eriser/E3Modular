@@ -2,6 +2,7 @@
 #include <e3_Trace.h>
 
 #include "core/GlobalHeader.h"
+#include "core/Settings.h"
 #include "core/Processor.h"
 #include "core/Polyphony.h"
 #include "gui/Resources.h"
@@ -20,23 +21,20 @@ namespace e3 {
         AudioProcessorEditor(owner),
         processor_(owner)
     {
-        setWantsKeyboardFocus(true);
-
         createComponents();
         restoreWindowState();
 
         ApplicationCommandManager* commandManager = getCommandManager();
         commandManager->registerAllCommandsForTarget(this);
         addKeyListener(commandManager->getKeyMappings());
+        setWantsKeyboardFocus(true);
 
         XmlElement* styleXml = processor_->getSettings()->getStyle();
         style_ = new Style(styleXml);
         setLookAndFeel(style_);
 
         processor_->getPolyphony()->monitorUpdateSignal.Connect(monitor_.get(), &Monitor::monitor);
-
-        std::string path = processor_->getSettings()->getRecentBankPath();
-        openBank(File(path));
+        browserPanel_->updateContents(processor_->getBankXml());
     }
 
 
@@ -151,14 +149,6 @@ namespace e3 {
     }
 
 
-    void AudioEditor::openBank(File file)
-    {
-        XmlElement* root = processor_->openBank(file.getFullPathName().toStdString());
-        browserPanel_->updateInstruments(root);
-        processor_->loadInstrument();
-    }
-
-
     void AudioEditor::onOpenBank()
     {
         FileChooser fc("Open Bank",
@@ -168,7 +158,10 @@ namespace e3 {
 
         if (fc.browseForFileToOpen())
         {
-            openBank(fc.getResult());
+            std::string path = fc.getResult().getFullPathName().toStdString();
+            processor_->openBank(path);
+            browserPanel_->updateContents(processor_->getBankXml());
+            processor_->loadInstrument();
         }
     }
 
@@ -196,8 +189,8 @@ namespace e3 {
 
     void AudioEditor::onNewBank()
     {
-        XmlElement* root = processor_->newBank();
-        browserPanel_->updateInstruments(root);
+        processor_->newBank();
+        browserPanel_->updateContents(processor_->getBankXml());
         processor_->loadInstrument();
     }
 

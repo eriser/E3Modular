@@ -21,7 +21,7 @@ namespace e3 {
 
         void initPorts() override;
         void initProcess() override;
-        void updateData() override;
+        void initVoices() override;
         void updateInPorts() override;
 
         void processAudio() throw();

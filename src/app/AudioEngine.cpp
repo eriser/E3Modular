@@ -1,3 +1,4 @@
+#include <e3_Exception.h>
 
 #include "core/Settings.h"
 #include "core/Processor.h"

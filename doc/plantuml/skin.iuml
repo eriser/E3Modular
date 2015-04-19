@@ -1,6 +1,12 @@
 skinparam backgroundColor #eeeeee
 skinparam shadowing false
 
+skinparam class {
+    BackgroundColor Gainsboro
+    ArrowColor Black
+    BorderColor Gray
+}
+
 skinparam note {
     BackgroundColor LightSteelBlue
     BorderColor LightSteelBlue

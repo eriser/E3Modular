@@ -16,7 +16,7 @@ namespace e3
 
         void resized() override;
 
-        void updateInstruments(XmlElement* root);
+        void updateContents(XmlElement* root);
         XmlElement* getSelectedInstrument();
 
     protected:

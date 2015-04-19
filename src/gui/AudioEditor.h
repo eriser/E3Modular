@@ -42,7 +42,6 @@ namespace e3 {
     private:
         void restoreWindowState();
         void createComponents();
-        void openBank(File file);
 
         void onOpenBank();
         void onSaveBank(bool askForFilename);

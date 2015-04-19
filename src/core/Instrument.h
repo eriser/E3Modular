@@ -15,18 +15,18 @@ namespace e3 {
     {
     public:
         Instrument();
-        //Instrument(const Instrument& other) = delete;
         ~Instrument();
 
-        //void operator=(const Instrument& other) = delete;
-
         void deleteModules();
-        void initModules(Polyphony* polyphony);
-        void updateModules(double sampleRate, uint16_t numVoices);
+        void initModules(Polyphony* polyphony, double sampleRate);
+        //void updateModules(double sampleRate, uint16_t numVoices=0);
         void resetModules();
         void connectModules();
         void resumeModules();
         void suspendModules();
+
+        void setSampleRate(double sampleRate);
+        void setNumVoices(uint16_t numVoices);
 
         Module* findModule(uint16_t moduleId);
         bool checkSentinel(Module* module);

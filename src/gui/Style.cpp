@@ -142,6 +142,8 @@ namespace e3 {
         setColour(kTabButtonOnBackgroundColourId, colorMap["buttonOnBackground"]);
         setColour(kTabButtonOffTextColourId, colorMap["buttonOffText"]);
         setColour(kTabButtonOnTextColourId, colorMap["buttonOnText"]);
+        setColour(kWire1ColourId, colorMap["wire1"]);
+        setColour(kWire2ColourId, colorMap["wire2"]);
     }
 
 

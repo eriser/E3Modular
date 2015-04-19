@@ -50,7 +50,7 @@ namespace e3 {
 
         const char* rootTagname_ = "E3MSettings";
         std::string defaultXml_ =
-            "<Application Autosave='1' BankPath='' Style='Default' />"
+            "<Application Autosave='1' RecentBank='' Style='Default' />"
             "<Standalone>"
             "<WindowState x='10' y='10' w='1000' h='700' />"
             "<AudioDeviceState DeviceType = '' OutputDeviceName = '' InputDeviceName = ''"
@@ -64,7 +64,7 @@ namespace e3 {
             "<Style name = 'Default'>"
             "<Color name = 'background' argb = 'ff5f5f60' />"
             "<Color name = 'contentBackground1' argb = 'ffbebdbb' />"
-            "<Color name = 'contentBackground2' argb = 'ff808080' / >"
+            "<Color name = 'contentBackground2' argb = 'ff808080' />"
             "<Color name = 'darkText' argb = 'ffffffff' />"
             "<Color name = 'lightText' argb = 'ffbdbcba' />"
             "<Color name = 'highlight' argb = 'ffcf732f' />"
@@ -72,6 +72,6 @@ namespace e3 {
             "<Color name = 'buttonOnBackground' argb = 'ffd08930' />"
             "<Color name = 'buttonOffText' argb = 'ffbdbcba' />"
             "<Color name = 'buttonOnText' argb = 'ff000000' />"
-            "</ Style>";
+            "</Style>";
     };
 } // namespace e3 

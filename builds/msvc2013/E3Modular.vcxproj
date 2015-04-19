@@ -438,7 +438,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\core\GlobalHeader.h" />
     <ClInclude Include="..\..\src\core\MonitorCore.h" />
     <ClInclude Include="..\..\src\core\Module.h" />
-    <ClInclude Include="..\..\src\core\ModelCatalog.h" />
+    <ClInclude Include="..\..\src\core\ModuleCatalog.h" />
     <ClInclude Include="..\..\src\core\Processor.h" />
     <ClInclude Include="..\..\src\core\CpuMeter.h" />
     <ClInclude Include="..\..\src\core\Settings.h" />
@@ -447,7 +447,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\src\core\ParameterShaper.h" />
-    <ClInclude Include="..\..\src\core\Models.h" />
+    <ClInclude Include="..\..\src\core\ModuleBase.h" />
     <ClInclude Include="..\..\src\core\Instrument.h" />
     <ClInclude Include="..\..\src\core\Sink.h" />
     <ClInclude Include="..\..\src\core\Voice.h" />
@@ -463,6 +463,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\gui\Resources.h" />
     <ClInclude Include="..\..\src\gui\Style.h" />
     <ClInclude Include="..\..\src\gui\EditorPanel.h" />
+    <ClInclude Include="..\..\src\gui\Wire.h" />
     <ClInclude Include="..\..\src\modules\Delay.h" />
     <ClInclude Include="..\..\src\modules\Envelopes.h" />
     <ClInclude Include="..\..\src\modules\Master.h" />
@@ -500,14 +501,14 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\core\BankSerializer.cpp" />
     <ClCompile Include="..\..\src\core\CpuMeter.cpp" />
     <ClCompile Include="..\..\src\core\Module.cpp" />
-    <ClCompile Include="..\..\src\core\ModelCatalog.cpp">
+    <ClCompile Include="..\..\src\core\ModuleCatalog.cpp">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='UT_Debug|Win32'">
       </DeploymentContent>
     </ClCompile>
     <ClCompile Include="..\..\src\core\Processor.cpp" />
     <ClCompile Include="..\..\src\core\Settings.cpp" />
     <ClCompile Include="..\..\src\core\ParameterShaper.cpp" />
-    <ClCompile Include="..\..\src\core\Models.cpp" />
+    <ClCompile Include="..\..\src\core\ModuleBase.cpp" />
     <ClCompile Include="..\..\src\core\Polyphony.cpp" />
     <ClCompile Include="..\..\src\core\Ports.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Debug|Win32'">false</ExcludedFromBuild>
@@ -528,6 +529,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\gui\Monitor.cpp" />
     <ClCompile Include="..\..\src\gui\Resources.cpp" />
     <ClCompile Include="..\..\src\gui\Style.cpp" />
+    <ClCompile Include="..\..\src\gui\Wire.cpp" />
     <ClCompile Include="..\..\src\modules\Delay.cpp" />
     <ClCompile Include="..\..\src\modules\Envelopes.cpp" />
     <ClCompile Include="..\..\src\modules\Master.cpp" />

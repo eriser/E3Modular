@@ -12,7 +12,7 @@ namespace e3 {
         SineOscil();
 
         void initPorts() override;
-        void updateData() override;
+        void initVoices() override;
         void updatePorts() override;
         void updateInPorts() override;
         void setParameter( uint16_t paramId, double value, double modulation=0.f, int16_t voice=-1 );

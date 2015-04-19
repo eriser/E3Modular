@@ -19,7 +19,7 @@ namespace e3 {
     }
 
 
-    void ADSREnv::updateData()
+    void ADSREnv::initVoices()
     {
         value_        = valueBuffer_.resize( numVoices_, 0 );
         target_       = targetBuffer_.resize( numVoices_, 0 );

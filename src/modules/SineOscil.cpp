@@ -25,7 +25,7 @@ namespace e3 {
     }
 
 
-    void SineOscil::updateData()
+    void SineOscil::initVoices()
     {
         phaseIndex_ = phaseIndexBuffer_.resize( numVoices_, 0. );
         amplitude_  = amplitudeBuffer_.resize( numVoices_, 1 );
@@ -55,6 +55,7 @@ namespace e3 {
         Module::updatePorts();
     }
 
+
     void SineOscil::updateInPorts()
     {
         fmInputPointer_ = fmInputPort_.setNumVoices( numVoices_ );
@@ -68,7 +69,7 @@ namespace e3 {
         Module::setSampleRate(sampleRate);
 
         for( uint16_t i = 0; i < numVoices_; i++ ) {
-            increment_[ i ] = oldRate * increment_[ i ] / sampleRate_;
+            increment_[i] = oldRate * increment_[i] / sampleRate_;
         }
     }
 

@@ -1,12 +1,15 @@
 
+#include <e3_Trace.h>
 
 #include "gui/AudioEditor.h"
+#include "core/Settings.h"
 #include "core/CpuMeter.h"
 #include "core/Polyphony.h"
 #include "core/Bank.h"
 #include "core/Instrument.h"
-#include "core/Processor.h"
+#include "core/Sink.h"
 
+#include "core/Processor.h"
 
 
 #ifdef BUILD_TARGET_VST
@@ -20,36 +23,53 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 namespace e3 {
 
     Processor::Processor() : AudioProcessor(),
+        settings_(new Settings()),
         polyphony_(new Polyphony()),
         bank_(new Bank()),
+        sink_(new Sink()),
         cpuMeter_(new CpuMeter())
     {
-        settings_.load();
-        bank_->setSettings(&settings_);
+        settings_->load();
+        bank_->setSettings(settings_.get());
     }
+
 
     Processor::~Processor()
     {
-        settings_.store();
+        settings_->store();
     }
 
 
     void Processor::prepareToPlay(double sampleRate, int)
     {
-        sink_.setSampleRate(sampleRate);
+        sink_->setSampleRate(sampleRate);
         cpuMeter_->setSampleRate((uint32_t)sampleRate);
+
+        if (instrument_ == nullptr)
+        {
+            openBank(settings_->getRecentBankPath());
+            loadInstrument();
+        }
+        else {
+            try {
+                instrument_->setSampleRate(sampleRate);
+            }
+            catch (const std::exception& e) {
+                TRACE(e.what());
+            }
+        }
     }
 
 
-    XmlElement* Processor::openBank(const std::string& path)
+    void Processor::openBank(const std::string& path)
     {
-        return bank_->open(path);
+        bank_->open(path);
     }
 
 
-    XmlElement* Processor::newBank()
+    void Processor::newBank()
     {
-        return bank_->createNewBank();
+        bank_->createNewBank();
     }
 
 
@@ -74,9 +94,11 @@ namespace e3 {
             uint16_t numVoices = instrument_->numVoices_;
             polyphony_->setNumVoices(numVoices);
 
-            instrument_->initModules(polyphony_.get());
-            instrument_->updateModules(getSampleRate(), numVoices);
-            sink_.compile(instrument_);
+            instrument_->initModules(polyphony_.get(), getSampleRate());
+            //instrument_->updateModules(getSampleRate(), numVoices);
+            instrument_->connectModules(); 
+
+            sink_->compile(instrument_);
         }
 
         resume();
@@ -120,7 +142,7 @@ namespace e3 {
             const int numSamplesNow = hasEvent ? midiEventPos - startSample : numSamples;
 
             if (numSamplesNow > 0) {
-                sink_.process(audioBuffer, startSample, numSamplesNow);
+                sink_->process(audioBuffer, startSample, numSamplesNow);
             }
 
             if (hasEvent) {
@@ -137,7 +159,6 @@ namespace e3 {
     }
 
 
-    //==============================================================================
     void Processor::getStateInformation(MemoryBlock&)
     {
         // You should use this method to store your parameters in the memory block.
@@ -149,6 +170,12 @@ namespace e3 {
     {
         // You should use this method to restore your parameters from this memory block,
         // whose contents will have been created by the getStateInformation() call.
+    }
+
+
+    XmlElement* Processor::getBankXml() const
+    {
+        return (bank_ != nullptr) ? bank_->getXml() : nullptr;
     }
 
 

@@ -6,11 +6,12 @@ namespace e3 {
 
     AppWindow::AppWindow(const String& title) : DocumentWindow(
         title, 
-        Colours::transparentBlack,
-        DocumentWindow::minimiseButton | DocumentWindow::closeButton)
+        Colours::black,
+        DocumentWindow::minimiseButton | DocumentWindow::closeButton,
+        true)
     {
         removeColour(ResizableWindow::backgroundColourId);
-        setTitleBarButtonsRequired(DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
+        //setTitleBarButtonsRequired(DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
         setTitleBarTextCentred(false);
 
         Rectangle<int> r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;

@@ -1,0 +1,36 @@
+
+@startuml
+
+!include skin.iuml
+
+title
+<font size=24 color=#000000>Sequence Diagram: Data Transfer between Ports</font>
+
+endtitle
+
+participant SourceModule
+participant SourceOutPort
+participant TargetModule
+
+loop process audio for all voices
+    SourceModule -> SourceOutPort: putAudio
+
+    loop all targets
+        SourceOutPort -> SourceOutPort: apply modulation
+        alt AdapterNone
+            SourceOutPort -> SourceOutPort: write at voice offset
+        else AdapterMonoToPoly
+            SourceOutPort -> SourceOutPort: write to all voices
+        else AdapterPolyToMono
+            SourceOutPort -> SourceOutPort: write to voice 0
+        end
+    end
+end
+
+loop process audio for all voices
+    TargetModule -> TargetModule: read value for voice \nfrom inPort
+    TargetModule -> TargetOutPort: putAudio
+end
+
+
+@enduml

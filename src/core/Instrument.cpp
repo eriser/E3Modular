@@ -37,28 +37,16 @@ namespace e3 {
     }
 
 
-    void Instrument::initModules(Polyphony* polyphony)
+    void Instrument::initModules(Polyphony* polyphony, double sampleRate)
     {
         for (iterator it = begin(); it != end(); it++)
         {
             Module* m = *it;
-            m->init(polyphony);
+            m->init(polyphony, sampleRate);
         }
     }
 
 
-    void Instrument::updateModules(double sampleRate, uint16_t numVoices)
-    {
-        for (iterator it = begin(); it != end(); it++)
-        {
-            Module* m = *it;
-            m->setSampleRate(sampleRate);
-            m->setNumVoices(numVoices);
-            m->update();
-        }
-    }
-
-    
     void Instrument::resetModules()
     {
         for (iterator it = begin(); it != end(); it++) 
@@ -81,7 +69,7 @@ namespace e3 {
     {
         for (uint16_t i = 0; i < target->links_.size(); i++)
         {
-            LinkModel& link = target->getLink(i);
+            Link& link = target->getLink(i);
             Module* source = findModule(link.leftModule_);
             ASSERT(source);
             if (source) {
@@ -100,6 +88,31 @@ namespace e3 {
             }
         }
         return nullptr;
+    }
+
+
+    void Instrument::setSampleRate(double sampleRate)
+    {
+        for (iterator it = begin(); it != end(); it++)
+        {
+            Module* m = *it;
+            m->setSampleRate(sampleRate);
+        }
+    }
+
+
+    void Instrument::setNumVoices(uint16_t numVoices)
+    {
+        //numVoices_ = (numVoices == 0) ? numVoices_ : numVoices;
+        ASSERT(numVoices > 0);
+        numVoices_ = numVoices;
+
+        for (iterator it = begin(); it != end(); it++)
+        {
+            Module* m = *it;
+            m->setNumVoices(numVoices_);
+            m->update();
+        }
     }
 
 
