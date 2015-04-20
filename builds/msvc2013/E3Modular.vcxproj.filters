@@ -135,6 +135,9 @@
     <ClInclude Include="..\..\src\gui\Wire.h">
       <Filter>src\gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\gui\PortComponent.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp">
@@ -246,6 +249,9 @@
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\Wire.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\PortComponent.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
   </ItemGroup>

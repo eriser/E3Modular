@@ -455,6 +455,14 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\gui\BrowserPanel.h" />
     <ClInclude Include="..\..\src\gui\CommandTarget.h" />
     <ClInclude Include="..\..\src\gui\EditableTableCell.h" />
+    <ClInclude Include="..\..\src\gui\PortComponent.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Debug|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\..\src\gui\PreferencesPanel.h" />
     <ClInclude Include="..\..\src\gui\SetupPanel.h" />
     <ClInclude Include="..\..\src\gui\TabComponent.h" />
@@ -522,6 +530,14 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\gui\CommandTarget.cpp" />
     <ClCompile Include="..\..\src\gui\EditableTableCell.cpp" />
     <ClCompile Include="..\..\src\gui\EditorPanel.cpp" />
+    <ClCompile Include="..\..\src\gui\PortComponent.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\src\gui\PreferencesPanel.cpp" />
     <ClCompile Include="..\..\src\gui\SetupPanel.cpp" />
     <ClCompile Include="..\..\src\gui\TabComponent.cpp" />

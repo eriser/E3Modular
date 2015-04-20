@@ -29,7 +29,7 @@ namespace e3 {
         bool selected_ = false;
 
     protected:
-        bool Wire::segmentIntersectsRectangle(const Rectangle<float>& rc, const Point<float>& a1, const Point<float>& a2);
+        //bool Wire::segmentIntersectsRectangle(const Rectangle<float>& rc, const Point<float>& a1, const Point<float>& a2);
     };
 
     typedef std::map< const Link, Wire* > WireMap;
