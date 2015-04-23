@@ -5,6 +5,11 @@
 
 namespace e3
 {
+    // -------------------------------------------------------------
+    // Provides a TabbedComponent that draws the tab buttons with a gap 
+    // between them.
+    // -------------------------------------------------------------
+
     class TabComponent : public TabbedComponent
     {
     public:

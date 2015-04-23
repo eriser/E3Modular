@@ -28,7 +28,7 @@ namespace e3 {
         void setSampleRate(double sampleRate);
         void setNumVoices(uint16_t numVoices);
 
-        Module* findModule(uint16_t moduleId);
+        Module* getModule(uint16_t moduleId);
         bool checkSentinel(Module* module);
 
         Module* createAndAddModule(ModuleType type);
@@ -52,7 +52,7 @@ namespace e3 {
         int hash_;
 
     protected:
-        bool hasMaster()    { return nullptr != findModule(kModuleMaster); }
+        bool hasMaster()    { return nullptr != getModule(kModuleMaster); }
         void connectModule(Module* target);
         uint16_t createModuleId(ModuleType type);
 

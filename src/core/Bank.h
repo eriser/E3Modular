@@ -16,7 +16,7 @@ namespace e3 {
     public:
         void open(const std::string& path);
         void createNewBank();
-        void store(const std::string& path, bool saveCurrent=true, bool makeBackup=true);
+        void save(const std::string& path, bool saveCurrent=true, bool makeBackup=true);
 
         const std::string getName() const;    
         void setName(const std::string& name); 

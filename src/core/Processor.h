@@ -36,6 +36,7 @@ namespace e3 {
         Polyphony* getPolyphony()  { return polyphony_.get(); }
 
         void prepareToPlay(double sampleRate, int samplesPerBlock) override;
+        void releaseResources() override;
         void processBlock(AudioSampleBuffer&, MidiBuffer&) override;
 
         AudioProcessorEditor* createEditor() override;
@@ -73,13 +74,12 @@ namespace e3 {
         bool suspend();
         void resume(bool nested = false);
 
-        void releaseResources() override                                    {}
-
         void openBank(const std::string& path);
         void newBank();
         void saveBank(const std::string& path = "");
         void loadInstrument(int hash = 0, bool saveCurrent = true);
 
+        Instrument* getInstrument() const   { return instrument_; }
         XmlElement* getBankXml() const;
 
         //enum Parameters

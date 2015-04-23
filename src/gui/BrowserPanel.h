@@ -17,7 +17,7 @@ namespace e3
         void resized() override;
 
         void updateContents(XmlElement* root);
-        XmlElement* getSelectedInstrument();
+        XmlElement* getSelectedInstrumentXml();
 
     protected:
         enum TabIds { 

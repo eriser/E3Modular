@@ -27,7 +27,7 @@ namespace e3 {
         reset();
         //instrument->connectModules();
 
-        Master* master = dynamic_cast<Master*>(instrument->findModule(kModuleMaster));
+        Master* master = dynamic_cast<Master*>(instrument->getModule(kModuleMaster));
         if (nullptr == master)    // nothing to do
             return;
 
@@ -52,7 +52,7 @@ namespace e3 {
                 for (size_t i = 0; i < module->links_.size(); i++)
                 {
                     Link& link = module->links_.at(i);
-                    Module* next = instrument->findModule(link.leftModule_);
+                    Module* next = instrument->getModule(link.leftModule_);
                     if (next && next != module)
                         queue.push(next);                 // enqueue sources of current node
                 }

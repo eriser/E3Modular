@@ -25,7 +25,7 @@ namespace e3 {
     }
 
 
-    void Bank::store(const std::string& path, bool saveCurrent, bool makeBackup)
+    void Bank::save(const std::string& path, bool saveCurrent, bool makeBackup)
     {
         std::string p = path.empty() ? getPath() : path;
         ASSERT(p.empty() == false);

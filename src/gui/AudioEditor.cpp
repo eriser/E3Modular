@@ -33,7 +33,9 @@ namespace e3 {
         setLookAndFeel(Settings::getInstance().getStyle());
 
         processor_->getPolyphony()->monitorUpdateSignal.Connect(monitor_.get(), &MonitorComponent::monitor);
+        
         browserPanel_->updateContents(processor_->getBankXml());
+        editorPanel_->showInstrument(processor_->getInstrument(), browserPanel_->getSelectedInstrumentXml());
     }
 
 
@@ -134,7 +136,7 @@ namespace e3 {
         tabPanel_->addTab("Setup", Colours::transparentBlack, setupPanel_, false, kSetupPanel);
 
         addAndMakeVisible(tabPanel_);
-        tabPanel_->setCurrentTabIndex(kBrowserPanel);
+        tabPanel_->setCurrentTabIndex(kEditorPanel);
 
         monitor_ = new MonitorComponent();
         addAndMakeVisible(monitor_);
@@ -197,11 +199,12 @@ namespace e3 {
 
     void AudioEditor::onLoadInstrument()
     {
-        XmlElement* e = browserPanel_->getSelectedInstrument();
+        XmlElement* e = browserPanel_->getSelectedInstrumentXml();
         if (e != nullptr)
         {
             int hash = e->getIntAttribute("hash");
             processor_->loadInstrument(hash);
+            editorPanel_->showInstrument(processor_->getInstrument(), e);
         }
     }
 

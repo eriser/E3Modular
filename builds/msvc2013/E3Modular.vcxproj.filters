@@ -144,6 +144,12 @@
     <ClInclude Include="..\..\src\core\MonitorUpdater.h">
       <Filter>src\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\gui\WirePanel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\ParameterPanel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp">
@@ -265,6 +271,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\core\MonitorUpdater.cpp">
       <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\ParameterPanel.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\WirePanel.cpp">
+      <Filter>src\gui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

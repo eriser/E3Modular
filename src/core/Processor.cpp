@@ -53,6 +53,12 @@ namespace e3 {
     }
 
 
+    void Processor::releaseResources()
+    {
+        saveBank();
+    }
+
+
     void Processor::openBank(const std::string& path)
     {
         bank_->open(path);
@@ -67,7 +73,7 @@ namespace e3 {
 
     void Processor::saveBank(const std::string& path)
     {
-        bank_->store(path);
+        bank_->save(path);
     }
 
 

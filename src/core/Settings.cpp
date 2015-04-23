@@ -134,7 +134,6 @@ namespace e3 {
     }
 
 
-
     std::string Settings::getWindowState(const std::string& context) const
     {
         std::string defaultState = "0 0 1000 700";

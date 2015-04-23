@@ -1,21 +1,25 @@
 
 #include <algorithm>
 
+#include <e3_Trace.h>
+
 #include "core/GlobalHeader.h"
 #include "core/Module.h"
-#include "gui/EditorPanel.h"
-#include "gui/PortComponent.h"
+#include "gui/Style.h"
+#include "gui/WirePanel.h"
+//#include "gui/PortComponent.h"
 #include "gui/ModuleComponent.h"
 
 
 namespace e3 {
 
-    ModuleComponent::ModuleComponent(EditorPanel* owner, Module* module) :
+    ModuleComponent::ModuleComponent(WirePanel* owner, Module* module) :
         owner_(owner),
         module_(module)
     {
-        setVisible((module != nullptr) && (module->style_ & kModuleStyleVisible));
-        setColors();
+        createComponents();
+        //setVisible((module != nullptr) && (module->style_ & kModuleStyleVisible));
+        //setColors();
     }
 
 
@@ -27,63 +31,103 @@ namespace e3 {
     }
 
 
+    Module* ModuleComponent::getModule() const   { return module_; }
+    uint16_t ModuleComponent::getModuleId() const { return module_->id_; }
+
+
+    void ModuleComponent::paint(Graphics& g)
+    {
+        Colour bkgndCol = findColour(Style::kModuleColourId);
+        g.fillAll(bkgndCol);
+    }
+
+
+    void ModuleComponent::resized()
+    {
+        //dragConstrainer_.setMinimumOnscreenAmounts(getHeight(), getWidth(), getHeight(), getWidth());
+        dragConstrainer_.setMinimumOnscreenAmounts(getHeight(), getWidth(), 0, 0);
+    }
+
+
+    void ModuleComponent::mouseDown(const MouseEvent& e)
+    {
+        positionBeforeDragging_ = getPosition();
+        dragger_.startDraggingComponent(this, e);
+    }
+
+
+    void ModuleComponent::mouseDrag(const MouseEvent& e) 
+    {
+        dragger_.dragComponent(this, e, &dragConstrainer_);
+        owner_->checkSize();
+    }
+
+
+    void ModuleComponent::mouseUp(const MouseEvent&)
+    {
+        Point<int> pos = getPosition();
+        if (positionBeforeDragging_ != pos) {
+            owner_->storeModulePosition(module_->id_, pos);
+        }
+    }
+
+
     void ModuleComponent::mouseDoubleClick(const MouseEvent&)
     {
         if (module_)
         {
-            bool collapsed = !module_->collapsed_;
-            collapseOrExpand(collapsed);
+            collapsed_ = !collapsed_;
+            //collapseOrExpand(collapsed);
         }
     }
 
 
-    PortComponent* ModuleComponent::getPort(uint16_t portId, PortType portType)
-    {
-        PortList& list = (portType == kInport) ? inports_ : outports_;
+    //PortComponent* ModuleComponent::getPort(uint16_t portId, PortType portType)
+    //{
+    //    PortList& list = (portType == kInport) ? inports_ : outports_;
 
-        for (size_t i = 0; i < inports_.size(); i++)
-        {
-            PortComponent* port = inports_[i];
-            if
-        }
+    //    for (size_t i = 0; i < inports_.size(); i++)
+    //    {
+    //        PortComponent* port = inports_[i];
+    //    }
 
-        //for (CCView* pSv = pFirstView; pSv; pSv = pSv->pNext)
-        //{
-        //    if (pSv->pView->isTypeOf("ModulePort")) {
-        //        ModulePort* port = dynamic_cast<ModulePort*>(pSv->pView);
-        //        if (port && port->info_->id_ == portId && port->align_ == portAlign)
-        //        {
-        //            return port;
-        //        }
-        //    }
-        //}
-        //VERIFY(false);
-        return nullptr;
-    }
-
-
-    PortComponent* ModuleComponent::getInport(uint16_t portId)
-    {
-    }
+    //    //for (CCView* pSv = pFirstView; pSv; pSv = pSv->pNext)
+    //    //{
+    //    //    if (pSv->pView->isTypeOf("ModulePort")) {
+    //    //        ModulePort* port = dynamic_cast<ModulePort*>(pSv->pView);
+    //    //        if (port && port->info_->id_ == portId && port->align_ == portAlign)
+    //    //        {
+    //    //            return port;
+    //    //        }
+    //    //    }
+    //    //}
+    //    //VERIFY(false);
+    //    return nullptr;
+    //}
 
 
-    void ModuleComponent::getDockingPosition(uint16_t portId, PortType portType, Point<int>& pos)
-    {
-        if (module_->collapsed_ == false)
-        {
-            PortComponent* port = getPort(portId, portType);
-            port->getDockPosition(pos);
-        }
-        else
-        {
-            Rectangle<int> bounds = getLocalBounds();
-            pos.y = bounds.getY() + bounds.getHeight() / 2;
-            pos.x = (portType == kInport) ? bounds.getX() + 1 : bounds.getRight() - 1;
+    //PortComponent* ModuleComponent::getInport(uint16_t portId)
+    //{
+    //}
 
-            Rectangle<int> rcParent = owner_->getLocalBounds();
-            pos.offset(-rcParent.getX(), -rcParent.getY());
-        }
-    }
+
+    //void ModuleComponent::getDockingPosition(uint16_t portId, PortType portType, Point<int>& pos)
+    //{
+    //    if (module_->collapsed_ == false)
+    //    {
+    //        PortComponent* port = getPort(portId, portType);
+    //        port->getDockPosition(pos);
+    //    }
+    //    else
+    //    {
+    //        Rectangle<int> bounds = getLocalBounds();
+    //        pos.y = bounds.getY() + bounds.getHeight() / 2;
+    //        pos.x = (portType == kInport) ? bounds.getX() + 1 : bounds.getRight() - 1;
+
+    //        Rectangle<int> rcParent = owner_->getLocalBounds();
+    //        pos.offset(-rcParent.getX(), -rcParent.getY());
+    //    }
+    //}
 
 
     //int ModuleComponent::getTextBlockHeight(const std::string& s, Font& font)
@@ -119,74 +163,98 @@ namespace e3 {
         int top    = portHeight_ / 2;
         int offset = top;
 
-        for (size_t i = 0; i < module_->inPortModels_.size(); i++)
+        for (size_t i = 0; i < module_->inports_.size(); i++)
         {
-            PortModel* portModel = &module_->inPortModels_[i];
+            Port* port = module_->inports_[i];
             Rectangle<int> r(0, offset, width / 2, offset + portHeight_);
             offset += portHeight_;
-            PortComponent* port = new PortComponent(r, portModel, kInport, this);
-            inports_.add(port);
-            addAndMakeVisible(port);
+            UNUSED(port);
+
+            //PortComponent* port = new PortComponent(r, port, kInport, this);
+            //inports_.add(port);
+            //addAndMakeVisible(port);
         }
 
         offset = top;
-        for (size_t i = 0; i < module_->outPortModels_.size(); i++)
+        for (size_t i = 0; i < module_->outports_.size(); i++)
         {
-            PortModel* portModel = &module_->outPortModels_[i];
+            Port* port = module_->outports_[i];
             Rectangle<int> r(width - (width / 2), offset, width, offset + portHeight_);
             offset += portHeight_;
-            PortComponent* port = new PortComponent(r, portModel, kOutport, this);
-            outports_.add(port);
-            addAndMakeVisible(port);
+            UNUSED(port);
+            //PortComponent* port = new PortComponent(r, portModel, kOutport, this);
+            //outports_.add(port);
+            //addAndMakeVisible(port);
         }
-        setColors();
-        setPortVisibility();
+        //setColors();
+        //setPortVisibility();
     }
 
 
-    void ModuleComponent::createWires()
+    void ModuleComponent::calculateSize()
     {
-        for (uint16_t i = 0; i < module_->links_.size(); i++)
+        Rectangle<int> content = getLocalBounds();
+
+        if (collapsed_ == false)
         {
-            Link& link = module_->getLink(i);
-            Point<int> targetPosition, sourcePosition;
-
-            PortComponent* inPort = getPort(link.rightPort_, kInport);
-            inPort->connect(targetPosition, link);
-
-            PortComponent* outPort = owner_->getPort(link, kOutport);
-            outPort->connect(sourcePosition, link);
-
-            ModuleComponent* source = getModule(moduleId);
-            if (source != nullptr)
-            {
-                source->getDockingPosition(link.leftModule_, link.leftPort_, kOutport, sourcePosition);
-                getDockingPosition(link.rightModule_, kOutport, targetPosition);
-
-                Wire* wire = new Wire(sourcePosition.toFloat(), targetPosition.toFloat());
-                addWire(link, wire);
-            }
+            int numPorts = jmax(module_->inports_.size(), module_->outports_.size());
+            int height   = portHeight_ + numPorts * portHeight_;
+            content.setHeight(height);
         }
+        else {
+            content.setHeight(portHeight_ * 2);
+        }
+
+        content.setWidth(100);
+        setBounds(content);
     }
 
-    
-    void ModuleComponent::removeWires(uint16_t targetId)          // remove all wires, from inputs and outputs
-    {
-        for (uint16_t i = 0; i < data_->links_.size(); i++)      // iterate over all links from and to this box
-        {
-            Link& link = module_->getLink(i);
 
-            if (link.leftModule_ == targetId) {         // remove wires connected to own inputs
-                removeWire(link, kInport);
-            }
 
-            if (module_->id_ == targetId)                    // remove wires connected to outputs of other box
-            {
-                PortComponent* outPort = owner_->getPort(link, kOutport);
-                outPort->disconnect(link);
-            }
-        }
-    }
+
+    //void ModuleComponent::createWires()
+    //{
+    //    for (uint16_t i = 0; i < module_->links_.size(); i++)
+    //    {
+    //        Link& link = module_->getLink(i);
+    //        Point<int> targetPosition, sourcePosition;
+
+    //        PortComponent* inPort = getPort(link.rightPort_, kInport);
+    //        inPort->connect(targetPosition, link);
+
+    //        PortComponent* outPort = owner_->getPort(link, kOutport);
+    //        outPort->connect(sourcePosition, link);
+
+    //        ModuleComponent* source = getModule(moduleId);
+    //        if (source != nullptr)
+    //        {
+    //            source->getDockingPosition(link.leftModule_, link.leftPort_, kOutport, sourcePosition);
+    //            getDockingPosition(link.rightModule_, kOutport, targetPosition);
+
+    //            Wire* wire = new Wire(sourcePosition.toFloat(), targetPosition.toFloat());
+    //            addWire(link, wire);
+    //        }
+    //    }
+    //}
+
+    //
+    //void ModuleComponent::removeWires(uint16_t targetId)          // remove all wires, from inputs and outputs
+    //{
+    //    for (uint16_t i = 0; i < data_->links_.size(); i++)      // iterate over all links from and to this box
+    //    {
+    //        Link& link = module_->getLink(i);
+
+    //        if (link.leftModule_ == targetId) {         // remove wires connected to own inputs
+    //            removeWire(link, kInport);
+    //        }
+
+    //        if (module_->id_ == targetId)                    // remove wires connected to outputs of other box
+    //        {
+    //            PortComponent* outPort = owner_->getPort(link, kOutport);
+    //            outPort->disconnect(link);
+    //        }
+    //    }
+    //}
 
     /*
     void ModuleComponent::removeWire(const Link& linkInfo, PortType portType)
@@ -350,28 +418,6 @@ namespace e3 {
             label_->colText_ = colText_;
 
         setBackgroundColor(colBkgnd_);
-    }
-
-
-    void ModuleComponent::calculateSize()
-    {
-        CRect rcSize = size;
-        ModuleInfo* info = ModuleInfo::getInfo(data_->catalog_);
-
-        if (data_->collapsed_ == false)
-        {
-            int numPorts = max(info->inports_.size(), info->outPorts_.size());
-            int height = portHeight_ + numPorts * portHeight_;
-            CPoint x = CPoint(100, height);
-            rcSize.setWidth(x.x);
-            rcSize.setHeight(x.y);
-        }
-        else {
-            rcSize(rcSize.left, rcSize.top, rcSize.left + 100, rcSize.top + portHeight_ * 2);
-        }
-
-        setViewSize(rcSize);
-        setMouseableArea(rcSize);
     }
 
 

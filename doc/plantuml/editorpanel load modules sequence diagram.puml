@@ -1,0 +1,29 @@
+
+@startuml
+
+!include skin.iuml
+
+title
+<font size=24 color=#000000>Sequence Diagram: Editor Panel Load Modules</font>
+
+endtitle
+
+participant AudioEditor
+Participant Processor
+participant BrowserPanel
+Participant EditorPanel
+Participant ModuleComponent
+
+AudioEditor -> Processor: openBank
+AudioEditor -> BrowserPanel: updateContent( xml )
+AudioEditor -> EditorPanel: updateContent( xml )
+
+loop all modules in instrument
+    EditorPanel -> ModuleComponent: create \n(module)
+    ModuleComponent -> ModuleComponent: create ports
+end
+    ModuleComponent -> ModuleComponent: create wires
+
+
+
+@enduml

@@ -71,7 +71,7 @@ namespace e3 {
         for (uint16_t i = 0; i < target->links_.size(); i++)
         {
             Link& link = target->getLink(i);
-            Module* source = findModule(link.leftModule_);
+            Module* source = getModule(link.leftModule_);
             ASSERT(source);
             if (source) {
                 source->connectPort(target, &link);
@@ -80,7 +80,7 @@ namespace e3 {
     }
 
 
-    Module* Instrument::findModule(uint16_t moduleId)
+    Module* Instrument::getModule(uint16_t moduleId)
     {
         for (iterator it = begin(); it != end(); it++)
         {
@@ -128,7 +128,7 @@ namespace e3 {
         uint16_t id    = minId;
 
         for (; id <= maxId; id++) {
-            if (nullptr == findModule(id)) break;
+            if (nullptr == getModule(id)) break;
         }
         ASSERT(id <= size());
         return id;

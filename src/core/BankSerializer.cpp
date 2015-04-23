@@ -50,11 +50,11 @@ namespace e3 {
             int h = e->getIntAttribute("hash");
             if (h == hash) {
                 try {
-                    Instrument* instrument = new Instrument;    // processor will be owner of the instrument
+                    Instrument* instrument = new Instrument();  // processor will be owner of the instrument
                     readInstrument(e, instrument);
                     return instrument;
                 }
-                catch (const std::exception& e) {       // parse error, skip instrument
+                catch (const std::exception& e) {               // parse error, skip instrument
                     TRACE(e.what());
                     return nullptr;
                 }

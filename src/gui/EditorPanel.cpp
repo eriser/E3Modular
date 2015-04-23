@@ -1,15 +1,44 @@
 
 #include "core/GlobalHeader.h"
 #include "core/Module.h"
+#include "core/Instrument.h"
 //#include "gui/PortComponent.h"
 //#include "gui/ModuleComponent.h"
+#include "gui/WirePanel.h"
+#include "gui/ParameterPanel.h"
 #include "gui/EditorPanel.h"
 
 
 namespace e3
 {
     EditorPanel::EditorPanel()
-    {}
+    {
+        wirePanel_ = new WirePanel(this);
+        parameterPanel_ = new ParameterPanel();
+
+        viewport_.setViewedComponent(wirePanel_, false);
+        viewport_.setFocusContainer(true);
+
+        addAndMakeVisible(viewport_);
+        addAndMakeVisible(parameterPanel_);
+    }
+
+
+    void EditorPanel::showInstrument(Instrument* instrument, XmlElement* instrumentXml)
+    {
+        wirePanel_->showInstrument(instrument, instrumentXml);
+    }
+
+
+    void EditorPanel::resized()
+    {
+        Rectangle<int> content = getLocalBounds();
+        int separator = jmax(300, (int)(content.getWidth() * 0.75));
+
+        viewport_.setBounds(content.withWidth(separator));      // this is the visible area
+        wirePanel_->checkSize();
+    }
+
 
     //ModuleComponent* EditorPanel::getModule(uint16_t id)
     //{

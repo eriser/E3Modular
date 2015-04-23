@@ -1,0 +1,35 @@
+
+@startuml
+
+!include skin.iuml
+
+title
+<font size=24 color=#000000>Class Diagram: Module Display</font>
+
+endtitle
+
+hide empty members
+
+class Module
+class Port
+class WirePanel
+class ViewPort
+class ParameterPanel
+class ModuleComponent
+class PortComponent
+class Wire
+class EditorPanel
+
+EditorPanel --o "1" ViewPort
+ViewPort --o "1" WirePanel
+EditorPanel --o "1" ParameterPanel
+WirePanel --o "*" ModuleComponent
+WirePanel --o "*" Wire
+ModuleComponent --o "1" Module
+ModuleComponent --o "*" Wire
+ModuleComponent --o "*" PortComponent
+PortComponent --o "1" Port
+Module --o "*" Port
+ParameterPanel --o "1" Module
+
+@enduml

@@ -61,7 +61,7 @@ namespace e3
     }
 
 
-    XmlElement* BrowserPanel::getSelectedInstrument()
+    XmlElement* BrowserPanel::getSelectedInstrumentXml()
     {
         return instrumentBrowser_->getActiveItem();
     }

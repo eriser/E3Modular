@@ -634,7 +634,7 @@ namespace e3 {
         {
             connect();
             AudioOutport* outport = dynamic_cast<AudioOutport*>(sine_->getOutport(0));
-            AudioInport* inport = dynamic_cast<AudioInport*>(master_->getInport(0));
+            AudioInport* inport   = dynamic_cast<AudioInport*>(master_->getInport(0));
 
             outport->putValue(17, 0);
             double value = *inport->getBuffer();
@@ -653,7 +653,7 @@ namespace e3 {
             TestableInstrument() : Instrument() {}
             //TestableInstrument(const Instrument& other) : Instrument(other) {}
 
-            using Instrument::findModule;
+            using Instrument::getModule;
             using Instrument::createModuleId;
             using Instrument::hasMaster;
             using Instrument::connectModule;
@@ -697,9 +697,9 @@ namespace e3 {
         }
 
 
-        TEST_F(InstrumentTest, findModule)
+        TEST_F(InstrumentTest, getModule)
         {
-            Module* m = instrument_.findModule(2);
+            Module* m = instrument_.getModule(2);
             EXPECT_NE(nullptr, m);
         }
 
@@ -871,7 +871,7 @@ namespace e3 {
                 EXPECT_EQ(1, adsr->links_[0].leftModule_);
                 EXPECT_EQ(2, adsr->links_[1].leftModule_);
 
-                Module* m = instrument->findModule(master->links_[0].leftModule_);
+                Module* m = instrument->getModule(master->links_[0].leftModule_);
                 EXPECT_NE(nullptr, m);
                 EXPECT_EQ(adsr, m);
                 EXPECT_EQ(3, m->id_);
@@ -955,7 +955,7 @@ namespace e3 {
         TEST_F(BankTest, store)
         {
             bank_.open(testBank_valid_filename);
-            bank_.store("TestBank_storeTest.e3m", false, false);
+            bank_.save("TestBank_storeTest.e3m", false, false);
             bank_.open("TestBank_storeTest.e3m");
             checkBank(bank_);
 
@@ -964,7 +964,7 @@ namespace e3 {
             bank_.storeInstrument(instrument);
             int hash = instrument->hash_;
             bank_.setInstrumentHash(hash);
-            bank_.store("TestBank_storeTest.e3m", false, false);
+            bank_.save("TestBank_storeTest.e3m", false, false);
             bank_.open("TestBank_storeTest.e3m");
             EXPECT_EQ(hash, bank_.getInstrumentHash());
 
