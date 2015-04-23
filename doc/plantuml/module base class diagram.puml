@@ -54,12 +54,17 @@ class ModuleModel {
     LinkModel& getLink(uint16_t index)
 }
 
+class Module {
+}
+
 
 PortModel o-- PortModelList
 Parameter o-- ParameterMap
+Parameter <|-- Link
 Link o-- LinkList
 ParameterMap o-- ModuleModel
 LinkList o-- ModuleModel
 PortModelList o-- ModuleModel
+ModuleModel <|-- Module
 
 @enduml

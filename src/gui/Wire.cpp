@@ -1,5 +1,6 @@
 
 #include <e3_Exception.h>
+#include "core/Settings.h"
 #include "gui/Style.h"
 #include "gui/Wire.h"
 
@@ -36,7 +37,8 @@ namespace e3 {
             return;
         }
 
-        Colour c = selected_ ? Colour(0xff5f5f60) : Colour(0xffd08930);
+        Style* style = Settings::getInstance().getStyle();
+        Colour c = selected_ ? style->findColour(Style::kWire1ColourId) : style->findColour(Style::kWire2ColourId);
         g.setColour(c);
         g.drawLine(Line<float>(front(), back()), 1);
     }

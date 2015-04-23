@@ -9,7 +9,6 @@ namespace e3 {
 
     class AudioEngine;
     class AppWindow;
-    class Settings;
 
 
     class Application : public JUCEApplication
@@ -25,12 +24,11 @@ namespace e3 {
         const String getApplicationName()           { return ProjectInfo::projectName; }
         const String getApplicationVersion()        { return ProjectInfo::versionString; }
 
-        AudioEngine* getAudioEngine();
-        AudioDeviceManager* getDeviceManager();
+        AudioEngine* getAudioEngine() const;
+        AudioDeviceManager* getDeviceManager() const;
         AudioProcessor* getProcessor() const;
 
-        static Application* getApp();
-        static Settings* getSettings();
+        static Application* getInstance();
 
         void anotherInstanceStarted(const String&) override {}
         bool moreThanOneInstanceAllowed() override          { return true; }

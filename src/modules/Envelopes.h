@@ -9,6 +9,7 @@ namespace e3 {
     {
     public:
         enum ParamId {
+            kParamIn       = 0,         // TODO: what's the use?
             kParamGate     = 1,
             kParamAttack   = 2,
             kParamDecay    = 3,
@@ -17,12 +18,10 @@ namespace e3 {
             kParamNumParams
         };
 
-        ADSREnv() : Module(kModuleAdsrEnv) {}
+        ADSREnv();
 
-        void initPorts() override;
-        void initProcess() override;
         void initVoices() override;
-        void updateInPorts() override;
+        void updateInports() override;
 
         void processAudio() throw();
         void processControl() throw() override;
@@ -58,9 +57,9 @@ namespace e3 {
 
         bool sentinel_ = false;
 
-        AudioInPort audioInPort_;
-        AudioOutPort audioOutPort_;
-        double* audioInPortPointer_ = nullptr;
+        AudioInport audioInport_;
+        AudioOutport audioOutport_;
+        double* audioInportPointer_ = nullptr;
 
         enum State {
             kStateAttack,

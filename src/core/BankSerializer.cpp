@@ -2,7 +2,6 @@
 #include "JuceHeader.h"
 #include <e3_Trace.h>
 
-#include "core/ModuleCatalog.h"
 #include "core/Instrument.h"
 #include "core/Bank.h"
 #include "core/BankSerializer.h"
@@ -108,8 +107,8 @@ namespace e3 {
             Module* module = instrument->createAndAddModule(type);
 
             try {
-                module->id_ = (int16_t)e->getIntAttribute("id");
-                module->label_ = e->getStringAttribute("label", module->label_).toStdString();
+                module->id_          = (int16_t)e->getIntAttribute("id");
+                module->label_       = e->getStringAttribute("label", module->label_).toStdString();
                 module->voicingType_ = (VoicingType)e->getIntAttribute("voicing", module->voicingType_);
                 //module->xpos_      = element->getIntAttribute("xpos");
                 //module->ypos_      = element->getIntAttribute("ypos");
@@ -133,7 +132,7 @@ namespace e3 {
 
             try
             {
-                Parameter p = ModuleCatalog::instance().getParameter(module->moduleType_, id);
+                Parameter p = module->getParameter(id);
                 readParameter(e, p);
                 module->parameters_.update(p);
             }
@@ -246,11 +245,10 @@ namespace e3 {
                 XmlElement* const ep = e->createNewChildElement("param");
                 ep->setAttribute("id", param.id_);
 
-                const Parameter& defaultParam = ModuleCatalog::instance().getParameter(module->moduleType_, param.id_);
+                const Parameter& defaultParam = module->getParameter(param.id_);
                 writeParameter(ep, param, defaultParam);
             }
         }
-
     }
 
 

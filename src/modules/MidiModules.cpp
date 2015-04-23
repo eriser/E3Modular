@@ -12,9 +12,13 @@ namespace e3 {
     //--------------------------------------------------------
 
 
-    MidiGate::MidiGate() : Module(kModuleMidiGate) 
+    MidiGate::MidiGate() : Module(
+        kModuleMidiGate,
+        "Midi Gate",
+        kPolyphonic,
+        kProcessEvent)
     {
-        outPorts_.push_back(&eventOutPort_);
+        addOutport(0, &gateOutport_);
     }
 
 
@@ -33,7 +37,7 @@ namespace e3 {
     void MidiGate::onMidiGate(double gate, uint16_t voice)
     {
         if (gate > -1) {
-            eventOutPort_.putEvent(gate, voice);
+            gateOutport_.putEvent(gate, voice);
         }
     }
 
@@ -42,10 +46,45 @@ namespace e3 {
     // class MidiPitch
     //--------------------------------------------------------
 
-    //void MidiPitch::init(Polyphony* polyphony, double sampleRate)
-    //{
-    //    Module::init(polyphony, sampleRate);
-    //}
+    MidiPitch::MidiPitch() : Module(
+        kModuleMidiPitch,
+        "Midi Pitch",
+        kPolyphonic,
+        (ProcessingType)(kProcessEvent | kProcessControl))
+    {
+        addOutport(0, &freqOutport_);
+        createParameters();
+    }
+
+
+    MidiPitch::MidiPitch(
+        ModuleType moduleType, 
+        const std::string& label,
+        VoicingType voicingType,
+        ProcessingType processingType)
+        :
+        Module(moduleType, label, voicingType, processingType)
+    {
+        createParameters();
+    }
+
+
+    void MidiPitch::createParameters()
+    {
+        Parameter paramBend(kParamBendRange, "BendRange", kControlBiSlider, 2);
+        paramBend.valueShaper_ = { -48, 48, 96 };
+        parameters_.add(paramBend);
+
+        Parameter paramTime(kParamGlideTime, "Portamento Time", kControlSlider, 0);
+        paramTime.valueShaper_ = { 0, 2000 };
+        paramTime.unit_ = "msec";
+        paramTime.numberFormat_ = kNumberFloat;
+        parameters_.add(paramTime);
+
+        Parameter paramAuto(kParamGlideAuto, "Portamento Auto", kControlCheckbox, 0);
+        paramBend.valueShaper_ = { 0, 1 };
+        parameters_.add(paramAuto);
+    }
 
 
     void MidiPitch::initSignals()
@@ -59,12 +98,6 @@ namespace e3 {
     {
         polyphony_->midiNoteSignal.Disconnect(this, &MidiPitch::onMidiNote);
         polyphony_->midiPitchbendSignal.Disconnect(this, &MidiPitch::onMidiPitchbend);
-    }
-
-
-    void MidiPitch::initPorts()
-    {
-        outPorts_.push_back(&freqOutPort_);
     }
 
 
@@ -95,23 +128,21 @@ namespace e3 {
         if( gate != 0 )
         {
             calcGlide( freq, voice );
-            freqOutPort_.putEvent( freq_[voice] * bendFactor_, voice );
+            freqOutport_.putEvent( freq_[voice] * bendFactor_, voice );
         }
     }
 
 
-    //void MidiPitch::onMidiPitchbend( uint16_t value1, uint16_t value2 )
     void MidiPitch::onMidiPitchbend(int value)
     {
-        //uint16_t value = Combine14Bits( value1, value2 );
-        double cents   = ((value - 0x2000) / (double)0x2000) * bendRange_ * 100;
-        bendFactor_    = pow( 2.f, cents / 1200.f );
+        double cents = ((value - 0x2000) / (double)0x2000) * bendRange_ * 100;
+        bendFactor_  = pow( 2.f, cents / 1200.f );
 
         uint16_t maxVoices = std::min<uint16_t>( numVoices_, polyphony_->numSounding_ );
         for( uint16_t i=0; i<maxVoices; i++ )
         {
             uint16_t v = polyphony_->soundingVoices_[i];
-            freqOutPort_.putEvent( freq_[v] * bendFactor_, v );
+            freqOutport_.putEvent( freq_[v] * bendFactor_, v );
         }
     }
 
@@ -131,7 +162,7 @@ namespace e3 {
             } 
             else {
                 freq_[v] += glideDelta_[v];
-                freqOutPort_.putEvent( freq_[v] * bendFactor_, v );
+                freqOutport_.putEvent( freq_[v] * bendFactor_, v );
             }
         }
     }
@@ -170,10 +201,14 @@ namespace e3 {
     // class MidiInput
     //--------------------------------------------------------
 
-    void MidiInput::initPorts()
+    MidiInput::MidiInput() : MidiPitch(
+        kModuleMidiInput,
+        "Midi Input",
+        kPolyphonic,
+        (ProcessingType)(kProcessEvent | kProcessControl))
     {
-        outPorts_.push_back(&freqOutPort_);
-        outPorts_.push_back(&gateOutPort_);
+        addOutport(0, &freqOutport_);
+        addOutport(1, &gateOutport_);
     }
 
 
@@ -198,7 +233,7 @@ namespace e3 {
         MidiPitch::onMidiNote( pitch, gate, voice );
 
         if( gate > -1 ) {
-            gateOutPort_.putEvent( gate, voice );
+            gateOutport_.putEvent( gate, voice );
         }
     }
 }

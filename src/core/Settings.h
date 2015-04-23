@@ -7,16 +7,22 @@
 
 namespace e3 {
 
+    class Style;
+
     class Settings
     {
     public:
+        static Settings& getInstance();
+
         void load();
         void store();
         void storeIfNeeded();
-        
+
         XmlElement* getRoot() { return root_; }
         XmlElement* getElement(const std::string& name) const;
 
+        Style* getStyle() const;
+            
         void setPath(const std::string& path);
         const std::string getPath()             { return file_.getFullPathName().toStdString(); }
 
@@ -25,8 +31,6 @@ namespace e3 {
 
         std::string getRecentBankPath() const;
         void setRecentBankPath(const std::string& path);
-
-        XmlElement* getStyle(const std::string& name = "Default");
 
 #ifdef BUILD_TARGET_APP
         void loadAudioDevices(AudioDeviceManager* manager, int numInputChannels, int numOutputChannels);
@@ -41,11 +45,13 @@ namespace e3 {
         void parse(const std::string& settings);
 
         std::string getDefaultXml();
-
+        XmlElement* getStyleXml(const std::string& name = "Default");
         static std::string createDefaultFilename();
 
         File file_;
-        ScopedPointer<XmlElement> root_ = nullptr;
+        ScopedPointer<XmlElement> root_;
+        ScopedPointer<Style> style_;
+
         bool needsStore_ = false;
 
         const char* rootTagname_ = "E3MSettings";

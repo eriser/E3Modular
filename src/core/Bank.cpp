@@ -78,16 +78,6 @@ namespace e3 {
     }
 
 
-    void Bank::setSettings(Settings* settings)
-    { 
-        settings_ = settings; 
-
-        XmlElement* e = settings_->getElement("Application");
-        autosave_     = e->getBoolAttribute("Autosave");
-        makeBackup_   = e->getBoolAttribute("Backup");
-    }
-
-
     XmlElement* Bank::getXml()
     {
         return xml_.get();
@@ -116,14 +106,14 @@ namespace e3 {
 
     void Bank::setPath(const std::string& path)
     {
-        XmlElement* e = settings_->getElement("Application");
+        XmlElement* e = Settings::getInstance().getElement("Application");
         e->setAttribute("RecentBank", path);
     }
 
 
     std::string Bank::getPath()
     {
-        XmlElement* e = settings_->getElement("Application");
+        XmlElement* e = Settings::getInstance().getElement("Application");
         return e->getStringAttribute("RecentBank").toStdString();
     }
 

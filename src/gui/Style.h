@@ -36,19 +36,28 @@ namespace e3 {
             int width, int height, bool isMouseOver, bool isMouseDown,
             int columnFlags) override;
 
-
         enum ColourIds
         {
-            kBackgroundColourId             = 0x2000000,
-            kContentBackground1ColourId     = 0x2000001,
-            kContentBackground2ColourId     = 0x2000002,
-            kHighlightColourId              = 0x2000010,
-            kTabButtonOffBackgroundColourId = 0x2000020,
-            kTabButtonOnBackgroundColourId  = 0x2000021,
-            kTabButtonOffTextColourId       = 0x2000022,
-            kTabButtonOnTextColourId        = 0x2000023,
-            kWire1ColourId                  = 0x2000030,
-            kWire2ColourId                  = 0x2000031,
+            kBackgroundColourId              = 0x2000000,
+            kContentBackground1ColourId      = 0x2000001,
+            kContentBackground2ColourId      = 0x2000002,
+            kHighlightColourId               = 0x2000010,
+            kTabButtonOffBackgroundColourId  = 0x2000020,
+            kTabButtonOnBackgroundColourId   = 0x2000021,
+            kTabButtonOffTextColourId        = 0x2000022,
+            kTabButtonOnTextColourId         = 0x2000023,
+
+            kModuleColourId                  = 0x2000050,
+            kModuleMonoColourId              = 0x2000051,
+            kModulePort1ColourId             = 0x2000052,
+            kModulePort2ColourId             = 0x2000053,
+            kModuleText1ColourId             = 0x2000054,
+            kModuleText2ColourId             = 0x2000055,
+            kModuleBorder1ColourId           = 0x2000056,
+            kModuleBorder2ColourId           = 0x2000057,
+            kModuleBorder3ColourId           = 0x2000058,
+            kWire1ColourId                   = 0x2000059,
+            kWire2ColourId                   = 0x200005a,
         };
 
     protected:

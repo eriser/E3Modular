@@ -1,25 +1,31 @@
 
+
 #include "modules/Master.h"
 
 
 namespace e3 {
 
-    void Master::initPorts()
+    Master::Master() : Module(
+        kModuleMaster,
+        "Master",
+        kMonophonic,
+        kProcessAudio) 
     {
-        inPorts_.push_back(&audioInPort_);
-    }
-
-
-    void Master::initProcess()
-    {
+        addInport(0, &audioInport_);
         processFunction_ = static_cast< ProcessFunctionPointer >(&Master::processAudio);
+       
+        Parameter paramVolume(kParamVolume, "Volume", kControlSlider, 0.35);
+        paramVolume.numberFormat_ = kNumberDecibel;
+        paramVolume.unit_ = "db";
+        parameters_.add(paramVolume);
     }
 
-
-    void Master::updateInPorts()
+    
+    void Master::updateInports()
     {
         ASSERT(numVoices_ == 1);
-        audioInPortPointer_ = audioInPort_.setNumVoices(numVoices_);
+        audioInport_.setNumVoices(numVoices_);
+        audioInportPointer_ = audioInport_.getBuffer();
     }
 
 
@@ -33,8 +39,8 @@ namespace e3 {
 
     void Master::processAudio() throw()
     {
-        double input = *audioInPortPointer_;
-        *audioInPortPointer_ = 0.0f;
+        double input = *audioInportPointer_;
+        *audioInportPointer_ = 0.0f;
         value_ = std::max<double>(-1, std::min<double>(1, input * volume_));
     }
 }

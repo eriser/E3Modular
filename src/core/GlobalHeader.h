@@ -20,39 +20,47 @@
 
 namespace e3 {
 
-    enum ModuleType {
-        kModuleUndefined = -1,
-        // system modules
-        kModuleMaster    = 0,
-        kModuleMidiGate  = 1,
-        kModuleMidiPitch = 2,
-        kModuleMidiInput = 3,
-        // audio
-        kModuleSineOscil = 10,
-        kModuleAdsrEnv   = 11,
-        kModuleDelay     = 12,
-    };
+    //enum ModuleType {
+    //    kModuleUndefined = -1,
+    //    // system modules
+    //    kModuleMaster    = 0,
+    //    kModuleMidiGate  = 1,
+    //    kModuleMidiPitch = 2,
+    //    kModuleMidiInput = 3,
+    //    // audio
+    //    kModuleSineOscil = 10,
+    //    kModuleAdsrEnv   = 11,
+    //    kModuleDelay     = 12,
+    //};
 
 
-    enum ProcessingType
-    {
-        kProcessEvent = 1,
-        kProcessControl = 2,
-        kProcessAudio = 4
+    //enum ProcessingType
+    //{
+    //    kProcessEvent = 1,
+    //    kProcessControl = 2,
+    //    kProcessAudio = 4
 
-    };
+    //};
 
-    enum VoicingType
-    {
-        kMonophonic = 0,
-        kPolyphonic = 1
-    };
+    //enum VoicingType
+    //{
+    //    kMonophonic = 0,
+    //    kPolyphonic = 1
+    //};
 
-    enum PortType
-    {
-        kInPort  = 0,
-        kOutPort = 1
-    };
+    //enum ModuleStyle
+    //{
+    //    kModuleStyleNothing = 0,
+    //    kModuleStyleVisible = 1,
+    //    kModuleStyleLabel = 2
+    //};
+
+
+    //enum PortType
+    //{
+    //    kInport  = 0,
+    //    kOutport = 1
+    //};
 
     enum NumberFormat
     {
@@ -70,12 +78,6 @@ namespace e3 {
         kControlNumEdit  = 4
     };
 
-    enum BoxStyle
-    {
-        kBoxNothing = 0,
-        kBoxVisible = 1,
-        kBoxLabel = 2
-    };
 
 
     const double PI = 3.14159265358979;

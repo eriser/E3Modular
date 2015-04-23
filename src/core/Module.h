@@ -1,9 +1,12 @@
 
 #pragma once
 
+#include <cstdint>
+#include <string>
+
 #include "core/GlobalHeader.h"
-#include "core/Ports.h"
-#include "core/ModuleBase.h"
+#include "core/Port.h"
+#include "core/Link.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4100) 
@@ -11,26 +14,69 @@
 
 namespace e3 {
 
-
     class Module;
-    class OutPort;
+    class Outport;
     class Polyphony;
 
     // Pointer type to the audio processing function of a module.
     typedef void (Module::*ProcessFunctionPointer)(void) throw();
 
+    enum ModuleType {
+        kModuleUndefined = -1,
+        // system modules
+        kModuleMaster = 0,
+        kModuleMidiGate = 1,
+        kModuleMidiPitch = 2,
+        kModuleMidiInput = 3,
+        // audio
+        kModuleSineOscil = 10,
+        kModuleAdsrEnv = 11,
+        kModuleDelay = 12,
+    };
 
-    class Module : public ModuleModel
+
+    enum ProcessingType
+    {
+        kProcessEvent = 1,
+        kProcessControl = 2,
+        kProcessAudio = 4
+
+    };
+
+    enum VoicingType
+    {
+        kMonophonic = 0,
+        kPolyphonic = 1
+    };
+
+    enum ModuleStyle
+    {
+        kModuleStyleNothing = 0,
+        kModuleStyleVisible = 1,
+        kModuleStyleLabel = 2
+    };
+
+    
+    //--------------------------------------------------------------------------
+    // class Module
+    // Abstract base class for Modules.
+    //--------------------------------------------------------------------------
+
+    class Module
     {
         friend class Instrument;
 
+    protected:
+        Module(
+            ModuleType moduleType,
+            const std::string& label,
+            VoicingType voicingType,
+            ProcessingType processingType,
+            ModuleStyle style = (ModuleStyle)(kModuleStyleVisible | kModuleStyleLabel));
+
     public:
-        Module(ModuleType type);
         virtual ~Module();
 
-        static Module* createModule(ModuleType moduleType);
-
-    public:
         void processAudio() throw() {}
         virtual void processEvent(double value, uint16_t voices) throw() {}
         virtual void processControl() throw () {}
@@ -41,15 +87,32 @@ namespace e3 {
         virtual void setSampleRate(double sampleRate);
         virtual void setNumVoices(uint16_t numVoices);
         virtual void setParameter(uint16_t paramId, double value, double modulation = 0.f, int16_t voice = -1) {}
+        const Parameter& getParameter(uint16_t parameterId) const;
 
-        const InPortList& getInPorts() const    { return inPorts_; }
-        const OutPortList& getOutPorts() const  { return outPorts_; }
+        void addLink(Link& link);
+        void removeLink(const Link& link);
+        Link& getLink(uint16_t index);
 
-        OutPort* getOutPort(uint16_t portId);
-        double* connect(uint16_t portId);
-        void disconnect(uint16_t portId);
+        Inport* Module::getInport(uint16_t portId);
+        Outport* getOutport(uint16_t portId);
+        double* connectTargetWithSource(uint16_t portId);
+        void disconnectTargetFromSource(uint16_t portId);
 
         virtual void onMidiController(int controllerNum, int value);
+
+    public:
+        std::string label_;
+        int16_t id_ = -1;
+        ModuleType moduleType_;
+        VoicingType voicingType_;
+        ProcessingType processingType_;
+        ModuleStyle style_;
+
+        ParameterMap parameters_;
+        LinkList links_;
+        LinkList removedLinks_;
+        InportList inports_;
+        OutportList outports_;
 
         ProcessFunctionPointer processFunction_ = nullptr;
 
@@ -66,35 +129,34 @@ namespace e3 {
         virtual void reset();
 
         virtual void initSignals() {}
-        virtual void initProcess() {}
-        virtual void initPorts() {}
         virtual void initVoices() {}
         virtual void initParameters();
 
         virtual void resetSignals() {}
-        virtual void resetPorts();
+        virtual void disconnectPorts();
         virtual void resetData()  {}
         virtual void resetParameters()  {}
 
         virtual void updatePorts();
-        virtual void updateInPorts();
-        virtual void updateOutPorts();
+        virtual void updateInports();
+        virtual void updateOutports();
         virtual void updateParameters();
 
+        void addInport(uint16_t id, Inport* port);
+        void addOutport(uint16_t id, Outport* port);
         void connectPort(Module* target, Link* link);
-        PortAdapterType chooseAdapter(VoicingType otherVoicingType) const;
+        VoiceAdapterType selectVoiceAdapter(VoicingType otherVoicingType) const;
 
         double sampleRate_   = INITIAL_SAMPLERATE;
         uint16_t numVoices_  = 0;
         bool mono_           = false;
+        bool collapsed_      = false;
 
-        InPortList inPorts_;
-        OutPortList outPorts_;
-
-        Polyphony* polyphony_;
+        Polyphony* polyphony_ = nullptr;
     };
 
     typedef std::vector<Module*> ModuleList;
+
 } // namespace e3
 
 #pragma warning(pop)

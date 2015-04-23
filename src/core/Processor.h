@@ -18,7 +18,6 @@
 
 namespace e3 {
 
-    class Settings;
     class CpuMeter;
     class Polyphony;
     class Bank;
@@ -33,9 +32,7 @@ namespace e3 {
     {
     public:
         Processor();
-        ~Processor();
 
-        Settings* getSettings()    { return settings_.get(); }
         Polyphony* getPolyphony()  { return polyphony_.get(); }
 
         void prepareToPlay(double sampleRate, int samplesPerBlock) override;
@@ -96,7 +93,6 @@ namespace e3 {
         float gain_ = 0.75;
 
     private:
-        ScopedPointer<Settings> settings_;
         ScopedPointer<Sink> sink_;
         ScopedPointer<Polyphony> polyphony_;
         ScopedPointer<Bank> bank_;

@@ -2,6 +2,7 @@
 
 #include "core/Polyphony.h"
 #include "modules/Envelopes.h"
+#include "modules/ModuleFactory.h"
 #include "core/Instrument.h"
 
 
@@ -29,7 +30,7 @@ namespace e3 {
 
     Module* Instrument::createAndAddModule(ModuleType type)
     {
-        Module* module = Module::createModule(type);
+        Module* module = ModuleFactory::create(type);
         push_back(module);
         module->id_ = createModuleId(type);
 

@@ -4,19 +4,34 @@
 
 namespace e3 {
 
-    void Delay::initProcess() 
+    Delay::Delay() : Module(
+        kModuleDelay,
+        "Delay",
+        kPolyphonic,
+        kProcessAudio)
     {
+        addInport(0, &audioInport_);
+        addOutport(0, &audioOutport_);
+
         processFunction_ = static_cast< ProcessFunctionPointer >(&Delay::processAudio);
+
+        Parameter paramTime(kParamDelaytime, "Time", kControlSlider, 0.5);
+        paramTime.unit_ = "sec";
+        paramTime.numberFormat_ = kNumberFloat;
+        parameters_.add(paramTime);
+
+        Parameter paramRepeats(kParamFeedback, "Repeats", kControlSlider, 0.5);
+        paramRepeats.unit_ = "sec";
+        paramRepeats.numberFormat_ = kNumberFloat;
+        parameters_.add(paramRepeats);
+
+        Parameter paramGain(kParamGain, "Gain", kControlSlider, 0.5);
+        paramGain.unit_ = "db";
+        paramGain.numberFormat_ = kNumberDecibel;
+        parameters_.add(paramGain);
     }
 
     
-    void Delay::initPorts()
-    {
-        inPorts_.push_back(&audioInPort_);
-        outPorts_.push_back(&audioOutPort_);
-    }
-
-
     void Delay::initVoices()
     {
         updateBuffer();
@@ -30,9 +45,10 @@ namespace e3 {
     }
 
 
-    void Delay::updateInPorts()
+    void Delay::updateInports()
     {
-        audioInPortPointer_ = audioInPort_.setNumVoices( numVoices_ );
+        audioInport_.setNumVoices( numVoices_ );
+        audioInportPointer_ = audioInport_.getBuffer();
     }
 
 
@@ -68,8 +84,8 @@ namespace e3 {
         
         for( v = 0; v < numVoices_; v++ )
         {
-            input = audioInPortPointer_[v];
-            audioInPortPointer_[v] = 0.f;
+            input = audioInportPointer_[v];
+            audioInportPointer_[v] = 0.f;
 
             index  = v * bufferSize_ + cursorBufferPointer_[v];
             output = delayBufferPointer_[index];
@@ -79,7 +95,7 @@ namespace e3 {
             if( ++cursorBufferPointer_[v] >= delayTime_ ) {
                 cursorBufferPointer_[v] = 0;
             }
-            audioOutPort_.putAudio( input + output * gain_, v );
+            audioOutport_.putValue( input + output * gain_, v );
         }
     }
 } // namespace e3

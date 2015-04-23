@@ -1,0 +1,84 @@
+
+
+@startuml
+
+!include skin.iuml
+
+title
+<font size=24 color=#000000>Class Diagram: Module/Ports</font>
+
+endtitle
+
+class ModuleModel {
+    +int16_t id_
+    +ModuleType moduleType_
+    +ProcessingType processingType_
+    +VoicingType voicingType_
+    +BoxStyle boxStyle_
+    'std::string label_
+    +PortModelList inPortModels_
+    +PortModelList outPortModels_
+    +ParameterMap parameters_
+    +LinkList links_
+    +LinkList removedLinks_
+
+    +void addLink(Link& link)
+    +void removeLink(const Link&)
+    +Link& getLink(uint16_t index)
+}
+
+
+class Port {
+    +Port::Type type_
+    +uint16_t id_
+    #uint16_t numVoices_
+ }
+
+class OutPort {
+    #uint16_t numTargets_;
+    #vector<Link*> targets_;
+    #Buffer<PortAdapterType> adapterBuffer_;
+    #Buffer<double> modulationBuffer_;
+}
+
+class AudioOutPort {
+    #AudioOutBuffer audioOutBuffer_
+}
+
+class EventOutPort {
+    void connect(Link*, Module*, PortAdapterType)
+    void disconnect(Link* link, Module* target)
+    void putEvent(double value, uint16_t voice)
+    void putEvent(double value)
+}
+
+class AudioInPort {
+    #Buffer<double> audioInBuffer_;
+    #int16_t numSources_;
+}
+
+
+class Module {
+    static Module* createModule(ModuleType moduleType)
+
+    +ProcessFunctionPointer processFunction_
+
+    #double sampleRate_
+    #uint16_t numVoices_
+    #bool mono_
+    #InPortList inPorts_;
+    #OutPortList outPorts_;
+    #Polyphony* polyphony_;
+}
+
+Port <|-- OutPort
+Port <|-- AudioInPort
+OutPort <|-- AudioOutPort
+OutPort <|-- EventOutPort
+AudioOutPort o-- Module
+AudioInPort o-- Module
+EventOutPort o-- Module
+ModuleModel <|-- Module
+
+
+@enduml

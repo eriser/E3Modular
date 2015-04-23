@@ -9,12 +9,10 @@ namespace e3 {
     class Delay : public Module
     {
     public:
-        Delay() : Module(kModuleDelay) {}
+        Delay();
 
-        void initProcess() override;
-        void initPorts() override;
         void initVoices() override;
-        void updateInPorts() override;
+        void updateInports() override;
         
         void processAudio() throw();
         void resume() override;
@@ -41,8 +39,8 @@ namespace e3 {
         Buffer< double > delayBuffer_;
         double* delayBufferPointer_ = nullptr;
 
-        AudioInPort audioInPort_; 
-        AudioOutPort audioOutPort_;
-        double* audioInPortPointer_;
+        AudioInport audioInport_; 
+        AudioOutport audioOutport_;
+        double* audioInportPointer_;
     };
 }

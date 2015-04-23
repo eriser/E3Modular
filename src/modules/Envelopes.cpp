@@ -6,16 +6,46 @@
 namespace e3 {
 
 
-    void ADSREnv::initPorts()
+    ADSREnv::ADSREnv() : Module(
+        kModuleAdsrEnv,
+        "ADSR",
+        kPolyphonic,
+        (ProcessingType)(kProcessAudio | kProcessControl))
     {
-        inPorts_.push_back(&audioInPort_);
-        outPorts_.push_back(&audioOutPort_);
-    }
+        addInport(0, &audioInport_);
+        addOutport(0, &audioOutport_);
 
-
-    void ADSREnv::initProcess()
-    {
         processFunction_ = static_cast< ProcessFunctionPointer >(&ADSREnv::processAudio);
+        
+        Parameter paramIn(kParamIn, "In", kControlHidden); // TODO: what is this good for?
+        parameters_.add(paramIn);
+
+        Parameter paramGate(kParamGate, "Gate", kControlHidden);
+        parameters_.add(paramGate);
+
+        Parameter paramAttack(kParamAttack, "Attack", kControlSlider, 0.1);
+        paramAttack.valueShaper_ = { 0, 1.2, 96, 6 };
+        paramAttack.unit_ = "sec";
+        paramAttack.numberFormat_ = kNumberFloat;
+        parameters_.add(paramAttack);
+
+        Parameter paramDecay(kParamDecay, "Decay", kControlSlider);
+        paramDecay.valueShaper_ = { 0, 1, 100, 6 };
+        paramDecay.unit_ = "sec";
+        paramDecay.numberFormat_ = kNumberFloat;
+        parameters_.add(paramDecay);
+
+        Parameter paramSustain(kParamSustain, "Sustain", kControlSlider, 0.75);
+        paramSustain.valueShaper_ = { 0, 1, 100, 6 };
+        paramSustain.unit_ = "db";
+        paramSustain.numberFormat_ = kNumberDecibel;
+        parameters_.add(paramSustain);
+
+        Parameter paramRelease(kParamRelease, "Release", kControlSlider);
+        paramRelease.valueShaper_ = { 0, 1, 100, 6 };
+        paramRelease.unit_ = "sec";
+        paramRelease.numberFormat_ = kNumberFloat;
+        parameters_.add(paramRelease);
     }
 
 
@@ -34,9 +64,10 @@ namespace e3 {
     }
 
 
-    void ADSREnv::updateInPorts()
+    void ADSREnv::updateInports()
     {
-        audioInPortPointer_ = audioInPort_.setNumVoices( numVoices_ );
+        audioInport_.setNumVoices(numVoices_);
+        audioInportPointer_ = audioInport_.getBuffer();
     }
 
 
@@ -167,12 +198,12 @@ namespace e3 {
         for( uint32_t i = 0; i < maxVoices; i++ )
         {
             uint16_t v             = polyphony_->soundingVoices_[i];
-            double input           = audioInPortPointer_[v];
-            audioInPortPointer_[v] = 0;
+            double input           = audioInportPointer_[v];
+            audioInportPointer_[v] = 0;
 
             value_[v] += delta_[v] * ( target_[v] - value_[v] );
 
-            audioOutPort_.putAudio( input * value_[v] * velocity_[v], v );
+            audioOutport_.putValue( input * value_[v] * velocity_[v], v );
         }
     }
 

@@ -5,8 +5,7 @@
 #include <map>
 
 #include "JuceHeader.h"
-//#include "gui/AudioEditor.h"
-#include "core/ModuleBase.h"
+#include "core/Module.h"
 
 
 namespace e3 {

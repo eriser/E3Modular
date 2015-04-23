@@ -1,4 +1,5 @@
 
+
 #pragma once
 
 #include "core/Module.h"
@@ -11,10 +12,9 @@ namespace e3 {
     public:
         SineOscil();
 
-        void initPorts() override;
         void initVoices() override;
         void updatePorts() override;
-        void updateInPorts() override;
+        void updateInports() override;
         void setParameter( uint16_t paramId, double value, double modulation=0.f, int16_t voice=-1 );
 
         void processAudio() throw();
@@ -43,11 +43,11 @@ namespace e3 {
         double tuning_ = 1;
         double fineTuning_ = 1;
 
-        AudioInPort  fmInputPort_;
-        AudioInPort  amInputPort_;
-        AudioOutPort audioOutPort_;
-        double* fmInputPointer_ = nullptr;
-        double* amInputPointer_ = nullptr;
+        AudioInport  fmInport_;
+        AudioInport  amInport_;
+        AudioOutport audioOutport_;
+        double* fmInportPointer_ = nullptr;
+        double* amInportPointer_ = nullptr;
         
         static Buffer<double> tableBuffer_;
         static double* table_;

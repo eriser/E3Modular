@@ -23,20 +23,12 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 namespace e3 {
 
     Processor::Processor() : AudioProcessor(),
-        settings_(new Settings()),
         polyphony_(new Polyphony()),
         bank_(new Bank()),
         sink_(new Sink()),
         cpuMeter_(new CpuMeter())
     {
-        settings_->load();
-        bank_->setSettings(settings_.get());
-    }
-
-
-    Processor::~Processor()
-    {
-        settings_->store();
+        Settings::getInstance().load();
     }
 
 
@@ -47,7 +39,7 @@ namespace e3 {
 
         if (instrument_ == nullptr)
         {
-            openBank(settings_->getRecentBankPath());
+            openBank(Settings::getInstance().getRecentBankPath());
             loadInstrument();
         }
         else {

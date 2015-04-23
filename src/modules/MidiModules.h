@@ -17,29 +17,31 @@ namespace e3 {
         void onMidiGate( double gate, uint16_t voice);
 
     protected:
-        EventOutPort eventOutPort_;
+        EventOutport gateOutport_;
     };
 
     class MidiPitch : public Module 
     {
     public:
-        MidiPitch() : Module(kModuleMidiPitch) {}
-        MidiPitch(ModuleType type) : Module(type) {}
+        MidiPitch();
+        MidiPitch(
+            ModuleType moduleType,
+            const std::string& label,
+            VoicingType voicingType,
+            ProcessingType processingType);
 
-        //void init(Polyphony* polyphony, double sampleRate) override;
         void initSignals() override;
         void resetSignals() override;
 
-        void initPorts() override;
         void initVoices() override;
         void setParameter( uint16_t paramId, double value, double modulation=0.f, int16_t voice=-1 );
         void onMidiNote( double pitch, double gate, uint16_t voice );
         void onMidiPitchbend(int value);
-        //void onMidiPitchbend(uint16_t value1, uint16_t value2);
         
         void processControl() throw() override;
 
     protected:
+        void createParameters();
         void calcGlide( double freq, uint16_t voice );
         void setGlideTime( double time );
 
@@ -61,22 +63,21 @@ namespace e3 {
         double bendFactor_   = 1.0;
         int16_t bendRange_   = 2;
 
-        EventOutPort freqOutPort_;
+        EventOutport freqOutport_;
     };
 
 
     class MidiInput : public MidiPitch
     {
     public:
-        MidiInput() : MidiPitch(kModuleMidiInput) {}
+        MidiInput();
 
-        void initPorts() override;
         void initSignals() override;
         void resetSignals() override;
         void onMidiNote(double pitch, double gate, uint16_t voice);
 
     protected:
-        EventOutPort gateOutPort_;
+        EventOutport gateOutport_;
     };
 
 }

@@ -2,17 +2,13 @@
 #include <algorithm>
 
 #include <e3_Exception.h>
+#include "core/GlobalHeader.h"
 #include "core/ModuleBase.h"
-//#include "gui/ModuleComponent.h"
+#include "gui/Style.h"
+#include "gui/ModuleComponent.h"
 #include "gui/PortComponent.h"
 
 namespace e3 {
-
-    class ModuleComponent : public Component {};
-
-    //----------------------------------------------------------------
-    // class PortComponent
-    //----------------------------------------------------------------
 
     PortComponent::PortComponent(const Rectangle<int>& bounds, PortModel* model, PortType portType, ModuleComponent* owner) :
         portModel_(model),
@@ -25,20 +21,20 @@ namespace e3 {
             repaint();
 
             const Rectangle<int>& b = bounds_;
-            if (portType_ == kInPort)
+            if (portType_ == kInport)
             {
                 rcSquare_    = Rectangle<int>(b.getX() + 4, b.getY() + 3, b.getX() + 10, b.getY() + 9);
                 rcIndicator_ = Rectangle<int>(b.getX(), b.getY() + 5, b.getX() + 4, b.getY() + 7);
                 rcHover_     = Rectangle<int>(b.getX(), b.getY(), b.getX() + 12, b.getBottom());
                 rcText_      = Rectangle<int>(b.getX() + 13, b.getY(), b.getRight() + 37, b.getBottom());
-                rcInvalid_   = Rectangle<int>(b.getX(), b.getY(), b.getRight() + 37, b.getBottom());
+                pcPaint_   = Rectangle<int>(b.getX(), b.getY(), b.getRight() + 37, b.getBottom());
             }
             else {
                 rcSquare_    = Rectangle<int>(b.getRight() - 10, b.getY() + 3, b.getRight() - 4, b.getY() + 9);
                 rcIndicator_ = Rectangle<int>(b.getRight() - 4, b.getY() + 5, b.getRight(), b.getY() + 7);
                 rcHover_     = Rectangle<int>(b.getRight() - 12, b.getY(), b.getRight(), b.getBottom());
                 rcText_      = Rectangle<int>(b.getX() - 37, b.getY(), b.getRight() - 15, b.getBottom());
-                rcInvalid_   = Rectangle<int>(b.getX() - 37, b.getY(), b.getRight(), b.getBottom());
+                pcPaint_   = Rectangle<int>(b.getX() - 37, b.getY(), b.getRight(), b.getBottom());
             }
         }
 
@@ -52,7 +48,7 @@ namespace e3 {
         void PortComponent::mouseExit(const MouseEvent&)
         {
             state_ &= ~kHover;
-            repaint(rcInvalid_);
+            repaint(pcPaint_);
 
             //return kMouseEventHandled;
         }
@@ -69,7 +65,7 @@ namespace e3 {
             uint16_t oldState = state_;
             setHover(e.getMouseDownPosition());
             if (state_ != oldState) {
-                repaint(rcInvalid_);
+                repaint(pcPaint_);
             }
             //return kMouseEventHandled;
         }
@@ -92,7 +88,7 @@ namespace e3 {
             {
                 getDockPosition(pos);
                 state_ |= kDocking;
-                repaint(rcInvalid_);
+                repaint(pcPaint_);
             }
             return result;
         }
@@ -106,7 +102,7 @@ namespace e3 {
             patchToPort(pos);
             state_ &= ~kDocking;
             setHover(pos);
-            repaint(rcInvalid_);
+            repaint(pcPaint_);
         }
 
 
@@ -115,7 +111,7 @@ namespace e3 {
             patchToPort(pos);
             setHover(pos);
             links_.push_back(link);
-            getDockPosition(pos);
+            getDockingPosition(pos);
             state_ |= kConnected;
         }
 
@@ -148,11 +144,11 @@ namespace e3 {
         }
 
 
-        void PortComponent::getDockPosition(Point<int>& pos)
+        void PortComponent::getDockingPosition(Point<int> pos)
         {
             Rectangle<int> b = getLocalBounds();
             pos.y = b.getY() + b.getHeight() / 2;
-            pos.x = portType_ == kInPort ? b.getX() + 1 : b.getRight() - 1;
+            pos.x = portType_ == kInport ? b.getX() + 1 : b.getRight() - 1;
             portToPatch(pos);
         }
 
@@ -173,46 +169,43 @@ namespace e3 {
 
         void PortComponent::paint(Graphics& g)
         {
-            //CColor colPort1 = (state_ & Connected) ? colors.modulePort2 : colors.modulePort1;
-            //CColor colPort2 = colors.modulePort2;
-            //if( owner_->data_->catalog_ == MASTER ) {
-            //    colPort1 = (state_ & Connected) ? colors.masterPort2 : colors.masterPort1;
-            //    colPort2 = colors.masterPort2;
-            //}
-            //pContext->setFillColor( colPort1 );
-            //pContext->setFrameColor( colPort2 );
+            Colour colPort1 = findColour(Style::kModulePort1ColourId);
+            Colour colPort2 = findColour(Style::kModulePort1ColourId);
+            colPort1        = (state_ & kConnected) ? colPort1 : colPort2;
 
-            //if( state_ & (Hover || Docking) )	    // draw port square
-            //{
-            //    Rectangle<int> rcFrame( rcSquare_ );
-            //    rcFrame.inset( -1, -1 );
-            //    pContext->setLineWidth( 1 );
-            //    pContext->drawRect( rcFrame, kDrawFilledAndStroked );
-            //}
-            //else {
-            //    pContext->drawRect( rcSquare_, kDrawFilled );
-            //}
+            g.setColour( colPort1 );
+            //g.setFrameColor( colPort2 );
 
-            //if( links_.empty() == false ) {	    	// draw connection indicator
-            //    pContext->drawRect( rcIndicator_, kDrawFilled );
-            //}
+            if( state_ & (kHover || kDocking) )	    // draw port square
+            {
+                Rectangle<int> rcFrame( rcSquare_ );
+                rcFrame.expand( 1, 1 );
+                g.fillRect( rcFrame );
+            }
+            else {
+                g.fillRect(rcSquare_);
+            }
 
-            //if( state_ & (Hover || Docking) )	    // draw label
-            //{
-            //    Rectangle<int> oldClip;
-            //    pContext->getClipRect( oldClip );
-            //    pContext->setClipRect( rcInvalid_ );
+            if( links_.empty() == false ) {	    	// draw connection indicator
+                g.drawRect( rcIndicator_);
+            }
 
-            //    pContext->setFont( fontArial9, fontArial9->getSize() );
-            //    pContext->setFontColor( colors.moduleText2 );
-            //    
-            //    pContext->setFillColor( MakeCColor( owner_->colBkgnd_.red, owner_->colBkgnd_.green, owner_->colBkgnd_.blue, 255 ));
-            //    pContext->drawRect( rcText_, kDrawFilled );
-
-            //    pContext->drawStringUTF8(info_->label_.c_str(), rcText_, portType_ == kInPort ? kLeftText : kRightText, true);
-            //    pContext->setClipRect( oldClip );
-            //}
-            //setDirty( false );
+            if( state_ & (kHover || kDocking) )	    // draw label
+            {
+                Rectangle<int> rcClip = g.getClipBounds();
+                g.reduceClipRegion(pcPaint_);
+                
+                //g.setFont( fontArial9, fontArial9->getSize() );
+                //g.setFontColor( colors.moduleText2 );
+                
+                g.setColour(findColour(Style::kModuleColourId));
+                g.fillRect( rcText_);
+                
+                int align = (portType_ == kInport) ? Justification::centredLeft : Justification::centredRight;
+                g.drawText(portModel_->label_, rcText_, align, true);
+                
+                g.reduceClipRegion(rcClip);
+            }
         }
 
 } // namespace e3

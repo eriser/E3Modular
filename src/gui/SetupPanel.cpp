@@ -29,7 +29,7 @@ namespace e3
 #ifdef BUILD_TARGET_APP
     void SetupPanel::createComponents()
     {
-        AudioEngine* engine         = Application::getApp()->getAudioEngine();
+        AudioEngine* engine         = Application::getInstance()->getAudioEngine();
         AudioDeviceManager* manager = engine->getDeviceManager();
         Processor* processor        = engine->getProcessor();
 

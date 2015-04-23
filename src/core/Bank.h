@@ -8,15 +8,12 @@
 
 
 namespace e3 {
-    class Settings;
     class Instrument;
 
     class Bank {
         friend class BankSerializer;
 
     public:
-        //void close(bool doStore, bool makeBackup);
-
         void open(const std::string& path);
         void createNewBank();
         void store(const std::string& path, bool saveCurrent=true, bool makeBackup=true);
@@ -35,17 +32,10 @@ namespace e3 {
 
         void append(Instrument* instrument);
 
-        void setSettings(Settings* settings);
-
         XmlElement* getXml();
         void setXml(XmlElement* e);
 
     protected:
-        Settings* settings_ = nullptr;
-        bool autosave_      = true;
-        bool makeBackup_    = false;
-
-        std::unique_ptr<XmlElement> xml_ = nullptr;
-        std::unique_ptr<XmlDocument> xmlDocument_ = nullptr;
+        std::unique_ptr<XmlElement> xml_          = nullptr;
     };
 }  // namespace e3

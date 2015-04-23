@@ -3,11 +3,19 @@
 
 #include "e3_Trace.h"
 #include "e3_Exception.h"
+#include "gui/Style.h"
 #include "core/Settings.h"
 
 using std::string;
 
 namespace e3 {
+
+    Settings& Settings::getInstance()
+    {
+        static Settings instance;
+        return instance;
+    }
+
 
     void Settings::load()
     {
@@ -19,6 +27,17 @@ namespace e3 {
         } else {
             parse(file_);
         }
+
+        XmlElement* styleXml = getStyleXml();
+        style_ = new Style(styleXml);
+    }
+
+
+    void Settings::storeIfNeeded()
+    {
+        if (needsStore_) {
+            store();
+        }
     }
 
 
@@ -29,11 +48,9 @@ namespace e3 {
     }
 
 
-    void Settings::storeIfNeeded()
+    Style* Settings::getStyle() const
     {
-        if (needsStore_) {
-            store();
-        }
+        return style_.get();
     }
 
 
@@ -230,7 +247,7 @@ namespace e3 {
     }
 #endif
 
-    XmlElement* Settings::getStyle(const std::string& name)
+    XmlElement* Settings::getStyleXml(const std::string& name)
     {
         if (root_ != nullptr) 
         {

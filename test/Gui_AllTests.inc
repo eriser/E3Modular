@@ -6,22 +6,17 @@
 namespace e3 {
     namespace testing {
 
-        class TestableStyle : public Style
-        {
-        public:
-        };
-
         class StyleTest : public ::testing::Test
         {
         public:
             StyleTest() 
             {
                 settings_.load();
-                XmlElement* e = settings_.getStyle();
+                XmlElement* e = settings_.getStyleXml();
                 style_ = new Style(e);
             }
 
-            Settings settings_;
+            TestableSettings settings_;
             ScopedPointer<Style> style_;
         };
 

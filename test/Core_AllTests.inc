@@ -6,8 +6,6 @@
 #include <e3_CommonMacros.h>
 #include <core/Settings.h>
 #include <core/ParameterShaper.h>
-#include <core/ModuleBase.h>
-#include <core/ModuleCatalog.h>
 #include <core/Module.h>
 #include <core/Sink.h>
 #include <core/Polyphony.h>
@@ -15,6 +13,9 @@
 #include <core/Bank.h>
 #include <core/BankSerializer.h>
 #include <core/CpuMeter.h>
+#include <modules/ModuleFactory.h>
+#include <modules/Master.h>
+#include <modules/SineOscil.h>
 
 
 namespace e3 {
@@ -28,6 +29,7 @@ namespace e3 {
         {
         public:
             using Settings::file_;
+            using Settings::getStyleXml;
 
             bool testValid() 
             {
@@ -121,7 +123,7 @@ namespace e3 {
         TEST_F(SettingsTest, hasStyle)
         {
             settings_.load();
-            XmlElement* e = settings_.getStyle();
+            XmlElement* e = settings_.getStyleXml();
             ASSERT_NE(nullptr, e);
             EXPECT_TRUE(e->getStringAttribute("name") == "Default");
         }
@@ -130,7 +132,7 @@ namespace e3 {
         {
             settings_.setPath("e3m_no_style.settings");
             settings_.load();
-            XmlElement* e = settings_.getStyle();
+            XmlElement* e = settings_.getStyleXml();
             ASSERT_NE(nullptr, e);
             EXPECT_TRUE(e->getStringAttribute("name") == "Default");
         }
@@ -442,8 +444,9 @@ namespace e3 {
         }
 
 
+
         //----------------------------------------------------------------------------------------
-        // ModuleCatalogTest
+        // ModuleTest
         //----------------------------------------------------------------------------------------
 
         static ModuleType testModuleTypes[] = {
@@ -464,39 +467,104 @@ namespace e3 {
             { testModuleTypes[2], { kProcessEvent | kProcessControl, kPolyphonic, 0, 1, 3 } },
             { testModuleTypes[3], { kProcessEvent | kProcessControl, kPolyphonic, 0, 2, 3 } },
             { testModuleTypes[4], { kProcessAudio, kPolyphonic, 2, 1, 4 } },
-            { testModuleTypes[5], { kProcessAudio | kProcessControl, kPolyphonic, 2, 1, 6 } },
-            { testModuleTypes[6], { kProcessAudio, kPolyphonic, 4, 1, 3 } },
-        };
-
-        class ModuleCatalogTest : public ::testing::Test
+            { testModuleTypes[5], { kProcessAudio | kProcessControl, kPolyphonic, 1, 1, 6 } },
+            { testModuleTypes[6], { kProcessAudio, kPolyphonic, 1, 1, 3 } },
+        };      
+        
+        class TestableModule : public Module
         {
         public:
-            ModuleCatalogTest() {}
+            TestableModule(ModuleType type, VoicingType voicingType=kPolyphonic) : Module(
+                type,
+                "TestableModule",
+                voicingType,
+                kProcessAudio)
+            {}
 
-            void testEqualsCatalog(ModuleType moduleType)
+            using Module::selectVoiceAdapter;
+        };
+
+        class TestableSineOscil : public SineOscil
+        {
+        public:
+            using Module::connectPort;
+            using Module::update;
+            using Module::disconnectPorts;
+        };
+
+        class TestableMaster : public Master
+        {
+        public:
+            using Module::connectPort;
+            using Module::update;
+            using Module::disconnectPorts;
+        };
+
+        class ModuleTest : public ::testing::Test
+        {
+        public:
+            ModuleTest() {}
+
+            void testInitialization(ModuleType moduleType)
             {
-                const ModuleCatalog& catalog = ModuleCatalog::instance();
-                const ModuleModel& model = catalog.getModuleModel(moduleType);
+                ScopedPointer<Module> module = ModuleFactory::create(moduleType);
                 std::vector<int>& expected = moduleTestMap[moduleType];
 
-                EXPECT_EQ(expected[0], catalog.getProcessingType(moduleType));
-                EXPECT_EQ(expected[1], catalog.getVoicingType(moduleType));
-                EXPECT_EQ(expected[2], model.inPortModels_.size());
-                EXPECT_EQ(expected[3], model.outPortModels_.size());
-                EXPECT_EQ(expected[4], model.parameters_.size());
+                EXPECT_EQ(expected[0], module->processingType_);
+                EXPECT_EQ(expected[1], module->voicingType_);
+                EXPECT_EQ(expected[2], module->inports_.size());
+                EXPECT_EQ(expected[3], module->outports_.size());
+                EXPECT_EQ(expected[4], module->parameters_.size());
+            }
+
+            ScopedPointer<TestableSineOscil> sine_;
+            ScopedPointer<TestableMaster> master_;
+
+            void connect()
+            {
+                sine_ = new TestableSineOscil();
+                master_ = new TestableMaster();
+                EXPECT_NE(nullptr, sine_);
+                EXPECT_NE(nullptr, master_);
+
+                sine_->id_ = 1;
+                master_->id_ = 0;
+                sine_->setNumVoices(1);
+                master_->setNumVoices(1);
+                sine_->update();
+                master_->update();
+
+                Link link;
+                link.value_ = 1;    // modulation value
+                link.leftModule_ = 1;
+                link.rightModule_ = 0;
+                link.leftPort_ = 0;
+                link.rightPort_ = 0;
+                master_->addLink(link);
+                sine_->connectPort(master_, &link);
             }
         };
 
-        TEST_F(ModuleCatalogTest, ModelInitialization)
+
+        TEST_F(ModuleTest, ModuleInitialization)
         {
             ModuleTestMap::const_iterator it = moduleTestMap.begin();
             for (; it != moduleTestMap.end(); it++)
             {
-                testEqualsCatalog(it->first);
+                testInitialization(it->first);
             }
         }
 
-        TEST_F(ModuleCatalogTest, Parameter_ConstructAndCopy)
+        TEST_F(ModuleTest, ParameterMap_setDefaultValues)
+        {
+            ScopedPointer<Module> module = ModuleFactory::create(kModuleMaster);
+            module->parameters_.setDefaultValues();
+
+            Parameter& param = module->parameters_.at(0);
+            EXPECT_EQ(param.defaultValue_, param.value_);
+        }
+
+        TEST_F(ModuleTest, Parameter_ConstructAndCopy)
         {
             Parameter p1, p2;
             EXPECT_EQ(p1.id_, 0);
@@ -509,72 +577,6 @@ namespace e3 {
             EXPECT_EQ(p1.id_, p2.id_);
             EXPECT_EQ(p1.defaultValue_, p2.defaultValue_);
         }
-
-        TEST_F(ModuleCatalogTest, ParameterMap_setDefaultValues)
-        {
-            ModuleModel model = ModuleCatalog::instance().getModuleModel(kModuleMaster);
-            model.parameters_.setDefaultValues();
-
-            Parameter& param = model.parameters_.at(0);
-            EXPECT_EQ(param.defaultValue_, param.value_);
-        }
-
-
-        //----------------------------------------------------------------------------------------
-        // ModuleTest
-        //----------------------------------------------------------------------------------------
-
-        class TestableModule : public Module
-        {
-        public:
-            TestableModule(ModuleType type) : Module(type) {}
-
-            using Module::createModule;
-            using Module::chooseAdapter;
-        };
-
-        class ModuleTest : public ::testing::Test
-        {
-        public:
-            ModuleTest() {}
-
-            void testEqualsCatalog(ModuleType moduleType)
-            {
-                Module* module = TestableModule::createModule(moduleType);
-                std::vector<int>& expected = moduleTestMap[moduleType];
-
-                EXPECT_EQ(expected[0], module->processingType_);
-                EXPECT_EQ(expected[1], module->voicingType_);
-                EXPECT_EQ(expected[2], module->inPortModels_.size());
-                EXPECT_EQ(expected[3], module->outPortModels_.size());
-                EXPECT_EQ(expected[4], module->parameters_.size());
-
-                if (module)delete module;
-            }
-        };
-
-
-        //TEST(ModelTest, ModulePointer_ZeroAfterCopy)
-        //{
-        //    ModuleModel m1;
-        //    m1.module_ = (Module*)123;
-
-        //    ModuleModel m2 = m1;
-        //    EXPECT_EQ(nullptr, m2.module_);
-        //    EXPECT_NE(nullptr, m1.module_);
-
-        //    m1.module_ = nullptr;
-        //}
-
-
-        TEST_F(ModuleTest, createModule)
-        {
-            for (uint16_t t=0; t < ARRAY_SIZE(testModuleTypes); t++)
-            {
-                testEqualsCatalog(testModuleTypes[t]);
-            }
-        }
-
 
         TEST_F(ModuleTest, addAndRemoveLink)
         {
@@ -602,21 +604,44 @@ namespace e3 {
             EXPECT_EQ(0, module.removedLinks_.size());
         }
 
-        TEST_F(ModuleTest, chooseAdapter)
+        TEST_F(ModuleTest, selectVoiceAdapter)
         {
-            TestableModule master(kModuleMaster);
+            TestableModule master(kModuleMaster, kMonophonic);
             TestableModule sine(kModuleSineOscil);
 
             ASSERT_EQ(kMonophonic, master.voicingType_);
             ASSERT_EQ(kPolyphonic, sine.voicingType_);
             
-            EXPECT_EQ(kAdapterNone, master.chooseAdapter(kMonophonic));
-            EXPECT_EQ(kAdapterMonoToPoly, master.chooseAdapter(kPolyphonic));
+            EXPECT_EQ(kAdapterNone, master.selectVoiceAdapter(kMonophonic));
+            EXPECT_EQ(kAdapterMonoToPoly, master.selectVoiceAdapter(kPolyphonic));
 
-            EXPECT_EQ(kAdapterNone, sine.chooseAdapter(kPolyphonic));
-            EXPECT_EQ(kAdapterPolyToMono, sine.chooseAdapter(kMonophonic));
+            EXPECT_EQ(kAdapterNone, sine.selectVoiceAdapter(kPolyphonic));
+            EXPECT_EQ(kAdapterPolyToMono, sine.selectVoiceAdapter(kMonophonic));
         }
-        
+
+        TEST_F(ModuleTest, connect)
+        {
+            connect();
+            Port* port = sine_->getOutport(0);
+            EXPECT_TRUE(port->isConnected());
+
+            master_->disconnectPorts();
+            sine_->disconnectPorts();
+            EXPECT_FALSE(port->isConnected());
+        }
+
+        TEST_F(ModuleTest, sendThroughPorts)
+        {
+            connect();
+            AudioOutport* outport = dynamic_cast<AudioOutport*>(sine_->getOutport(0));
+            AudioInport* inport = dynamic_cast<AudioInport*>(master_->getInport(0));
+
+            outport->putValue(17, 0);
+            double value = *inport->getBuffer();
+            EXPECT_EQ(17, value);
+        }
+
+
 
         //----------------------------------------------------------------------------------------
         // InstrumentTest
@@ -664,15 +689,6 @@ namespace e3 {
             TestableInstrument instrument_;
         };
 
-
-        //TEST_F(InstrumentTest, CopyAssignment)
-        //{
-        //    TestableInstrument p = instrument_;
-
-        //    EXPECT_EQ(instrument_.name_, p.name_);
-        //    EXPECT_EQ(instrument_.size(), p.size());
-        //    EXPECT_TRUE(p.hasMaster());
-        //}
 
         TEST_F(InstrumentTest, deleteModules)
         {
@@ -785,8 +801,7 @@ namespace e3 {
         {
         public:
             BankTest() {
-                settings_.load();
-                bank_.setSettings(&settings_);
+                Settings::getInstance().load();
             }
 
             Settings settings_;
@@ -829,12 +844,12 @@ namespace e3 {
                 EXPECT_EQ(kPolyphonic, sine->voicingType_);
                 EXPECT_EQ(kPolyphonic, adsr->voicingType_);
 
-                EXPECT_EQ(1, master->getInPorts().size());
-                EXPECT_EQ(2, input->getOutPorts().size());
-                EXPECT_EQ(2, sine->getInPorts().size());
-                EXPECT_EQ(1, sine->getOutPorts().size());
-                EXPECT_EQ(1, adsr->getInPorts().size());
-                EXPECT_EQ(1, adsr->getOutPorts().size());
+                EXPECT_EQ(1, master->inports_.size());
+                EXPECT_EQ(2, input->outports_.size());
+                EXPECT_EQ(2, sine->inports_.size());
+                EXPECT_EQ(1, sine->outports_.size());
+                EXPECT_EQ(1, adsr->inports_.size());
+                EXPECT_EQ(1, adsr->outports_.size());
 
                 EXPECT_EQ("Master", master->label_);
                 EXPECT_EQ("Input", input->label_);
@@ -957,7 +972,7 @@ namespace e3 {
             EXPECT_EQ(hash, instrument->hash_);
         }
 
-        TEST_F(BankTest, connect_modules)
+        TEST_F(BankTest, compile)
         {
             bank_.open(testBank_valid_filename);
             ScopedPointer<Instrument> instrument = bank_.loadInstrument();

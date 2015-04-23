@@ -11,17 +11,31 @@ namespace e3 {
     uint16_t SineOscil::tableSize_ = 2048;
 
 
-    SineOscil::SineOscil() : Module(kModuleSineOscil)
+    SineOscil::SineOscil() : Module(
+        kModuleSineOscil,
+        "Sine",
+        kPolyphonic,
+        kProcessAudio)
     {
         makeWaveTable();
-    }
 
+        addOutport(0, &audioOutport_);
+        addInport(0, &fmInport_);
+        addInport(1, &amInport_);
+        
+        Parameter paramFreq(kParamFrequency, "Frequency", kControlHidden);
+        parameters_.add(paramFreq);
 
-    void SineOscil::initPorts()
-    {
-        outPorts_.push_back(&audioOutPort_);
-        inPorts_.push_back(&fmInputPort_);
-        inPorts_.push_back(&amInputPort_);
+        Parameter paramAmp(kParamAmplitude, "Amplitude", kControlHidden);
+        parameters_.add(paramAmp);
+
+        Parameter paramTune(kParamTuning, "Tune", kControlBiSlider);
+        paramTune.valueShaper_ = { -48, 48, 96 };
+        parameters_.add(paramTune);
+
+        Parameter paramFinetune(kParamFinetuning, "Finetune", kControlBiSlider);
+        paramFinetune.valueShaper_ = { -1, 1, 200 };
+        parameters_.add(paramFinetune);
     }
 
 
@@ -36,8 +50,8 @@ namespace e3 {
 
     void SineOscil::updatePorts()
     {
-        bool fm = fmInputPort_.isConnected();
-        bool am = amInputPort_.isConnected();
+        bool fm = fmInport_.isConnected();
+        bool am = amInport_.isConnected();
 
         if (fm == false && am == false) {
             processFunction_ = static_cast< ProcessFunctionPointer >(&SineOscil::processAudio);
@@ -56,12 +70,14 @@ namespace e3 {
     }
 
 
-    void SineOscil::updateInPorts()
+    void SineOscil::updateInports()
     {
-        fmInputPointer_ = fmInputPort_.setNumVoices( numVoices_ );
-        amInputPointer_ = amInputPort_.setNumVoices( numVoices_ );
+        fmInport_.setNumVoices( numVoices_ );
+        amInport_.setNumVoices( numVoices_ );
+        fmInportPointer_ = fmInport_.getBuffer();
+        amInportPointer_ = amInport_.getBuffer();
     }
-
+    
 
     void SineOscil::setSampleRate(double sampleRate)
     {
@@ -167,7 +183,7 @@ namespace e3 {
             tick += amplitude_[v] * frac * ( table_[index + 1] - tick );
 
             phaseIndex_[v] = pos + increment_[v];                    
-            audioOutPort_.putAudio( tick, v );
+            audioOutport_.putValue( tick, v );
         }
     }
 
@@ -184,8 +200,8 @@ namespace e3 {
             v   = mono_ ? 0 : polyphony_->soundingVoices_[i];
             pos = phaseIndex_[v];
             
-            pos += fmInputPointer_[v];							// FM
-            fmInputPointer_[v] = 0.f;
+            pos += fmInportPointer_[v];							// FM
+            fmInportPointer_[v] = 0.f;
             
             while( pos < 0.0 ) pos += tableSize_;         // Check limits of table address
             while( pos >= tableSize_ ) pos -= tableSize_;
@@ -196,7 +212,7 @@ namespace e3 {
             tick += amplitude_[v] * frac * ( table_[index + 1] - tick );
 
             phaseIndex_[v] = pos + increment_[v]; 
-            audioOutPort_.putAudio( tick, v );
+            audioOutport_.putValue( tick, v );
         }
     }
 
@@ -220,11 +236,11 @@ namespace e3 {
             frac  = pos - index;
             tick  = table_[index];
             tick += frac * ( table_[index + 1] - tick );
-            tick *= amplitude_[v] + amInputPointer_[v];
-            amInputPointer_[v] = 0;
+            tick *= amplitude_[v] + amInportPointer_[v];
+            amInportPointer_[v] = 0;
 
             phaseIndex_[v] = pos + increment_[v];                     // table position, which can be negative.
-            audioOutPort_.putAudio( tick, v );
+            audioOutport_.putValue( tick, v );
         }
     }
 
@@ -241,8 +257,8 @@ namespace e3 {
             v = mono_ ? 0 : polyphony_->soundingVoices_[i];
             pos = phaseIndex_[v];
 
-            pos += fmInputPointer_[v];                         // FM
-            fmInputPointer_[v] = 0.f;
+            pos += fmInportPointer_[v];                         // FM
+            fmInportPointer_[v] = 0.f;
 
             while (pos < 0.0) pos += tableSize_;         // Check limits of table address
             while (pos >= tableSize_) pos -= tableSize_;
@@ -251,11 +267,11 @@ namespace e3 {
             frac = pos - index;
             tick = table_[index];
             tick += frac * (table_[index + 1] - tick);
-            tick *= amplitude_[v] + amInputPointer_[v];
-            amInputPointer_[v] = 0.f;
+            tick *= amplitude_[v] + amInportPointer_[v];
+            amInportPointer_[v] = 0.f;
 
             phaseIndex_[v] = pos + increment_[v];
-            audioOutPort_.putAudio(tick, v);
+            audioOutport_.putValue(tick, v);
         }
     }
 } // namespace e3

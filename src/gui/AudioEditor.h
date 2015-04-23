@@ -12,7 +12,6 @@
 #include <memory>
 #include "JuceHeader.h"
 #include "gui/CommandTarget.h"
-#include "gui/Style.h"
 
 
 namespace e3 {
@@ -22,7 +21,7 @@ namespace e3 {
     class EditorPanel;
     class BrowserPanel;
     class SetupPanel;
-    class Monitor;
+    class MonitorComponent;
 
 
     class AudioEditor : public AudioProcessorEditor, public CommandTarget
@@ -36,8 +35,6 @@ namespace e3 {
         void createIcon(Image& image);
 
         bool perform(const InvocationInfo& info) override;      // Implementation for ApplicationCommandTarget
-
-        ScopedPointer<Style> style_;
 
     private:
         void restoreWindowState();
@@ -60,7 +57,7 @@ namespace e3 {
         ScopedPointer<EditorPanel>  editorPanel_;
         ScopedPointer<BrowserPanel> browserPanel_;
         ScopedPointer<SetupPanel> setupPanel_;
-        ScopedPointer<Monitor> monitor_;
+        ScopedPointer<MonitorComponent> monitor_;
         ScopedPointer<ResizableCornerComponent> resizer_;
 
         ComponentBoundsConstrainer resizeLimits_;

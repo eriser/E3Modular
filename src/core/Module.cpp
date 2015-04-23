@@ -1,50 +1,35 @@
 
-#include <stdexcept>
 #include <e3_Exception.h>
 
-#include <e3_Trace.h> // TODO remove this line
-
 #include "core/GlobalHeader.h"
-#include "core/ModuleCatalog.h"
 #include "core/Polyphony.h"
-#include "modules/Master.h"
-#include "modules/MidiModules.h"
-#include "modules/Envelopes.h"
-#include "modules/SineOscil.h"
-#include "modules/Delay.h"
 #include "core/Module.h"
 
 
 
 namespace e3 {
 
-    Module::Module(ModuleType type) : 
-        ModuleModel(ModuleCatalog::instance().getModuleModel(type))
-    {
-        mono_ = (voicingType_ == kMonophonic);
-    }
+    Module::Module(
+        ModuleType moduleType,
+        const std::string& label,
+        VoicingType voicingType,
+        ProcessingType processingType,
+        ModuleStyle style)
+        :
+        label_(label),
+        moduleType_(moduleType),
+        voicingType_(voicingType),
+        processingType_(processingType),
+        style_(style),
+        mono_(voicingType_ == kMonophonic)
+    {}
 
 
     Module::~Module()
     {
+        outports_.clear();
+        inports_.clear();
         reset();
-    }
-
-
-    Module* Module::createModule(ModuleType type)
-    {
-        switch (type)
-        {
-        case kModuleMaster:	   return new Master();
-        case kModuleMidiGate:  return new MidiGate();
-        case kModuleMidiPitch: return new MidiPitch();
-        case kModuleMidiInput: return new MidiInput();
-        case kModuleSineOscil: return new SineOscil();
-        case kModuleAdsrEnv:   return new ADSREnv();
-        case kModuleDelay:	   return new Delay();
-
-        default: THROW(std::domain_error, "module type %d does not exist", type);
-        }
     }
 
 
@@ -58,8 +43,6 @@ namespace e3 {
         ASSERT(sampleRate_ > 0);
         ASSERT(numVoices_ > 0);
 
-        initPorts();
-        initProcess();
         initVoices();
         initParameters();
         initSignals();
@@ -72,7 +55,7 @@ namespace e3 {
     void Module::reset()
     {
         resetSignals();
-        resetPorts();
+        disconnectPorts();
         resetData();
         resetParameters();
 
@@ -83,10 +66,10 @@ namespace e3 {
     }
 
 
-    void Module::resetPorts()
+    void Module::disconnectPorts()
     {
-        inPorts_.clear();
-        outPorts_.clear();
+        outports_.disconnect();
+        inports_.disconnect();
     }
 
 
@@ -103,23 +86,23 @@ namespace e3 {
 
     void Module::updatePorts()
     {
-        updateInPorts();
-        updateOutPorts();
+        updateInports();
+        updateOutports();
     }
 
 
-    void Module::updateInPorts()
+    void Module::updateInports()
     {
-        for (uint16_t i = 0; i < inPorts_.size(); i++) {
-            inPorts_[i]->setNumVoices(numVoices_);
+        for (uint16_t i = 0; i < inports_.size(); i++) {
+            inports_[i]->setNumVoices(numVoices_);
         }
     }
 
 
-    void Module::updateOutPorts()
+    void Module::updateOutports()
     {
-        for (uint16_t i = 0; i< outPorts_.size(); i++) {
-            outPorts_[i]->setNumVoices(numVoices_);
+        for (uint16_t i = 0; i< outports_.size(); i++) {
+            outports_[i]->setNumVoices(numVoices_);
         }
     }
 
@@ -147,6 +130,38 @@ namespace e3 {
     }
 
 
+    const Parameter& Module::getParameter(uint16_t parameterId) const
+    {
+        return parameters_.at(parameterId);
+    }
+
+
+    void Module::addLink(Link& link)
+    {
+        if (removedLinks_.contains(link))
+            removedLinks_.remove(link);
+
+        link.rightModule_ = id_;
+        links_.push_back(link);
+    }
+
+
+    void Module::removeLink(const Link& link)
+    {
+        links_.remove(link);
+
+        if (removedLinks_.contains(link)) {
+            removedLinks_.remove(link);
+        }
+        removedLinks_.push_back(link);
+    }
+
+
+    Link& Module::getLink(uint16_t index)
+    {
+        return links_.at(index);
+    }
+
     void Module::onMidiController(int, int)  {}
 
     
@@ -162,31 +177,50 @@ namespace e3 {
     }
 
 
-    OutPort* Module::getOutPort(uint16_t portId)
+    void Module::addInport(uint16_t id, Inport* port)
     {
-        return portId < outPorts_.size() ? outPorts_.at(portId) : nullptr;
+        inports_.insert(inports_.begin() + id, port);
     }
 
 
-    double* Module::connect(uint16_t portId)
+    void Module::addOutport(uint16_t id, Outport* port)
     {
-        VERIFY(portId >= 0 && portId < inPorts_.size());
+        outports_.insert(outports_.begin() + id, port);
+    }
+
+
+    Outport* Module::getOutport(uint16_t portId)
+    {
+        return portId < outports_.size() ? outports_.at(portId) : nullptr;
+    }
+
+    
+    Inport* Module::getInport(uint16_t portId)
+    {
+        return portId < inports_.size() ? inports_.at(portId) : nullptr;
+    }
+
+
+    double* Module::connectTargetWithSource(uint16_t portId)
+    {
+        VERIFY(portId >= 0 && portId < inports_.size());
         VERIFY(numVoices_ > 0);
 
-        AudioInPort* port = inPorts_.at(portId);
-        double* ptr = port->connect();
+        AudioInport* inport = dynamic_cast<AudioInport*>(inports_.at(portId));
+        inport->connect();
 
         //checkPorts();
-        return ptr;
+        return inport->getBuffer();
     }
 
 
-    void Module::disconnect(uint16_t portId)
+    void Module::disconnectTargetFromSource(uint16_t portId)
     {
-        VERIFY(portId >= 0 && portId < inPorts_.size());
+        VERIFY(portId >= 0 && portId < inports_.size());
 
-        AudioInPort* port = inPorts_.at(portId);
-        port->disconnect();
+        AudioInport* inport = dynamic_cast<AudioInport*>(inports_.at(portId));
+        inport->disconnect();
+
         updatePorts();
     }
 
@@ -197,22 +231,22 @@ namespace e3 {
 
         if (target)
         {
-            OutPort* port = getOutPort(link->rightPort_);
+            Outport* port = getOutport(link->rightPort_);
             ASSERT(port);
 
             if (port)
             {
-                PortAdapterType adapter = chooseAdapter(target->voicingType_);
+                VoiceAdapterType adapter = selectVoiceAdapter(target->voicingType_);
                 port->connect(link, target, adapter);
             }
         }
     }
 
 
-    PortAdapterType Module::chooseAdapter(VoicingType otherVoicingType) const
+    VoiceAdapterType Module::selectVoiceAdapter(VoicingType otherVoicingType) const
     {
-        return voicingType_ == otherVoicingType ? kAdapterNone :
-            voicingType_ == kMonophonic ? kAdapterMonoToPoly : kAdapterPolyToMono;
+        return (voicingType_ == otherVoicingType) ? kAdapterNone :
+            (voicingType_ == kMonophonic) ? kAdapterMonoToPoly : kAdapterPolyToMono;
     }
 
 

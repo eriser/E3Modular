@@ -19,7 +19,6 @@ namespace e3 {
         ~AudioEngine();
 
         Processor* getProcessor() const;
-        //Settings* getSettings();
         AudioDeviceManager* getDeviceManager()  { return &deviceManager_; }
 
         void startPlaying();

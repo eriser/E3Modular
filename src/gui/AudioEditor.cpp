@@ -5,12 +5,13 @@
 #include "core/Settings.h"
 #include "core/Processor.h"
 #include "core/Polyphony.h"
+#include "gui/Style.h"
 #include "gui/Resources.h"
 #include "gui/EditorPanel.h"
 #include "gui/BrowserPanel.h"
 #include "gui/SetupPanel.h"
 #include "gui/TabComponent.h"
-#include "gui/Monitor.h"
+#include "gui/MonitorComponent.h"
 
 #include "gui/AudioEditor.h"
 
@@ -29,20 +30,19 @@ namespace e3 {
         addKeyListener(commandManager->getKeyMappings());
         setWantsKeyboardFocus(true);
 
-        XmlElement* styleXml = processor_->getSettings()->getStyle();
-        style_ = new Style(styleXml);
-        setLookAndFeel(style_);
+        setLookAndFeel(Settings::getInstance().getStyle());
 
-        processor_->getPolyphony()->monitorUpdateSignal.Connect(monitor_.get(), &Monitor::monitor);
+        processor_->getPolyphony()->monitorUpdateSignal.Connect(monitor_.get(), &MonitorComponent::monitor);
         browserPanel_->updateContents(processor_->getBankXml());
     }
 
 
     AudioEditor::~AudioEditor()
     {
-        //processor_->getSettings()->store();
-        processor_->getPolyphony()->monitorUpdateSignal.Disconnect(monitor_.get(), &Monitor::monitor);
+        processor_->getPolyphony()->monitorUpdateSignal.Disconnect(monitor_.get(), &MonitorComponent::monitor);
         removeKeyListener(getCommandManager()->getKeyMappings());
+
+        Settings::getInstance().store();
     }
 
 
@@ -66,7 +66,7 @@ namespace e3 {
         monitor_->setBounds(r);
 
         std::string bounds = getScreenBounds().toString().toStdString();
-        processor_->getSettings()->setWindowState(bounds, "Plugin");
+        Settings::getInstance().setWindowState(bounds, "Plugin");
     }
 
 
@@ -99,7 +99,7 @@ namespace e3 {
     void AudioEditor::restoreWindowState()
     {
         std::string context     = processor_->isPlugin() ? "Plugin" : "Standalone";
-        std::string windowState = processor_->getSettings()->getWindowState(context);
+        std::string windowState = Settings::getInstance().getWindowState(context);
 
         StringArray tokens;
         tokens.addTokens(StringRef(windowState), false);
@@ -136,7 +136,7 @@ namespace e3 {
         addAndMakeVisible(tabPanel_);
         tabPanel_->setCurrentTabIndex(kBrowserPanel);
 
-        monitor_ = new Monitor();
+        monitor_ = new MonitorComponent();
         addAndMakeVisible(monitor_);
 
         if (processor_->isPlugin()) 

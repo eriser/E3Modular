@@ -19,10 +19,10 @@ namespace e3 {
     public:
         PortComponent(const Rectangle<int>& bounds, PortModel* model, PortType portType, ModuleComponent* owner);
 
-        void mouseEnter(const MouseEvent &e) override;
-        void mouseExit(const MouseEvent  &e)  override;
-        void mouseDown(const MouseEvent  &e) override;
-        void mouseMove(const MouseEvent  &e) override;
+        void mouseEnter(const MouseEvent& e) override;
+        void mouseExit(const MouseEvent& e)  override;
+        void mouseDown(const MouseEvent& e) override;
+        void mouseMove(const MouseEvent& e) override;
 
         void paint(Graphics& g) override;
 
@@ -31,7 +31,7 @@ namespace e3 {
         void endDocking(Point<int>& pos);
         void connect(Point<int>& pos, const Link& link);
         void disconnect(const Link& link);
-        void getDockPosition(Point<int>& pos);
+        void getDockingPosition(Point<int> pos);
 
 
         enum State {
@@ -55,7 +55,7 @@ namespace e3 {
         bool testHover(const Point<int>& pos);
         bool setHover(const Point<int>& pos);
 
-        Rectangle<int> rcText_, rcSquare_, rcHover_, rcIndicator_, rcInvalid_;
+        Rectangle<int> rcText_, rcSquare_, rcHover_, rcIndicator_, pcPaint_;
     };
 
 } // namespace e3

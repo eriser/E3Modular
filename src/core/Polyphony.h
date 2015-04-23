@@ -7,7 +7,7 @@
 #include "core/GlobalHeader.h"
 #include <e3_Buffer.h>
 #include "core/Voice.h"
-#include "core/MonitorCore.h"
+#include "core/MonitorUpdater.h"
 
 
 namespace e3 {
