@@ -5,6 +5,7 @@
 
 #include "core/GlobalHeader.h"
 #include "core/Module.h"
+#include "core/Settings.h"
 #include "gui/Style.h"
 #include "gui/WirePanel.h"
 //#include "gui/PortComponent.h"
@@ -44,6 +45,10 @@ namespace e3 {
 
     void ModuleComponent::resized()
     {
+        if (label_) {
+            //int textHeight = getTextHeight(module_->label_, label_->getFont());
+            label_->setBounds(0, 0, getWidth(), getHeight());
+        }
         //dragConstrainer_.setMinimumOnscreenAmounts(getHeight(), getWidth(), getHeight(), getWidth());
         dragConstrainer_.setMinimumOnscreenAmounts(getHeight(), getWidth(), 0, 0);
     }
@@ -130,19 +135,19 @@ namespace e3 {
     //}
 
 
-    //int ModuleComponent::getTextBlockHeight(const std::string& s, Font& font)
-    //{
-    //    //size_t len = s.length();
-    //    //int lines = 1;
+    int ModuleComponent::getTextHeight(const std::string& s, const Font& font)
+    {
+        //size_t len = s.length();
+        //int lines = 1;
 
-    //    //for (size_t i = 0; i < len; i++)
-    //    //{
-    //    //    if (s[i] == '\n')
-    //    //        ++lines;
-    //    //}
-    //    size_t lines = std::count(s.begin(), s.end(), '\n');
-    //    return (int)font.getHeight() * lines;
-    //}
+        //for (size_t i = 0; i < len; i++)
+        //{
+        //    if (s[i] == '\n')
+        //        ++lines;
+        //}
+        size_t lines = std::count(s.begin(), s.end(), '\n') + 1;
+        return (int)font.getHeight() * lines;
+    }
 
 
     void ModuleComponent::createComponents()
@@ -152,13 +157,15 @@ namespace e3 {
             Font font(10, Font::bold);
             label_ = new Label(module_->label_, module_->label_);
             label_->setJustificationType(Justification::centred);
+            label_->setInterceptsMouseClicks(false, false);
+            label_->setColour(Label::textColourId, Settings::getInstance().getStyle()->findColour(Style::kModuleText1ColourId));
             addAndMakeVisible(label_);
         }
 
         calculateSize();
 
         Rectangle<int> bounds = getLocalBounds();
-        int width  = bounds.getWidth();
+        int width = bounds.getWidth();
         //int height = bounds.getHeight();
         int top    = portHeight_ / 2;
         int offset = top;

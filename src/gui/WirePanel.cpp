@@ -15,7 +15,7 @@ namespace e3 {
 
     void WirePanel::paint(Graphics& g)
     {
-        Colour bkgndCol = findColour(Style::kContentBackground2ColourId);
+        Colour bkgndCol = findColour(Style::kContentBackground1ColourId);
         g.fillAll(bkgndCol);
     }
 

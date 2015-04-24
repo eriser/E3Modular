@@ -60,7 +60,7 @@ namespace e3 {
 
         //void setPortVisibility();
         //void deleteWire(const Link& link);
-        ////int getTextBlockHeight(const std::string& s, Font& font);
+        int getTextHeight(const std::string& s, const Font& font);
 
 
         WirePanel* owner_;
