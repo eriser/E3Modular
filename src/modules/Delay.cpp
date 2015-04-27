@@ -10,8 +10,8 @@ namespace e3 {
         kPolyphonic,
         kProcessAudio)
     {
-        addInport(0, &audioInport_);
-        addOutport(0, &audioOutport_);
+        addInport(0, "In", &audioInport_);
+        addOutport(0, "Out", &audioOutport_);
 
         processFunction_ = static_cast< ProcessFunctionPointer >(&Delay::processAudio);
 

@@ -7,25 +7,25 @@
 
 namespace e3 {
 
-    Wire::Wire(const Point<float>& first, const Point<float>& last)
+    Wire::Wire(const Point<int>& first, const Point<int>& last)
     {
         addPoint(first);
         addPoint(last);
     }
 
 
-    Wire::Wire(Wire* other)
-    {
-        ASSERT(other);
-        selected_ = other->selected_;
+    //Wire::Wire(Wire* other)
+    //{
+    //    ASSERT(other);
+    //    selected_ = other->selected_;
 
-        for (uint16_t i = 0; i < other->size(); i++) {
-            push_back(other->at(i));
-        }
-    }
+    //    for (size_t i = 0; i < other->size(); i++) {
+    //        push_back(other->at(i));
+    //    }
+    //}
 
 
-    void Wire::addPoint(const Point<float>& p)
+    void Wire::addPoint(const Point<int>& p)
     {
         push_back(p);
     }
@@ -38,78 +38,65 @@ namespace e3 {
         }
 
         Style* style = Settings::getInstance().getStyle();
-        Colour c = selected_ ? style->findColour(Style::kWire1ColourId) : style->findColour(Style::kWire2ColourId);
+        Colour c = selected_ ? style->findColour(Style::kWire2ColourId) : style->findColour(Style::kWire1ColourId);
         g.setColour(c);
-        g.drawLine(Line<float>(front(), back()), 1);
+        g.drawLine(Line<float>(front().toFloat(), back().toFloat()), 1);
     }
 
 
-    void Wire::getBoundingRect(Rectangle<float>& r)
+    void Wire::getBoundingRect(Rectangle<int>& r)
     {
         if (empty() == false)
         {
-            r = Rectangle<float>(front(), back());
+            r = Rectangle<int>(front(), back());
         }
         else ASSERT(false);
     }
 
 
-    //bool Wire::segmentIntersectsRectangle(const Rectangle<float>& r, const Point<float>& a1, const Point<float>& a2)
-    //{
-    //    // Find min and max X for the segment
-    //    float minX = jmin(a1.x, a2.x);
-    //    float maxX = jmax(a1.x, a2.x);
-
-    //    // Find the intersection of the segment's and rectangle's x-projections
-    //    if (maxX > r.getRight()) {
-    //        maxX = r.getRight();
-    //    }
-    //    if (minX < r.getX()) {
-    //        minX = r.getX();
-    //    }
-
-    //    // If their projections do not intersect return false
-    //    if (minX > maxX)  {
-    //        return false;
-    //    }
-
-    //    // Find corresponding min and max Y for min and max X we found before
-    //    float minY = a1.y;
-    //    float maxY = a2.y;
-
-    //    // TODO: try juce::Point::DotProduct
-    //    float dx = a2.x - a1.x;
-    //    if (abs(dx) > 0.0000001)
-    //    {
-    //        float a = (a2.y - a1.y) / dx;
-    //        float b = a1.y - a * a1.x;
-    //        minY = a * minX + b;
-    //        maxY = a * maxX + b;
-    //    }
-    //    if (minY > maxY) {
-    //        float tmp = maxY;
-    //        maxY = minY;
-    //        minY = tmp;
-    //    }
-    //    // Find the intersection of the segment's and rectangle's y-projections
-    //    if (maxY > r.getBottom()) {
-    //        maxY = r.getBottom();
-    //    }
-    //    if (minY < r.getY()) {
-    //        minY = r.getY();
-    //    }
-    //    if (minY > maxY) { // If Y-projections do not intersect return false
-    //        return false;
-    //    }
-    //    return true;
-    //}
-
-
-    bool Wire::hitTest(const Rectangle<float>& r)
+    bool Wire::segmentIntersectsRectangle(const Rectangle<int>& r, const Point<int>& a1, const Point<int>& a2)
     {
-        //selected_ = segmentIntersectsRectangle(r, front(), back());
-        selected_ = r.intersects(Line<float>(front(), back()));
-        return selected_;
+        // Find min and max X for the segment
+        double minX = std::min<double>(a1.x, a2.x);
+        double maxX = std::max<double>(a1.x, a2.x);
+
+        // Find the intersection of the segment's and rectangle's x-projections
+        maxX = std::min<double>(maxX, r.getRight());
+        minX = std::max<double>(minX, r.getX());
+
+        // If their projections do not intersect return false
+        if (minX > maxX)  {
+            return false;
+        }
+
+        // Find corresponding min and max Y for min and max X we found before
+        double minY = a1.y;
+        double maxY = a2.y;
+
+        // TODO: try juce::Point::DotProduct
+        double dx = a2.x - a1.x;
+        if (abs(dx) > 0.0000001)
+        {
+            double a = (a2.y - a1.y) / dx;
+            double b = a1.y - a * a1.x;
+            minY = a * minX + b;
+            maxY = a * maxX + b;
+        }
+        if (minY > maxY) {
+            std::swap(minY, maxY);
+        }
+        // Find the intersection of the segment's and rectangle's y-projections
+        maxY = std::min<double>(maxY, r.getBottom());
+        minY = std::max<double>(minY, r.getY());
+
+        return minY <= maxY;        // If Y-projections do not intersect return false
+    }
+
+
+    bool Wire::hitTest(const Rectangle<int>& area)
+    {
+        //selected_ = area.intersects(Line<int>(front(), back()));
+        return segmentIntersectsRectangle(area, front(), back());
     }
 
 } // namespace e3

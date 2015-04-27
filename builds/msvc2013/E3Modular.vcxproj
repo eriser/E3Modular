@@ -463,16 +463,18 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\..\src\gui\ModulePanel.h" />
     <ClInclude Include="..\..\src\gui\ParameterPanel.h" />
     <ClInclude Include="..\..\src\gui\PortComponent.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\PreferencesPanel.h" />
+    <ClInclude Include="..\..\src\gui\Selection.h" />
     <ClInclude Include="..\..\src\gui\SetupPanel.h" />
     <ClInclude Include="..\..\src\gui\TabComponent.h" />
     <ClInclude Include="..\..\src\gui\TableComponent.h" />
@@ -481,7 +483,6 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\gui\Style.h" />
     <ClInclude Include="..\..\src\gui\EditorPanel.h" />
     <ClInclude Include="..\..\src\gui\Wire.h" />
-    <ClInclude Include="..\..\src\gui\WirePanel.h" />
     <ClInclude Include="..\..\src\modules\Delay.h" />
     <ClInclude Include="..\..\src\modules\Envelopes.h" />
     <ClInclude Include="..\..\src\modules\Master.h" />
@@ -546,16 +547,18 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\src\gui\ModulePanel.cpp" />
     <ClCompile Include="..\..\src\gui\ParameterPanel.cpp" />
     <ClCompile Include="..\..\src\gui\PortComponent.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UT_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\PreferencesPanel.cpp" />
+    <ClCompile Include="..\..\src\gui\Selection.cpp" />
     <ClCompile Include="..\..\src\gui\SetupPanel.cpp" />
     <ClCompile Include="..\..\src\gui\TabComponent.cpp" />
     <ClCompile Include="..\..\src\gui\TableComponent.cpp" />
@@ -563,7 +566,6 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\gui\Resources.cpp" />
     <ClCompile Include="..\..\src\gui\Style.cpp" />
     <ClCompile Include="..\..\src\gui\Wire.cpp" />
-    <ClCompile Include="..\..\src\gui\WirePanel.cpp" />
     <ClCompile Include="..\..\src\modules\Delay.cpp" />
     <ClCompile Include="..\..\src\modules\Envelopes.cpp" />
     <ClCompile Include="..\..\src\modules\Master.cpp" />

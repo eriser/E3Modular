@@ -41,37 +41,37 @@ namespace e3 {
 
         TEST_F(WireTest, getBoundingRect)
         {
-            Rectangle<float> r1(10, 10, 100, 100);
+            Rectangle<int> r1(10, 10, 100, 100);
             Wire w(r1.getTopRight(), r1.getBottomLeft());
 
-            Rectangle<float> r2;
+            Rectangle<int> r2;
             w.getBoundingRect(r2);
             EXPECT_EQ(r1, r2);
 
-            Rectangle<float> r3(0, 0, 90, 90);
+            Rectangle<int> r3(0, 0, 90, 90);
             EXPECT_NE(r2, r3);
         }
 
         TEST_F(WireTest, hitTest)
         {
-            Rectangle<float> r(10, 10, 100, 100);
+            Rectangle<int> r(10, 10, 100, 100);
 
             Wire w1(r.getTopRight(), r.getBottomLeft());
             EXPECT_TRUE(w1.hitTest(r));
 
-            Wire w2(Point<float>(0, 20), Point<float>(20, 0));
+            Wire w2(Point<int>(0, 20), Point<int>(20, 0));
             EXPECT_TRUE(w2.hitTest(r));
 
-            Wire w3(Point<float>(0, 10), Point<float>(10, 0));
+            Wire w3(Point<int>(0, 10), Point<int>(10, 0));
             EXPECT_FALSE(w3.hitTest(r));
 
-            Wire w4(Point<float>(0, 10), Point<float>(10, 10));
+            Wire w4(Point<int>(0, 10), Point<int>(10, 10));
             EXPECT_TRUE(w4.hitTest(r));
 
-            Wire w5(Point<float>(0, 9), Point<float>(100, 9));
+            Wire w5(Point<int>(0, 9), Point<int>(100, 9));
             EXPECT_FALSE(w5.hitTest(r));
 
-            Wire w6(Point<float>(0, 10), Point<float>(9, 10));
+            Wire w6(Point<int>(0, 10), Point<int>(9, 10));
             EXPECT_FALSE(w6.hitTest(r));
         }
 

@@ -12,8 +12,9 @@ namespace e3 {
         kPolyphonic,
         (ProcessingType)(kProcessAudio | kProcessControl))
     {
-        addInport(0, &audioInport_);
-        addOutport(0, &audioOutport_);
+        addInport(0, "In", &audioInport_);
+        addInport(1, "Gate", &gateInport_);
+        addOutport(0, "Out", &audioOutport_);
 
         processFunction_ = static_cast< ProcessFunctionPointer >(&ADSREnv::processAudio);
         

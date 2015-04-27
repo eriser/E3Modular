@@ -64,6 +64,7 @@ namespace e3 {
     class Port
     {
     public:
+        Port(PortType type) : type_(type)  {}
         virtual ~Port() {}
 
         virtual void connect() {}
@@ -75,7 +76,17 @@ namespace e3 {
 
         virtual void setNumVoices(uint16_t numVoices);
 
+        void setId(int id)                      { id_ = id; }
+        int getId()                             { return id_;  }
+
+        PortType getType()                      { return type_; }
+        const std::string& getLabel()           { return label_; }
+        void setLabel(const std::string& label) { label_ = label; }
+
+    protected:
+        int id_                  = -1;
         uint16_t numVoices_      = 0;
+        PortType type_           = kUndefined;
         ControlType controlType_ = kControlHidden;
         std::string label_;
     };
@@ -89,6 +100,8 @@ namespace e3 {
     class Outport : public Port
     {
     public:
+        Outport() : Port(kOutport) {}
+
         void disconnectAll() override;
         bool isConnected() override;
 
@@ -120,7 +133,10 @@ namespace e3 {
     //------------------------------------------------------------------------
 
     class Inport : public Port
-    {};
+    {
+    public: 
+        Inport() : Port(kInport)  {}
+    };
 
 
 
@@ -207,7 +223,7 @@ namespace e3 {
         void putEvent(double value, uint16_t voice);
 
     protected:
-        std::vector< EventInport > inports_;
+        std::vector< EventInport* > inports_;
     };
 
 

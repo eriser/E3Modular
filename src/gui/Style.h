@@ -53,9 +53,9 @@ namespace e3 {
             kModulePort2ColourId             = 0x2000053,
             kModuleText1ColourId             = 0x2000054,
             kModuleText2ColourId             = 0x2000055,
-            kModuleBorder1ColourId           = 0x2000056,
-            kModuleBorder2ColourId           = 0x2000057,
-            kModuleBorder3ColourId           = 0x2000058,
+            kModuleBorderNormalColourId      = 0x2000056,
+            kModuleBorderSelectedColourId    = 0x2000057,
+            kModuleBorderFocusedColourId     = 0x2000058,
             kWire1ColourId                   = 0x2000059,
             kWire2ColourId                   = 0x200005a,
         };

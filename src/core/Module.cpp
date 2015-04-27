@@ -177,14 +177,18 @@ namespace e3 {
     }
 
 
-    void Module::addInport(uint16_t id, Inport* port)
+    void Module::addInport(int id, const std::string& label, Inport* port)
     {
+        port->setId(id);
+        port->setLabel(label);
         inports_.insert(inports_.begin() + id, port);
     }
 
 
-    void Module::addOutport(uint16_t id, Outport* port)
+    void Module::addOutport(int id, const std::string& label, Outport* port)
     {
+        port->setId(id);
+        port->setLabel(label);
         outports_.insert(outports_.begin() + id, port);
     }
 

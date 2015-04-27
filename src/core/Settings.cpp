@@ -41,10 +41,13 @@ namespace e3 {
     }
 
 
-    void Settings::store()
+    bool Settings::store()
     {
-        root_->writeToFile(file_, String::empty);
-        needsStore_ = false;
+		if (file_ == File() || file_.isDirectory() || !file_.getParentDirectory().createDirectory())
+			return false;
+		
+		needsStore_ = false;
+		return root_->writeToFile(file_, String::empty);
     }
 
 

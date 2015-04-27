@@ -15,7 +15,7 @@ namespace e3 {
         static Settings& getInstance();
 
         void load();
-        void store();
+        bool store();
         void storeIfNeeded();
 
         XmlElement* getRoot() { return root_; }
@@ -68,16 +68,35 @@ namespace e3 {
 
         std::string defaultStyleXml_ =
             "<Style name = 'Default'>"
-            "<Color name = 'background' argb = 'ff5f5f60' />"
-            "<Color name = 'contentBackground1' argb = 'ffbebdbb' />"
-            "<Color name = 'contentBackground2' argb = 'ff808080' />"
-            "<Color name = 'darkText' argb = 'ffffffff' />"
-            "<Color name = 'lightText' argb = 'ffbdbcba' />"
-            "<Color name = 'highlight' argb = 'ffcf732f' />"
-            "<Color name = 'buttonOffBackground' argb = 'ff3e4042' />"
-            "<Color name = 'buttonOnBackground' argb = 'ffd08930' />"
-            "<Color name = 'buttonOffText' argb = 'ffbdbcba' />"
-            "<Color name = 'buttonOnText' argb = 'ff000000' />"
-            "</Style>";
+            "<Color argb = 'ff5f5f60' name = 'background' / >"
+            "<Color argb = 'ffbebdbb' name = 'contentBackground1' / >"
+            "<Color argb = 'ff808080' name = 'contentBackground2' / >"
+            "<Color argb = 'ff000000' name = 'darkText' / >"
+            "<Color argb = 'ffbdbcba' name = 'lightText' / >"
+            "<Color argb = 'ffd08930' name = 'highlight' / >"
+            "<Color argb = 'ff3e4042' name = 'buttonOffBackground' / >"
+            "<Color argb = 'ffd08930' name = 'buttonOnBackground' / >"
+            "<Color argb = 'ffbdbcba' name = 'buttonOffText' / >"
+            "<Color argb = 'ff000000' name = 'buttonOnText' / >"
+            "<Color argb = 'cc8e8e8e' name = 'module' / >"
+            "<Color argb = 'ff4d5f53' name = 'moduleMono' / >"
+            "<Color argb = 'ff666666' name = 'modulePort1' / >"
+            "<Color argb = 'ffd08930' name = 'modulePort2' / >"
+            "<Color argb = 'ff555555' name = 'moduleText1' / >"
+            "<Color argb = 'ffA21D08' name = 'moduleText2' / >"
+            "<Color argb = 'ff6f6f6f' name = 'moduleBorderNormal' / >"
+            "<Color argb = 'ffd08930' name = 'moduleBorderSelected' / >"
+            "<Color argb = 'ffa21d08' name = 'moduleBorderFocused' / >"
+            "<Color argb = 'ff777777' name = 'wire1' / >"
+            "<Color argb = 'ffd08930' name = 'wire2' / >"
+            "<Color argb = 'ffa21d08' name = 'master' / >"
+            "<Color argb = 'ffbebdbb' name = 'masterPort1' / >"
+            "<Color argb = 'ffcb4f3b' name = 'masterPort2' / >"
+            "<Color argb = 'ffbebdbb' name = 'masterText1' / >"
+            "<Color argb = 'ffdedede' name = 'masterText2' / >"
+            "<Color argb = 'ffa21d08' name = 'masterFrame1' / >"
+            "<Color argb = 'ffdadada' name = 'masterFrame2' / >"
+            "<Color argb = 'ffeeeeee' name = 'masterFrame3' / >"
+            "< / Style>";
     };
 } // namespace e3 

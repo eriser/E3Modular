@@ -148,9 +148,9 @@ namespace e3 {
         setColour(kModulePort2ColourId, colorMap["modulePort2"]);
         setColour(kModuleText1ColourId, colorMap["moduleText1"]);
         setColour(kModuleText2ColourId, colorMap["moduleText2"]);
-        setColour(kModuleBorder1ColourId, colorMap["moduleBorder1"]);
-        setColour(kModuleBorder2ColourId, colorMap["moduleBorder2"]);
-        setColour(kModuleBorder3ColourId, colorMap["moduleBorder3"]);
+        setColour(kModuleBorderNormalColourId, colorMap["moduleBorderNormal"]);
+        setColour(kModuleBorderSelectedColourId, colorMap["moduleBorderSelected"]);
+        setColour(kModuleBorderFocusedColourId, colorMap["moduleBorderFocused"]);
         setColour(kWire1ColourId, colorMap["wire1"]);
         setColour(kWire2ColourId, colorMap["wire2"]);
         }

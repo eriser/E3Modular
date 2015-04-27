@@ -11,7 +11,7 @@ namespace e3 {
         kMonophonic,
         kProcessAudio) 
     {
-        addInport(0, &audioInport_);
+        addInport(0, "In", &audioInport_);
         processFunction_ = static_cast< ProcessFunctionPointer >(&Master::processAudio);
        
         Parameter paramVolume(kParamVolume, "Volume", kControlSlider, 0.35);

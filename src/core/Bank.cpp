@@ -27,8 +27,10 @@ namespace e3 {
 
     void Bank::save(const std::string& path, bool saveCurrent, bool makeBackup)
     {
-        std::string p = path.empty() ? getPath() : path;
-        ASSERT(p.empty() == false);
+		std::string p = path.empty() ? getPath() : path;
+		if (hasLoaded() == false || path.empty()) {
+			return;
+		}
 
         UNUSED(saveCurrent);
         UNUSED(makeBackup);
@@ -130,6 +132,12 @@ namespace e3 {
             xml_->setAttribute("name", name);
         }
     }
+
+
+	bool Bank::hasLoaded() const
+	{
+		return xml_ != nullptr;
+	}
 
 
 

@@ -153,6 +153,7 @@ namespace e3 {
 
     void AudioEditor::onOpenBank()
     {
+        // TODO: store current ModulePanel
         FileChooser fc("Open Bank",
             File::getCurrentWorkingDirectory(),
             "*.e3mb",
@@ -164,6 +165,7 @@ namespace e3 {
             processor_->openBank(path);
             browserPanel_->updateContents(processor_->getBankXml());
             processor_->loadInstrument();
+            editorPanel_->showInstrument(processor_->getInstrument(), browserPanel_->getSelectedInstrumentXml());
         }
     }
 

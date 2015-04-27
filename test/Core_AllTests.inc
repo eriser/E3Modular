@@ -466,8 +466,8 @@ namespace e3 {
             { testModuleTypes[1], { kProcessEvent, kPolyphonic, 0, 1, 0 } },
             { testModuleTypes[2], { kProcessEvent | kProcessControl, kPolyphonic, 0, 1, 3 } },
             { testModuleTypes[3], { kProcessEvent | kProcessControl, kPolyphonic, 0, 2, 3 } },
-            { testModuleTypes[4], { kProcessAudio, kPolyphonic, 2, 1, 4 } },
-            { testModuleTypes[5], { kProcessAudio | kProcessControl, kPolyphonic, 1, 1, 6 } },
+            { testModuleTypes[4], { kProcessAudio, kPolyphonic, 3, 1, 4 } },
+            { testModuleTypes[5], { kProcessAudio | kProcessControl, kPolyphonic, 2, 1, 6 } },
             { testModuleTypes[6], { kProcessAudio, kPolyphonic, 1, 1, 3 } },
         };      
         
@@ -823,7 +823,6 @@ namespace e3 {
                 Polyphony polyphony;
                 polyphony.setNumVoices(32);
                 instrument->initModules(&polyphony, 44100);
-                //instrument->updateModules(44100, polyphony.getNumVoices());
 
                 EXPECT_EQ("instrument_0", instrument->name_);
                 EXPECT_EQ(32, instrument->numVoices_);
@@ -846,13 +845,13 @@ namespace e3 {
 
                 EXPECT_EQ(1, master->inports_.size());
                 EXPECT_EQ(2, input->outports_.size());
-                EXPECT_EQ(2, sine->inports_.size());
+                EXPECT_EQ(3, sine->inports_.size());
                 EXPECT_EQ(1, sine->outports_.size());
-                EXPECT_EQ(1, adsr->inports_.size());
+                EXPECT_EQ(2, adsr->inports_.size());
                 EXPECT_EQ(1, adsr->outports_.size());
 
                 EXPECT_EQ("Master", master->label_);
-                EXPECT_EQ("Input", input->label_);
+                EXPECT_EQ("MidiInput", input->label_);
                 EXPECT_EQ("Sine", sine->label_);
                 EXPECT_EQ("ADSR", adsr->label_);
 
@@ -936,7 +935,6 @@ namespace e3 {
             ScopedPointer<Instrument> instrument = bank_.loadInstrument(hash);
             ASSERT_NE(nullptr, instrument);
             checkInstrument(instrument);
-            //delete i;
         }
 
         TEST_F(BankTest, store_instrument)
@@ -944,6 +942,7 @@ namespace e3 {
             bank_.open(testBank_valid_filename);
             int hash = bank_.getInstrumentHash();
             ScopedPointer<Instrument> instrument = bank_.loadInstrument();
+            ASSERT_NE(nullptr, instrument);
             bank_.storeInstrument(instrument);
             EXPECT_EQ(hash, instrument->hash_);
 
@@ -960,6 +959,7 @@ namespace e3 {
             checkBank(bank_);
 
             ScopedPointer<Instrument> instrument = bank_.loadInstrument();
+            ASSERT_NE(nullptr, instrument);
             instrument->deleteModules();
             bank_.storeInstrument(instrument);
             int hash = instrument->hash_;
@@ -976,6 +976,7 @@ namespace e3 {
         {
             bank_.open(testBank_valid_filename);
             ScopedPointer<Instrument> instrument = bank_.loadInstrument();
+            ASSERT_NE(nullptr, instrument);
 
             Polyphony polyphony;
             polyphony.setNumVoices(4);

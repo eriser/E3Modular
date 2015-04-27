@@ -110,9 +110,6 @@ namespace e3 {
                 module->id_          = (int16_t)e->getIntAttribute("id");
                 module->label_       = e->getStringAttribute("label", module->label_).toStdString();
                 module->voicingType_ = (VoicingType)e->getIntAttribute("voicing", module->voicingType_);
-                //module->xpos_      = element->getIntAttribute("xpos");
-                //module->ypos_      = element->getIntAttribute("ypos");
-                //module->collapsed_ = element->getBoolAttribute("collapsed");
 
                 readParameters(e, module);
                 readLinks(e, module);

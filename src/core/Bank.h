@@ -34,6 +34,7 @@ namespace e3 {
 
         XmlElement* getXml();
         void setXml(XmlElement* e);
+		bool hasLoaded() const;
 
     protected:
         std::unique_ptr<XmlElement> xml_          = nullptr;

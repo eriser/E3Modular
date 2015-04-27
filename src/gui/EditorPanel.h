@@ -10,7 +10,7 @@ namespace e3
     class Instrument;
     //class PortComponent;
     //class ModuleComponent;
-    class WirePanel;
+    class ModulePanel;
     class ParameterPanel;
 
 
@@ -31,7 +31,7 @@ namespace e3
 
     protected:
         Viewport viewport_;
-        ScopedPointer<WirePanel> wirePanel_;
+        ScopedPointer<ModulePanel> modulePanel_;
         ScopedPointer<ParameterPanel> parameterPanel_;
         //typedef std::map< uint16_t, ModuleComponent* > ModuleComponentMap;
         //

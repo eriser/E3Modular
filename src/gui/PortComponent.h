@@ -2,37 +2,44 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 
 #include "JuceHeader.h"
-#include "core/GlobalHeader.h"
-#include "core/ModuleBase.h"
+//#include "core/GlobalHeader.h"
+
 
 namespace e3 {
 
-    class PortInfo;
-    class ModuleComponent;
+    class Port;
+    //class ModuleComponent;
 
 
     class PortComponent : public Component
     {
+        friend class ModuleComponent;
+
     public:
-        PortComponent(const Rectangle<int>& bounds, PortModel* model, PortType portType, ModuleComponent* owner);
+        PortComponent(Port* port, ModuleComponent* owner);
+
+        void resized() override;
+        void paint(Graphics& g) override;
 
         void mouseEnter(const MouseEvent& e) override;
         void mouseExit(const MouseEvent& e)  override;
         void mouseDown(const MouseEvent& e) override;
         void mouseMove(const MouseEvent& e) override;
 
-        void paint(Graphics& g) override;
+        bool hitTest(int x, int y) override;
+        Point<int> getPosition();
 
-        bool testDocking(const Point<int>& pos);
-        bool startDocking(Point<int>& pos);
-        void endDocking(Point<int>& pos);
-        void connect(Point<int>& pos, const Link& link);
-        void disconnect(const Link& link);
-        void getDockingPosition(Point<int> pos);
+        //bool testDocking(const Point<int>& pos);
+        bool startDocking();
+        void endDocking();
 
+        void connect();
+        void disconnect();
+
+        int getPortId() const           { return port_->getId(); }
+        PortType getPortType() const    { return port_->getType(); }
 
         enum State {
             kIdle      = 0,
@@ -41,21 +48,18 @@ namespace e3 {
             kConnected = 4
         };
 
-        PortModel* portModel_;
-        PortType portType_;
-        ModuleComponent* owner_;
-        Rectangle<int> bounds_;
-        uint16_t state_;
-        std::vector<Link> links_;
 
     protected:
-        void patchToPort(Point<int>& pos);
-        void portToPatch(Point<int>& pos);
+        void translateFromParent(Point<int>& pos);
+        void translateToParent(Point<int>& pos);
 
-        bool testHover(const Point<int>& pos);
-        bool setHover(const Point<int>& pos);
+        bool setHoverState(const Point<int>& pos);
 
-        Rectangle<int> rcText_, rcSquare_, rcHover_, rcIndicator_, pcPaint_;
+        Port* port_;
+        ModuleComponent* owner_;
+        uint16_t state_;
+        uint16_t numConnections_ = 0;
+        Rectangle<int> rcText_, rcSquare_, rcHover_, rcConnector_, rcBkgnd_;
     };
 
 } // namespace e3

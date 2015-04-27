@@ -59,6 +59,7 @@ namespace e3 {
 
         AudioInport audioInport_;
         AudioOutport audioOutport_;
+        EventInport gateInport_;
         double* audioInportPointer_ = nullptr;
 
         enum State {

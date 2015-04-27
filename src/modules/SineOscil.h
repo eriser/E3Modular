@@ -43,6 +43,7 @@ namespace e3 {
         double tuning_ = 1;
         double fineTuning_ = 1;
 
+        EventInport  pitchInport_;
         AudioInport  fmInport_;
         AudioInport  amInport_;
         AudioOutport audioOutport_;

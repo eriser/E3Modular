@@ -144,10 +144,13 @@
     <ClInclude Include="..\..\src\core\MonitorUpdater.h">
       <Filter>src\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\WirePanel.h">
+    <ClInclude Include="..\..\src\gui\ParameterPanel.h">
       <Filter>src\gui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\ParameterPanel.h">
+    <ClInclude Include="..\..\src\gui\ModulePanel.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\Selection.h">
       <Filter>src\gui</Filter>
     </ClInclude>
   </ItemGroup>
@@ -275,7 +278,10 @@
     <ClCompile Include="..\..\src\gui\ParameterPanel.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\WirePanel.cpp">
+    <ClCompile Include="..\..\src\gui\ModulePanel.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\Selection.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
   </ItemGroup>

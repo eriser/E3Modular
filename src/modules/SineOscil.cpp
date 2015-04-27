@@ -19,9 +19,10 @@ namespace e3 {
     {
         makeWaveTable();
 
-        addOutport(0, &audioOutport_);
-        addInport(0, &fmInport_);
-        addInport(1, &amInport_);
+        addOutport(0, "Out", &audioOutport_);
+        addInport(0, "Pitch", &pitchInport_);
+        addInport(1, "FM", &fmInport_);
+        addInport(2, "AM", &amInport_);
         
         Parameter paramFreq(kParamFrequency, "Frequency", kControlHidden);
         parameters_.add(paramFreq);

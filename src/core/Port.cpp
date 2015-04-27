@@ -215,15 +215,20 @@ namespace e3 {
 
     void EventOutport::connect(Link* link, Module* target, VoiceAdapterType adapter)
     {
-        VERIFY(target);
-        addTarget(link, adapter);
+        EventInport* inport = dynamic_cast<EventInport*>(target->getInport(link->rightPort_));
+        ASSERT(target);
+        ASSERT(inport);
 
-        EventInport inport;
-        inport.module_  = target;
-        inport.paramId_ = link->rightPort_;
+        if (target != nullptr && inport != nullptr)
+        {
+            addTarget(link, adapter);
 
-        inports_.resize(numTargets_);
-        inports_.at(numTargets_ - 1) = inport;
+            inport->module_  = target;
+            inport->paramId_ = link->rightPort_;
+
+            inports_.resize(numTargets_);
+            inports_.at(numTargets_ - 1) = inport;
+        }
     }
 
 
@@ -253,8 +258,8 @@ namespace e3 {
         {
             double modulation        = modulationBuffer_[target * numVoices_ + voice];
 
-            EventInport& inport      = inports_.at(target);
-            Module* targetModule     = inport.module_;
+            EventInport* inport      = inports_.at(target);
+            Module* targetModule     = inport->module_;
             ASSERT(targetModule);
 
             VoiceAdapterType adapter = adapterBuffer_[target];
@@ -262,48 +267,21 @@ namespace e3 {
             switch (adapter)
             {
             case kAdapterNone:
-                targetModule->setParameter(inport.paramId_, value, modulation, voice);
+                targetModule->setParameter(inport->paramId_, value, modulation, voice);
                 break;
             case kAdapterMonoToPoly:
                 for (uint16_t i = 0; i<numVoices_; i++) {
-                    targetModule->setParameter(inport.paramId_, value, modulation, i);
+                    targetModule->setParameter(inport->paramId_, value, modulation, i);
                 }
                 break;
             case kAdapterPolyToMono:
-                targetModule->setParameter(inport.paramId_, value, modulation, 0);
+                targetModule->setParameter(inport->paramId_, value, modulation, 0);
                 break;
             }
         }
     }
 
 
-    //void EventOutport::putEvent(double value)
-    //{
-    //    for (uint16_t target = 0; target<numTargets_; target++)
-    //    {
-    //        for (uint16_t voice = 0; voice<numVoices_; voice++)
-    //        {
-    //            double modulation = modulationBuffer_[target*numVoices_ + voice];
-    //            EventInport* inport = &operator[](target);
-    //            Module* targetModule = inport->module_;
-    //            ASSERT(targetModule);
-
-    //            switch (adapterBuffer_[target])
-    //            {
-    //            case kAdapterNone:
-    //            case kAdapterMonoToPoly:
-    //                targetModule->setParameter(inport->paramId_, value, modulation, voice);
-    //                break;
-    //            case kAdapterPolyToMono:
-    //                targetModule->setParameter(inport->paramId_, value, modulation, 0);
-    //                voice = numVoices_;
-    //                break;
-    //            }
-    //        }
-    //    }
-    //}
-    
-    
     //-------------------------------------------------------
     // class AudioInport
     //-------------------------------------------------------

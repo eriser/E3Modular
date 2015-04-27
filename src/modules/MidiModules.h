@@ -63,7 +63,7 @@ namespace e3 {
         double bendFactor_   = 1.0;
         int16_t bendRange_   = 2;
 
-        EventOutport freqOutport_;
+        EventOutport pitchOutport_;
     };
 
 

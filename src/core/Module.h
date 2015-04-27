@@ -93,7 +93,7 @@ namespace e3 {
         void removeLink(const Link& link);
         Link& getLink(uint16_t index);
 
-        Inport* Module::getInport(uint16_t portId);
+        Inport* getInport(uint16_t portId);
         Outport* getOutport(uint16_t portId);
         double* connectTargetWithSource(uint16_t portId);
         void disconnectTargetFromSource(uint16_t portId);
@@ -142,15 +142,14 @@ namespace e3 {
         virtual void updateOutports();
         virtual void updateParameters();
 
-        void addInport(uint16_t id, Inport* port);
-        void addOutport(uint16_t id, Outport* port);
+        void addInport(int id, const std::string& label, Inport* port);
+        void addOutport(int id, const std::string& label, Outport* port);
         void connectPort(Module* target, Link* link);
         VoiceAdapterType selectVoiceAdapter(VoicingType otherVoicingType) const;
 
         double sampleRate_   = INITIAL_SAMPLERATE;
         uint16_t numVoices_  = 0;
         bool mono_           = false;
-        bool collapsed_      = false;
 
         Polyphony* polyphony_ = nullptr;
     };

@@ -18,7 +18,7 @@ namespace e3 {
         kPolyphonic,
         kProcessEvent)
     {
-        addOutport(0, &gateOutport_);
+        addOutport(0, "Gate", &gateOutport_);
     }
 
 
@@ -52,7 +52,7 @@ namespace e3 {
         kPolyphonic,
         (ProcessingType)(kProcessEvent | kProcessControl))
     {
-        addOutport(0, &freqOutport_);
+        addOutport(0, "Pitch", &pitchOutport_);
         createParameters();
     }
 
@@ -128,7 +128,7 @@ namespace e3 {
         if( gate != 0 )
         {
             calcGlide( freq, voice );
-            freqOutport_.putEvent( freq_[voice] * bendFactor_, voice );
+            pitchOutport_.putEvent( freq_[voice] * bendFactor_, voice );
         }
     }
 
@@ -142,7 +142,7 @@ namespace e3 {
         for( uint16_t i=0; i<maxVoices; i++ )
         {
             uint16_t v = polyphony_->soundingVoices_[i];
-            freqOutport_.putEvent( freq_[v] * bendFactor_, v );
+            pitchOutport_.putEvent( freq_[v] * bendFactor_, v );
         }
     }
 
@@ -162,7 +162,7 @@ namespace e3 {
             } 
             else {
                 freq_[v] += glideDelta_[v];
-                freqOutport_.putEvent( freq_[v] * bendFactor_, v );
+                pitchOutport_.putEvent( freq_[v] * bendFactor_, v );
             }
         }
     }
@@ -207,8 +207,8 @@ namespace e3 {
         kPolyphonic,
         (ProcessingType)(kProcessEvent | kProcessControl))
     {
-        addOutport(0, &freqOutport_);
-        addOutport(1, &gateOutport_);
+        addOutport(0, "Pitch", &pitchOutport_);
+        addOutport(1, "Gate", &gateOutport_);
     }
 
 
@@ -228,8 +228,6 @@ namespace e3 {
 
     void MidiInput::onMidiNote( double pitch, double gate, uint16_t voice )
     {
-        //TRACE( "MidiInput::onMidiNote pitch=%f gate=%f voice=%d\n", pitch, gate, voice );
-
         MidiPitch::onMidiNote( pitch, gate, voice );
 
         if( gate > -1 ) {
