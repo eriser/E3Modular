@@ -6,6 +6,7 @@
 #include <e3_CommonMacros.h>
 #include <core/Settings.h>
 #include <core/ParameterShaper.h>
+#include <core/Link.h>
 #include <core/Module.h>
 #include <core/Sink.h>
 #include <core/Polyphony.h>
@@ -422,7 +423,7 @@ namespace e3 {
         TEST_F(LinkListTest, update)
         {
             link_.id_ = 117;
-            list_.update(link_);
+            list_.replace(link_);
             EXPECT_TRUE(list_.contains(link_));
         }
 
@@ -435,12 +436,6 @@ namespace e3 {
         TEST_F(LinkListTest, getIndex)
         {
             EXPECT_EQ(2, list_.getIndex(link_));
-        }
-
-        TEST_F(LinkListTest, hasLeftModule)
-        {
-            EXPECT_TRUE(list_.hasLeftModule(link_.leftModule_));
-            EXPECT_FALSE(list_.hasLeftModule(117));
         }
 
 
@@ -680,10 +675,11 @@ namespace e3 {
                 }
                 EXPECT_EQ(3, testSet.size());  // test if set stores unique values
 
-                for (Instrument::const_iterator it = instrument.begin(); it != instrument.end(); it++) {
+                const ModuleList& list = instrument.getModules();
+                for (ModuleList::const_iterator it = list.begin(); it != list.end(); it++) {
                     uniqueSet.insert((*it)->id_);
                 }
-                return instrument.size() == uniqueSet.size();
+                return instrument.getNumModules() == uniqueSet.size();
             }
             
             TestableInstrument instrument_;
@@ -693,7 +689,7 @@ namespace e3 {
         TEST_F(InstrumentTest, deleteModules)
         {
             instrument_.deleteModules();
-            EXPECT_EQ(0, instrument_.size());
+            EXPECT_EQ(0, instrument_.getNumModules());
         }
 
 
@@ -705,26 +701,29 @@ namespace e3 {
 
         TEST_F(InstrumentTest, createModuleId)
         {
+            Module* m = nullptr;
+
             uint16_t id = instrument_.createModuleId(kModuleMaster);
             EXPECT_EQ(kModuleMaster, id);
 
             // erase single element and append new element
-            for (uint16_t i = 1; i < instrument_.size(); i++)
+            for (uint16_t i = 1; i < instrument_.getNumModules(); i++)
             {
-                delete instrument_[1];
-                instrument_.erase(instrument_.begin() + 1);
-                instrument_.createAndAddModule(kModuleMidiInput);
+                m = instrument_.getModule(i);
+                ASSERT_NE(nullptr, m);
+                instrument_.deleteModule(m);
+                m = instrument_.createAndAddModule(kModuleMidiInput);
 
-                EXPECT_EQ(i, instrument_.back()->id_);
+                EXPECT_EQ(i, m->id_);
                 EXPECT_TRUE(testModuleIdsAreUnique(instrument_));
             }
             
             // erase all elements but kModuleMaster and append new element
             instrument_.deleteModules();
-            instrument_.createAndAddModule(kModuleMidiInput);
+            m = instrument_.createAndAddModule(kModuleMidiInput);
 
-            EXPECT_EQ(1, instrument_.back()->id_);
-
+            ASSERT_NE(nullptr, m);
+            EXPECT_EQ(1, m->id_);
         }
 
         TEST_F(InstrumentTest, hasMaster)
@@ -810,11 +809,6 @@ namespace e3 {
             void checkBank(Bank& bank)
             {
                 EXPECT_EQ("test", bank.getName());
-   
-                //TestableInstrument* instrument = static_cast<TestableInstrument*>(bank.getInstrument(1));
-                //ASSERT_NE(nullptr, instrument);
-                //EXPECT_EQ("instrument_1", instrument->name_);
-                //EXPECT_EQ(1, instrument->numVoices_);
             }
 
             void checkInstrument(Instrument* i)
@@ -826,12 +820,12 @@ namespace e3 {
 
                 EXPECT_EQ("instrument_0", instrument->name_);
                 EXPECT_EQ(32, instrument->numVoices_);
-                ASSERT_EQ(4, instrument->size());
+                ASSERT_EQ(4, instrument->getNumModules());
 
-                Module* master = instrument->at(0);
-                Module* input  = instrument->at(1);
-                Module* sine   = instrument->at(2);
-                Module* adsr   = instrument->at(3);
+                Module* master = instrument->getModule(0);
+                Module* input  = instrument->getModule(1);
+                Module* sine   = instrument->getModule(2);
+                Module* adsr   = instrument->getModule(3);
 
                 EXPECT_NE(nullptr, master);
                 EXPECT_NE(nullptr, input);
@@ -865,12 +859,14 @@ namespace e3 {
                 ASSERT_EQ(1, sine->links_.size());
                 ASSERT_EQ(2, adsr->links_.size());
 
-                EXPECT_EQ(3, master->links_[0].leftModule_);
-                EXPECT_EQ(1, sine->links_[0].leftModule_);
-                EXPECT_EQ(1, adsr->links_[0].leftModule_);
-                EXPECT_EQ(2, adsr->links_[1].leftModule_);
+                const LinkList& links = instrument->getLinks();
+                ASSERT_EQ(links.size(), 4);
+                EXPECT_EQ(links[0].leftModule_, 3);
+                EXPECT_EQ(links[0].rightModule_, 0);
+                EXPECT_EQ(links[0].leftPort_, 0);
+                EXPECT_EQ(links[0].rightPort_, 0);
 
-                Module* m = instrument->getModule(master->links_[0].leftModule_);
+                Module* m = instrument->getModule(links[0].leftModule_);
                 EXPECT_NE(nullptr, m);
                 EXPECT_EQ(adsr, m);
                 EXPECT_EQ(3, m->id_);
@@ -888,6 +884,10 @@ namespace e3 {
                 checkMidiParameters(adsr->parameters_[3]);
                 checkMidiParameters(adsr->links_[0]);
                 checkMidiParameters(adsr->links_[1]);
+
+                LinkPointerList linksForAdsr;
+                instrument->getLinksForModule(adsr->id_, linksForAdsr);    
+                EXPECT_EQ(2, linksForAdsr.size());
             }
 
             void checkMidiParameters(const Parameter& model)
@@ -937,40 +937,31 @@ namespace e3 {
             checkInstrument(instrument);
         }
 
-        TEST_F(BankTest, store_instrument)
-        {
-            bank_.open(testBank_valid_filename);
-            int hash = bank_.getInstrumentHash();
-            ScopedPointer<Instrument> instrument = bank_.loadInstrument();
-            ASSERT_NE(nullptr, instrument);
-            bank_.storeInstrument(instrument);
-            EXPECT_EQ(hash, instrument->hash_);
-
-            instrument->deleteModules();
-            bank_.storeInstrument(instrument);
-            EXPECT_NE(hash, instrument->hash_);
-        }
-
         TEST_F(BankTest, store)
         {
             bank_.open(testBank_valid_filename);
-            bank_.save("TestBank_storeTest.e3m", false, false);
-            bank_.open("TestBank_storeTest.e3m");
+            bank_.save("TestBank_storeTest.e3mb", false, false);
+            bank_.open("TestBank_storeTest.e3mb");
             checkBank(bank_);
 
             ScopedPointer<Instrument> instrument = bank_.loadInstrument();
             ASSERT_NE(nullptr, instrument);
             instrument->deleteModules();
-            bank_.storeInstrument(instrument);
+            bank_.saveInstrument(instrument);
             int hash = instrument->hash_;
             bank_.setInstrumentHash(hash);
-            bank_.save("TestBank_storeTest.e3m", false, false);
-            bank_.open("TestBank_storeTest.e3m");
+            bank_.save("TestBank_storeTest.e3mb", false, false);
+            bank_.open("TestBank_storeTest.e3mb");
             EXPECT_EQ(hash, bank_.getInstrumentHash());
 
             instrument = bank_.loadInstrument();
+            ASSERT_NE(nullptr, instrument);
             EXPECT_EQ(hash, instrument->hash_);
+            EXPECT_EQ(0, instrument->getModules().size());
+            EXPECT_EQ(0, instrument->getLinks().size());
         }
+
+
 
         TEST_F(BankTest, compile)
         {
@@ -982,6 +973,7 @@ namespace e3 {
             polyphony.setNumVoices(4);
 
             instrument->initModules(&polyphony, 44100);
+            instrument->connectModules();
 
             Sink sink;
             sink.compile(instrument);

@@ -193,15 +193,43 @@ namespace e3 {
     }
 
 
-    Outport* Module::getOutport(uint16_t portId)
+    Outport* Module::getOutport(uint16_t portId) const
     {
         return portId < outports_.size() ? outports_.at(portId) : nullptr;
     }
 
     
-    Inport* Module::getInport(uint16_t portId)
+    Inport* Module::getInport(uint16_t portId) const
     {
         return portId < inports_.size() ? inports_.at(portId) : nullptr;
+    }
+
+
+    AudioOutport* Module::getAudioOutport(uint16_t portId) const
+    {
+        Outport* port = getOutport(portId);
+        return dynamic_cast<AudioOutport*>(port);
+    }
+
+
+    AudioInport* Module::getAudioInport(uint16_t portId) const
+    {
+        Inport* port = getInport(portId);
+        return dynamic_cast<AudioInport*>(port);
+    }
+
+
+    EventOutport* Module::getEventOutport(uint16_t portId) const
+    {
+        Outport* port = getOutport(portId);
+        return dynamic_cast<EventOutport*>(port);
+    }
+
+
+    EventInport* Module::getEventInport(uint16_t portId) const
+    {
+        Inport* port = getInport(portId);
+        return dynamic_cast<EventInport*>(port);
     }
 
 
@@ -235,13 +263,13 @@ namespace e3 {
 
         if (target)
         {
-            Outport* port = getOutport(link->rightPort_);
-            ASSERT(port);
+            Outport* outport = getOutport(link->leftPort_);
+            ASSERT(outport);
 
-            if (port)
+            if (outport)
             {
                 VoiceAdapterType adapter = selectVoiceAdapter(target->voicingType_);
-                port->connect(link, target, adapter);
+                outport->connect(target, link, adapter);
             }
         }
     }

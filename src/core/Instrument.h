@@ -11,7 +11,7 @@ namespace e3 {
 
     class Polyphony;
 
-    class Instrument : public ModuleList
+    class Instrument
     {
     public:
         Instrument();
@@ -19,7 +19,6 @@ namespace e3 {
 
         void deleteModules();
         void initModules(Polyphony* polyphony, double sampleRate);
-        //void updateModules(double sampleRate, uint16_t numVoices=0);
         void resetModules();
         void connectModules();
         void resumeModules();
@@ -28,16 +27,24 @@ namespace e3 {
         void setSampleRate(double sampleRate);
         void setNumVoices(uint16_t numVoices);
 
-        Module* getModule(uint16_t moduleId);
-        bool checkSentinel(Module* module);
+        Module* getModule(uint16_t moduleId) const;
+        const ModuleList& getModules() const { return modules_;  }
+        int getNumModules() const            { return modules_.size(); }
 
         Module* createAndAddModule(ModuleType type);
+        void deleteModule(Module* module);
+
+        void addLink(const Link& link);
+        const LinkList& getLinks() const              { return links_; }
+        void getLinksForModule(int16_t moduleId, LinkPointerList& list);
 
         void setNumUnison(uint16_t numUnison)         { numUnison_    = numUnison; }
         void setUnisonSpread(uint16_t unisonSpread)   { unisonSpread_ = unisonSpread; }
         void setHold(bool hold)                       { hold_         = hold; }
         void setRetrigger(bool retrigger)             { retrigger_    = retrigger; }
         void setLegato(bool legato)                   { legato_       = legato; }
+
+        bool checkSentinel(Module* module);
 
         uint16_t numVoices_    = 1;
         uint16_t numUnison_    = 1;
@@ -55,6 +62,9 @@ namespace e3 {
         bool hasMaster()    { return nullptr != getModule(kModuleMaster); }
         void connectModule(Module* target);
         uint16_t createModuleId(ModuleType type);
+
+        ModuleList modules_;
+        LinkList links_;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Instrument)
     };

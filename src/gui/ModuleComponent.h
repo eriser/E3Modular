@@ -18,7 +18,6 @@ namespace e3 {
     class PortComponent;
     class Wire;
 
-    typedef std::map< const Link, Wire* > WireMap;
 
     class ModuleComponent : public Component, public SelectableItem
     {
@@ -85,6 +84,7 @@ namespace e3 {
 
         Colour colBkgnd_, colFrame_, colPort_, colText_;
 
+        typedef std::map< const Link, Wire* > WireMap;
         WireMap wires_;
 
         ComponentBoundsConstrainer dragConstrainer_;

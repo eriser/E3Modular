@@ -35,7 +35,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::storeBank(const std::string& path, XmlElement* root)
+    void BankSerializer::saveBank(const std::string& path, XmlElement* root)
     {
         if (root->writeToFile(File(path), "", "UTF-8", 1000) == false) {
             THROW(std::runtime_error, "error writing bank file");
@@ -64,7 +64,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::storeInstrument(XmlElement* root, Instrument* instrument)
+    void BankSerializer::saveInstrument(XmlElement* root, Instrument* instrument)
     {
         forEachXmlChildElementWithTagName(*root, e, "instrument")
         {
@@ -72,7 +72,7 @@ namespace e3 {
             if (hash == instrument->hash_) {
                 try {
                     e->deleteAllChildElements();
-                    writeInstrument(e, instrument, instrument->hash_);
+                    writeInstrument(e, instrument);
                     return;
                 }
                 catch (const std::exception& e) {       // parse error
@@ -97,11 +97,16 @@ namespace e3 {
         instrument->unisonSpread_ = (uint16_t)e->getIntAttribute("spread", instrument->unisonSpread_);
 
         readModules(e, instrument);
+        readLinks(e, instrument);
     }
 
     void BankSerializer::readModules(XmlElement* parent, Instrument* instrument)
     {
-        forEachXmlChildElementWithTagName(*parent, e, "module")
+        XmlElement* modules = parent->getChildByName("modules");
+        if (modules == nullptr)
+            return;
+
+        forEachXmlChildElementWithTagName(*modules, e, "module")
         {
             ModuleType type = (ModuleType)e->getIntAttribute("type");
             Module* module = instrument->createAndAddModule(type);
@@ -112,11 +117,31 @@ namespace e3 {
                 module->voicingType_ = (VoicingType)e->getIntAttribute("voicing", module->voicingType_);
 
                 readParameters(e, module);
-                readLinks(e, module);
+                readModuleLinks(e, module);
             }
             catch (...) {
                 TRACE("module of type %d could not be created", type);
             }
+        }
+    }
+
+
+    void BankSerializer::readLinks(XmlElement* parent, Instrument* instrument)
+    {
+        XmlElement* links = parent->getChildByName("links");
+        if (links == nullptr)
+            return;
+
+        forEachXmlChildElementWithTagName(*links, e, "link")
+        {
+            Link link;
+            link.leftModule_  = (uint16_t)e->getIntAttribute("left_module");
+            link.rightModule_ = (uint16_t)e->getIntAttribute("right_module");
+            link.leftPort_    = (uint16_t)e->getIntAttribute("left_port");
+            link.rightPort_   = (uint16_t)e->getIntAttribute("right_port");
+
+            readParameter(e, link);
+            instrument->addLink(link);
         }
     }
 
@@ -140,7 +165,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readLinks(XmlElement* parent, Module* module)
+    void BankSerializer::readModuleLinks(XmlElement* parent, Module* module)
     {
         forEachXmlChildElementWithTagName(*parent, e, "link")
         {
@@ -184,12 +209,12 @@ namespace e3 {
     // BankSerializer write methods
     //--------------------------------------------------------------------------------
 
-    void BankSerializer::writeInstrument(XmlElement* const e, const Instrument* instrument, int& hash)
+    void BankSerializer::writeInstrument(XmlElement* const e, Instrument* instrument)
     {
-        e->setAttribute("name", instrument->name_);
+        e->setAttribute("name",     instrument->name_);
         e->setAttribute("category", instrument->category_);
-        e->setAttribute("comment", instrument->comment_);
-        e->setAttribute("voices", instrument->numVoices_);
+        e->setAttribute("comment",  instrument->comment_);
+        e->setAttribute("voices",   instrument->numVoices_);
 
         if (instrument->numUnison_ > 1) {
             e->setAttribute("unison", instrument->numUnison_);
@@ -202,15 +227,26 @@ namespace e3 {
         if (instrument->legato_)
             e->setAttribute("legato", instrument->legato_);
 
-        for (Instrument::const_iterator it = instrument->begin(); it != instrument->end(); it++)
+        XmlElement* const modules = e->createNewChildElement("modules");
+        const ModuleList& moduleList = instrument->getModules();
+        for (ModuleList::const_iterator it = moduleList.begin(); it != moduleList.end(); it++)
         {
-            XmlElement* const em = e->createNewChildElement("module");
+            XmlElement* const em = modules->createNewChildElement("module");
             writeModule(em, *it);
         }
 
+        XmlElement* const links = e->createNewChildElement("links");
+        const LinkList& linkList = instrument->getLinks();
+        for (LinkList::const_iterator it = linkList.begin(); it != linkList.end(); it++)
+        {
+            XmlElement* const el = links->createNewChildElement("link");
+            writeLink(el, *it);
+        }
+
         e->setAttribute("hash", 0);
-        hash = createHash(e);
+        int hash = createHash(e);
         e->setAttribute("hash", hash);
+        instrument->hash_ = hash;
     }
 
 
@@ -246,6 +282,18 @@ namespace e3 {
                 writeParameter(ep, param, defaultParam);
             }
         }
+    }
+
+
+    void BankSerializer::writeLink(XmlElement* const e, const Link& link)
+    {
+        e->setAttribute("left_module",  link.leftModule_);
+        e->setAttribute("right_module", link.rightModule_);
+        e->setAttribute("left_port",    link.leftPort_);
+        e->setAttribute("right_port",   link.rightPort_);
+
+        Parameter defaultParam;
+        writeParameter(e, link, defaultParam);
     }
 
 

@@ -27,10 +27,10 @@ namespace e3 {
 
     void Bank::save(const std::string& path, bool saveCurrent, bool makeBackup)
     {
-		std::string p = path.empty() ? getPath() : path;
-		if (hasLoaded() == false || path.empty()) {
-			return;
-		}
+        std::string p = path.empty() ? getPath() : path;
+        if (hasLoaded() == false || path.empty()) {
+            return;
+        }
 
         UNUSED(saveCurrent);
         UNUSED(makeBackup);
@@ -40,7 +40,7 @@ namespace e3 {
         //if (makeBackup)
             //makeBackup();
 
-        BankSerializer::storeBank(p, getXml());
+        BankSerializer::saveBank(p, getXml());
         setPath(p);
     }
 
@@ -74,9 +74,9 @@ namespace e3 {
     }
 
 
-    void Bank::storeInstrument(Instrument* instrument)
+    void Bank::saveInstrument(Instrument* instrument)
     {
-        BankSerializer::storeInstrument(getXml(), instrument);
+        BankSerializer::saveInstrument(getXml(), instrument);
     }
 
 
@@ -134,10 +134,10 @@ namespace e3 {
     }
 
 
-	bool Bank::hasLoaded() const
-	{
-		return xml_ != nullptr;
-	}
+    bool Bank::hasLoaded() const
+    {
+        return xml_ != nullptr;
+    }
 
 
 

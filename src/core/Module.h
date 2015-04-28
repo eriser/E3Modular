@@ -93,8 +93,13 @@ namespace e3 {
         void removeLink(const Link& link);
         Link& getLink(uint16_t index);
 
-        Inport* getInport(uint16_t portId);
-        Outport* getOutport(uint16_t portId);
+        Inport* getInport(uint16_t portId) const;
+        Outport* getOutport(uint16_t portId) const;
+        AudioOutport* getAudioOutport(uint16_t portId) const;
+        AudioInport* getAudioInport(uint16_t portId) const;
+        EventOutport* getEventOutport(uint16_t portId) const;
+        EventInport* getEventInport(uint16_t portId) const;
+
         double* connectTargetWithSource(uint16_t portId);
         void disconnectTargetFromSource(uint16_t portId);
 

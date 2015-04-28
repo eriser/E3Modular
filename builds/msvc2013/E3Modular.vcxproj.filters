@@ -153,6 +153,9 @@
     <ClInclude Include="..\..\src\gui\Selection.h">
       <Filter>src\gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\gui\WireManager.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp">
@@ -257,9 +260,6 @@
     <ClCompile Include="..\..\src\gui\ModuleComponent.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\Link.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\core\Parameter.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
@@ -281,7 +281,7 @@
     <ClCompile Include="..\..\src\gui\ModulePanel.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\Selection.cpp">
+    <ClCompile Include="..\..\src\gui\WireManager.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
   </ItemGroup>

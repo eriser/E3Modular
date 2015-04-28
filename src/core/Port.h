@@ -6,12 +6,12 @@
 #include <memory>
 #include <e3_Buffer.h>
 #include "core/GlobalHeader.h"
+#include "core/Link.h"
 
 
 
 namespace e3 {
 
-    class Link;
     class Module;
     class Inport;
     class Outport;
@@ -67,11 +67,11 @@ namespace e3 {
         Port(PortType type) : type_(type)  {}
         virtual ~Port() {}
 
-        virtual void connect() {}
-        virtual void disconnect()  {}
+        //virtual void connect() {}
+        //virtual void disconnect()  {}
         virtual void disconnectAll() = 0;
-        virtual void connect(Link*, Module*, VoiceAdapterType) {}
-        virtual void disconnect(Link*, Module*) {}
+        //virtual void connect(Link*, Module*, VoiceAdapterType) {}
+        //virtual void disconnect(Module*, Link*) {}
         virtual bool isConnected() { return false;  }
 
         virtual void setNumVoices(uint16_t numVoices);
@@ -102,6 +102,9 @@ namespace e3 {
     public:
         Outport() : Port(kOutport) {}
 
+        virtual void connect(Module*, Link*, VoiceAdapterType) {}
+        virtual void disconnect(Module*, Link*) {}
+
         void disconnectAll() override;
         bool isConnected() override;
 
@@ -111,16 +114,17 @@ namespace e3 {
         void onGate(double gate, uint16_t voice);
         void onController(int16_t controllerId, double value);
 
+        const LinkPointerList& getTargets() const  { return targets_; }
+
     protected:
-        uint16_t addTarget(Link* link, VoiceAdapterType adapter);
-        int16_t removeTarget(Link* link);
-        int16_t getIndex(Link* link);
+        void addTarget(Link* link, VoiceAdapterType adapter);
+        void removeTarget(Link* link);
 
         void setModulation(uint16_t targetId, double value, int16_t voice = -1);
         void initModulation();
 
-        uint16_t numTargets_ = 0;
-        std::vector< Link* > targets_;
+        LinkPointerList targets_;
+        size_t numTargets_ = 0;
 
         Buffer< VoiceAdapterType > adapterBuffer_;
         Buffer< double > modulationBuffer_;
@@ -136,6 +140,9 @@ namespace e3 {
     {
     public: 
         Inport() : Port(kInport)  {}
+
+        virtual void connect()    {}
+        virtual void disconnect() {}
     };
 
 
@@ -148,8 +155,8 @@ namespace e3 {
     class AudioOutport : public Outport
     {
     public:
-        void connect(Link* link, Module* target, VoiceAdapterType adapter) override;
-        void disconnect(Link* link, Module* target) override;
+        void connect(Module* target, Link* link, VoiceAdapterType adapter) override;
+        void disconnect(Module* target, Link* link) override;
         void disconnectAll() override;
 
         void __stdcall putValue(double value, uint16_t voice = 0) throw();
@@ -215,10 +222,9 @@ namespace e3 {
     class EventOutport : public Outport
     {
     public:
-        void connect(Link* link, Module* target, VoiceAdapterType adapter) override;
-        void disconnect(Link* link, Module* target) override;
+        void connect(Module* module, Link* link, VoiceAdapterType adapter) override;
+        void disconnect(Module* target, Link* link) override;
         void disconnectAll() override;
-        bool isConnected() override;
 
         void putEvent(double value, uint16_t voice);
 

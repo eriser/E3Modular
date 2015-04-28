@@ -28,7 +28,7 @@ namespace e3 {
         std::string getPath();
 
         Instrument* loadInstrument(int hash=0);
-        void storeInstrument(Instrument* instrument);
+        void saveInstrument(Instrument* instrument);
 
         void append(Instrument* instrument);
 

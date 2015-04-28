@@ -23,7 +23,7 @@ namespace e3 {
         modules_.clear();
 
         if (instrument != nullptr && instrumentXml != nullptr) {
-            panelXml_ = instrumentXml->getChildByName("wire_panel");
+            panelXml_ = instrumentXml->getChildByName("module_panel");
             if (panelXml_)
             {
                 forEachXmlChildElementWithTagName(*panelXml_, e, "module")

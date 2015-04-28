@@ -10,7 +10,7 @@ namespace e3 {
 
     Instrument::Instrument()
     {
-        reserve(100);
+        modules_.reserve(100);
     }
 
     Instrument::~Instrument()
@@ -21,26 +21,87 @@ namespace e3 {
 
     void Instrument::deleteModules()
     {
-        for (iterator it = begin(); it != end(); it++)	{
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)	{
             delete *it;
         }
-        ModuleList::clear();
+        modules_.clear();
+        links_.clear();
     }
 
 
     Module* Instrument::createAndAddModule(ModuleType type)
     {
         Module* module = ModuleFactory::create(type);
-        push_back(module);
+        modules_.push_back(module);
         module->id_ = createModuleId(type);
 
         return module;
     }
 
 
+    void Instrument::deleteModule(Module* module)
+    {
+        ModuleList targets;
+        //getTargetModules(module, &targets);
+
+        // remove the links at the targets
+        for (int16_t i = 0; i < (int16_t)targets.size(); i++)        
+        {
+            Module* next = targets.at(i);
+            for (uint16_t j = 0; j < next->links_.size();)
+            {
+                Link& link = next->getLink(j);
+                if (link.leftModule_ == module->id_) {
+                    next->links_.remove(link);
+                }
+                else j++;
+            }
+        }
+
+        // disconnect ports of own links
+        for (int16_t i = 0; i < (int16_t)module->links_.size();)     
+        {
+            Link& link = module->getLink(i);
+            if (link.leftModule_ == module->id_)
+            {
+                module->links_.remove(link);
+            }
+            else i++;
+        }
+
+        // remove and delete module
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
+        {
+            if ((*it)->id_ == module->id_) {
+                delete *it;
+                modules_.erase(it);
+                break;
+            }
+        }
+    }
+
+
+    void Instrument::addLink(const Link& link)
+    {
+        links_.add(link);
+    }
+
+
+    void Instrument::getLinksForModule(int16_t moduleId, LinkPointerList& list)
+    {
+        for (LinkList::iterator it = links_.begin(); it != links_.end(); ++it)
+        {
+            Link& link = *it;
+            if (link.rightModule_ == moduleId) {
+                list.add(&link);
+            }
+        }
+    }
+
+
     void Instrument::initModules(Polyphony* polyphony, double sampleRate)
     {
-        for (iterator it = begin(); it != end(); it++)
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             Module* m = *it;
             m->init(polyphony, sampleRate);
@@ -50,7 +111,7 @@ namespace e3 {
 
     void Instrument::resetModules()
     {
-        for (iterator it = begin(); it != end(); it++) 
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             (*it)->reset();
         }
@@ -59,7 +120,7 @@ namespace e3 {
 
     void Instrument::connectModules()
     {
-        for (iterator it = begin(); it != end(); it++) 
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             connectModule(*it);
         }
@@ -68,21 +129,34 @@ namespace e3 {
 
     void Instrument::connectModule(Module* target)
     {
-        for (uint16_t i = 0; i < target->links_.size(); i++)
+        for (LinkList::iterator it = links_.begin(); it != links_.end(); ++it)
         {
-            Link& link = target->getLink(i);
-            Module* source = getModule(link.leftModule_);
-            ASSERT(source);
-            if (source) {
-                source->connectPort(target, &link);
+            Link* link = &(*it);
+            if (link->rightModule_ == target->id_)
+            {
+                Module* source = getModule(link->leftModule_);
+                ASSERT(source);
+                if (source) {
+                    source->connectPort(target, link);
+                }
             }
         }
+
+        //for (uint16_t i = 0; i < target->links_.size(); i++)
+        //{
+        //    Link& link = target->getLink(i);
+        //    Module* source = getModule(link.leftModule_);
+        //    ASSERT(source);
+        //    if (source) {
+        //        source->connectPort(target, &link);
+        //    }
+        //}
     }
 
 
-    Module* Instrument::getModule(uint16_t moduleId)
+    Module* Instrument::getModule(uint16_t moduleId) const
     {
-        for (iterator it = begin(); it != end(); it++)
+        for (ModuleList::const_iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             if ((*it)->id_ == moduleId) {
                 return *it;
@@ -94,7 +168,7 @@ namespace e3 {
 
     void Instrument::setSampleRate(double sampleRate)
     {
-        for (iterator it = begin(); it != end(); it++)
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             Module* m = *it;
             m->setSampleRate(sampleRate);
@@ -108,7 +182,7 @@ namespace e3 {
         ASSERT(numVoices > 0);
         numVoices_ = numVoices;
 
-        for (iterator it = begin(); it != end(); it++)
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             Module* m = *it;
             m->setNumVoices(numVoices_);
@@ -124,20 +198,20 @@ namespace e3 {
         }
 
         uint16_t minId = kModuleMaster + 1;
-        uint16_t maxId = (uint16_t)size();
+        uint16_t maxId = (uint16_t)modules_.size();
         uint16_t id    = minId;
 
         for (; id <= maxId; id++) {
             if (nullptr == getModule(id)) break;
         }
-        ASSERT(id <= size());
+        ASSERT(id <= maxId);
         return id;
     }
 
 
     void Instrument::resumeModules()
     {
-        for (iterator it = begin(); it != end(); it++) {
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++) {
             (*it)->resume();
         }
     }
@@ -145,7 +219,7 @@ namespace e3 {
 
     void Instrument::suspendModules()
     {
-        for (iterator it = begin(); it != end(); it++) {
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++) {
             (*it)->suspend();
         }
     }

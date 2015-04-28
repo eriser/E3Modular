@@ -83,7 +83,7 @@ namespace e3 {
 
         if (instrument_ != nullptr && saveCurrent) {
             instrument_->resetModules();
-            bank_->storeInstrument(instrument_);
+            bank_->saveInstrument(instrument_);
         }
 
         instrument_ = bank_->loadInstrument(hash);

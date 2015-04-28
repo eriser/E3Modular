@@ -58,6 +58,8 @@ namespace e3 {
 
     void ModuleComponent::beginDrag(const MouseEvent& e)
     {
+        MouseEvent e1 = e.getEventRelativeTo(this);
+        
         positionBeforeDragging_ = getPosition();
         dragger_.startDraggingComponent(this, e);
     }
@@ -194,8 +196,8 @@ namespace e3 {
     {
         for (uint16_t i = 0; i < module_->links_.size(); i++)
         {
-            Link& link = module_->getLink(i);
-            PortComponent* inport = getPort(link.rightPort_, kInport);
+            Link& link             = module_->getLink(i);
+            PortComponent* inport  = getPort(link.rightPort_, kInport);
             PortComponent* outport = owner_->getPort(link, kOutport);
 
             inport->connect();

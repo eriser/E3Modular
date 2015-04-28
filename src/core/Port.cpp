@@ -22,38 +22,30 @@ namespace e3 {
     // class Outport
     //-------------------------------------------------------
 
-    uint16_t Outport::addTarget(Link* link, VoiceAdapterType adapter)
+    void Outport::addTarget(Link* link, VoiceAdapterType adapter)
     {
-        targets_.push_back(link);
-        numTargets_++;
+        numTargets_ = targets_.add(link);
 
         adapterBuffer_.resize(numTargets_);
         adapterBuffer_[numTargets_ - 1] = adapter;
         initModulation();
-
-        return numTargets_;
     }
 
 
-    int16_t Outport::removeTarget(Link* link)
+    void Outport::removeTarget(Link* link)
     {
-        int16_t idx = getIndex(link);
-        VERIFY(idx >= 0);
-
-        numTargets_--;
-        targets_.erase(targets_.begin() + idx);
+        numTargets_ = targets_.remove(link);
 
         adapterBuffer_.resize(numTargets_);
         initModulation();
-
-        return idx;
     }
 
 
     void Outport::disconnectAll()
     {
-        numTargets_ = 0;
         targets_.clear();
+        numTargets_ = 0;
+
         adapterBuffer_.clear();
         modulationBuffer_.clear();
     }
@@ -89,7 +81,7 @@ namespace e3 {
 
     void Outport::setModulation(Link* link)
     {
-        int16_t idx = getIndex(link);
+        int16_t idx = targets_.getIndex(link);
         ASSERT(idx >= 0);
         if (idx >= 0)
         {
@@ -103,7 +95,7 @@ namespace e3 {
         modulationBuffer_.set(0);
         modulationBuffer_.resize(numTargets_ * numVoices_);
 
-        for (uint16_t i = 0; i < targets_.size(); i++)
+        for (uint16_t i = 0; i < numTargets_; i++)
         {
             Link* link = targets_[i];
             setModulation(i, link->value_);
@@ -132,7 +124,7 @@ namespace e3 {
         value = value;
         controllerId = controllerId;
         
-        for (uint16_t i = 0; i<targets_.size(); i++)
+        for (uint16_t i = 0; i < numTargets_; i++)
         {
             //Link* link = targets_[i];
             //if (link->scaleController(controllerId, value))
@@ -144,43 +136,36 @@ namespace e3 {
     }
 
 
-
-    int16_t Outport::getIndex(Link* link)
-    {
-        for (uint16_t i = 0; i<targets_.size(); i++)
-        {
-            const Link& next = *targets_.at(i);
-            if (next == link) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-
-
     //-------------------------------------------------------
     // class AudioOutport
     //-------------------------------------------------------
 
-    void AudioOutport::connect(Link* link, Module* target, VoiceAdapterType adapter)
+    void AudioOutport::connect(Module* target, Link* link, VoiceAdapterType adapter)
     {
-        VERIFY(target);
-        addTarget(link, adapter);
+        AudioInport* inport = target->getAudioInport(link->rightPort_);
+        ASSERT(inport != nullptr);
 
-        audioOutBuffer_.resize(numTargets_);
-        audioOutBuffer_[numTargets_ - 1] = target->connectTargetWithSource(link->rightPort_);
+        if (inport != nullptr) 
+        {
+            addTarget(link, adapter);
+            audioOutBuffer_.resize(numTargets_);
+            audioOutBuffer_[numTargets_ - 1] = inport->getBuffer();
+        }
     }
 
 
-    void AudioOutport::disconnect(Link* link, Module* target)
+    void AudioOutport::disconnect(Module* target, Link* link)
     {
-        VERIFY(target);
+        ASSERT(target);
+        ASSERT(link);
 
-        int16_t idx = removeTarget(link);
-        if (idx >= 0)
+        int16_t index = targets_.getIndex(link);
+        removeTarget(link);
+        ASSERT(index >= 0);
+
+        if (index >= 0)
         {
-            audioOutBuffer_.remove(idx);
+            audioOutBuffer_.remove(index);
             target->disconnectTargetFromSource(link->rightPort_);
         }
     }
@@ -197,7 +182,7 @@ namespace e3 {
     // class EventInport
     //-------------------------------------------------------
 
-    void EventInport::disconnectAll()
+    void EventInport::disconnectAll()  // TODO: handle multiple connections
     {
         module_  = nullptr;
         paramId_ = -1;
@@ -209,17 +194,18 @@ namespace e3 {
         return module_ != nullptr;
     }
 
+    
     //-------------------------------------------------------
     // class EventOutport
     //-------------------------------------------------------
 
-    void EventOutport::connect(Link* link, Module* target, VoiceAdapterType adapter)
+    void EventOutport::connect(Module* target, Link* link, VoiceAdapterType adapter)
     {
-        EventInport* inport = dynamic_cast<EventInport*>(target->getInport(link->rightPort_));
-        ASSERT(target);
+        EventInport* inport = target->getEventInport(link->leftPort_);
         ASSERT(inport);
+        ASSERT(link);
 
-        if (target != nullptr && inport != nullptr)
+        if (inport != nullptr)
         {
             addTarget(link, adapter);
 
@@ -232,37 +218,36 @@ namespace e3 {
     }
 
 
-    void EventOutport::disconnect(Link* link, Module*)
+    void EventOutport::disconnect(Module*, Link* link)
     {
-        int16_t idx = removeTarget(link);
-        inports_.erase(inports_.begin() + idx);
+        int16_t index = targets_.getIndex(link);
+        ASSERT(index >= 0);
+        removeTarget(link);
+
+        if (index >= 0) {
+            inports_.erase(inports_.begin() + index);
+        }
     }
 
 
     void EventOutport::disconnectAll()
     {
-        Outport::disconnect();
+        Outport::disconnectAll();
         inports_.clear();
-    }
-
-
-    bool EventOutport::isConnected()
-    {
-        return numTargets_ > 0;
     }
 
 
     void EventOutport::putEvent(double value, uint16_t voice)
     {
-        for (uint16_t target = 0; target < numTargets_; target++)
+        for (uint16_t targetIndex = 0; targetIndex < numTargets_; targetIndex++)
         {
-            double modulation        = modulationBuffer_[target * numVoices_ + voice];
+            double modulation    = modulationBuffer_[targetIndex * numVoices_ + voice];
 
-            EventInport* inport      = inports_.at(target);
-            Module* targetModule     = inport->module_;
+            EventInport* inport  = inports_.at(targetIndex);
+            Module* targetModule = inport->module_;
             ASSERT(targetModule);
 
-            VoiceAdapterType adapter = adapterBuffer_[target];
+            VoiceAdapterType adapter = adapterBuffer_[targetIndex];
             __assume(adapter < 3);
             switch (adapter)
             {

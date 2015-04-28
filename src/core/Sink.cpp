@@ -46,16 +46,35 @@ namespace e3 {
 
             if (module->processingType_ & (kProcessAudio | kProcessEvent))
             {
-                if (contains(module) == false)
+                if (contains(module) == false) {
                     push_back(module);
-
-                for (size_t i = 0; i < module->links_.size(); i++)
-                {
-                    Link& link = module->links_.at(i);
-                    Module* next = instrument->getModule(link.leftModule_);
-                    if (next && next != module)
-                        queue.push(next);                 // enqueue sources of current node
                 }
+                LinkPointerList links;
+                instrument->getLinksForModule(module->id_, links);
+
+                for (LinkPointerList::const_iterator it = links.begin(); it != links.end(); ++it)
+                {
+                    Link* link = *it;
+                    Module* next = instrument->getModule(link->leftModule_);
+                    if (next && next != module) {
+                        queue.push(next);                 // enqueue sources of current node
+                    }
+                }
+
+                
+                //for (size_t i = 0; i < module->outports_.size(); ++i)
+                //{
+                //    Outport* port = module->outports_[i];
+                //    const LinkList& targets = port->getTargets();
+
+                //    for (size_t i = 0; i < targets.size(); ++i)
+                //    {
+                //        const Link& link = targets.at(i);
+                //        Module* next = instrument->getModule(link.leftModule_);
+                //        if (next && next != module)
+                //            queue.push(next);                 // enqueue sources of current node
+                //    }
+                //}
             }
             queue.pop();
         }

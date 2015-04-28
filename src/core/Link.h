@@ -16,11 +16,29 @@ namespace e3 {
     class Link : public Parameter
     {
     public:
-        bool operator==(const Link& other) const;
+        bool operator==(const Link& other) const
+        {
+            return
+                other.leftModule_  == leftModule_ &&
+                other.rightModule_ == rightModule_ &&
+                other.leftPort_    == leftPort_ &&
+                other.rightPort_   == rightPort_;
+        }
+
+
+        bool operator<(const Link& other) const
+        {
+            if (other.rightModule_ != rightModule_) return rightModule_ < other.rightModule_;
+            if (other.leftModule_  != leftModule_)  return leftModule_  < other.leftModule_;
+            if (other.rightPort_   != rightPort_)   return rightPort_   < other.rightPort_;
+            if (other.leftPort_    != leftPort_)    return leftPort_    < other.leftPort_;
+
+            return false;
+        }
+
         bool operator==(const Link* other) const   { return operator==(*other); }
         bool operator!=(const Link& other) const   { return !(*this == other); }
         bool operator!=(const Link* other) const   { return !(this == other); }
-        bool operator<(const  Link& other) const;
         bool operator>(const  Link& other) const   { return !(*this == other && *this < other); }
 
         uint16_t leftModule_  = 0;  // module that sends data into the link
@@ -35,20 +53,78 @@ namespace e3 {
     // A container for Links
     //----------------------------------------------------------------
 
-    class LinkList : public std::vector< Link >
+    template <class T>
+    class LinkListTemplate : public std::vector< T >
     {
     public:
-        void add(Link& link);
-        Link& get(const Link& link);
-        void update(const Link& link);
-        void remove(const Link& link);
-        int16_t getIndex(const Link& link);
-        bool contains(const Link& link);
-        bool hasLeftModule(uint16_t id);
+        T& get(const T& link)
+        {
+            iterator pos = find(link);
+            if (pos == end()) {
+                THROW(std::out_of_range, "Link not found");
+            }
+            return *pos;
+        }
+
+
+        size_t add(const T& link)
+        {
+            bool linkExists = contains(link);
+            ASSERT(linkExists == false);
+
+            if (linkExists == false)  {
+                push_back(link);
+            }
+            return size();
+        }
+
+
+        void replace(const T& link)
+        {
+            iterator pos = find(link);
+            ASSERT(pos != end());
+
+            if (pos != end()) {
+                *pos = link;
+            }
+        }
+
+
+        size_t remove(const T& link)
+        {
+            iterator pos = find(link);
+            ASSERT(pos != end());
+
+            if (pos != end()) {
+                erase(pos);
+            }
+            return size();
+        }
+
+
+        int16_t getIndex(const T& link)
+        {
+            iterator pos = find(link);
+
+            return pos == end() ? -1 : (int16_t)(pos - begin());
+        }
+
+
+        bool contains(const T& link)
+        {
+            iterator pos = find(link);
+            return pos != end();
+        }
 
     private:
-        iterator find(const Link& link);
+        iterator find(const T& link)
+        {
+            return std::find(begin(), end(), link);
+        }
     };
+
+    typedef LinkListTemplate<Link> LinkList;
+    typedef LinkListTemplate<Link*> LinkPointerList;
 
 } // namespace e3
 
