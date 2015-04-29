@@ -1,13 +1,9 @@
 
 #pragma once
 
-#include <string>
-#include <map>
-
 #include "JuceHeader.h"
 #include "core/Module.h"
 #include "core/Link.h"
-#include "gui/Selection.h"
 
 
 namespace e3 {
@@ -17,18 +13,19 @@ namespace e3 {
     class PortComponent;
 
 
-    class ModuleComponent : public Component, public SelectableItem
+    class ModuleComponent : public Component
     {
     public:
         ModuleComponent(ModulePanel* owner, Module* module, bool collapsed);
 
         void paint(Graphics& g) override;
         void resized() override;
-        void select(bool doSelect) override;
+        void select(bool doSelect);
+        bool isSelected() const     { return selected_; }
 
-        void beginDrag(const MouseEvent& e) override;
-        void continueDrag(const MouseEvent& e) override;
-        void endDrag(const MouseEvent& e) override;
+        void beginDrag(const MouseEvent& e);
+        void continueDrag(const MouseEvent& e);
+        void endDrag(const MouseEvent& e);
 
         void mouseDoubleClick(const MouseEvent& e) override;
 
@@ -36,6 +33,7 @@ namespace e3 {
         //void moveTo(Rectangle<int>& r);
         void createPorts();
         PortComponent* getPort(int portId, PortType portType);
+        PortComponent* getPort(Link* link, PortType portType);
         void getPortPosition(int portId, PortType portType, Point<int>& pos);
         //void collapseOrExpand(bool collapse);
         //bool isCollapsed();

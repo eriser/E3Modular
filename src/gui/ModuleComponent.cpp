@@ -100,6 +100,12 @@ namespace e3 {
     }
 
 
+    PortComponent* ModuleComponent::getPort(Link* link, PortType portType)
+    {
+        return panel_->getPort(link, portType);
+    }
+
+
     void ModuleComponent::getPortPosition(int portId, PortType portType, Point<int>& pos)
     {
         if (collapsed_ == false)
@@ -228,7 +234,7 @@ namespace e3 {
         if (doSelect != isSelected()) {
             panel_->updateWiresForModule(this, doSelect);
         }
-        SelectableItem::select(doSelect);
+        selected_ = doSelect;
     }
 
 

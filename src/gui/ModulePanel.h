@@ -4,7 +4,7 @@
 #include <cstdint>
 #include "JuceHeader.h"
 #include "core/Port.h"
-#include "gui/Selection.h"
+#include "gui/ModuleSelection.h"
 
 
 namespace e3 {
@@ -17,7 +17,7 @@ namespace e3 {
 
 
     class ModulePanel : public Component,
-                        public LassoSource<SelectableItem*>,
+                        public LassoSource<ModuleComponent*>,
                         public ChangeListener
     {
     public:
@@ -31,8 +31,8 @@ namespace e3 {
         void mouseDrag(const MouseEvent& e) override;
         void mouseUp(const MouseEvent& e) override;
 
-        SelectionManager& getLassoSelection() override;
-        void findLassoItemsInArea(Array<SelectableItem*>& results, const Rectangle<int>& area) override;
+        ModuleSelection& getLassoSelection() override;
+        void findLassoItemsInArea(Array<ModuleComponent*>& results, const Rectangle<int>& area) override;
         void changeListenerCallback(ChangeBroadcaster* broadcaster) override;
 
         void checkSize();
@@ -49,9 +49,9 @@ namespace e3 {
         OwnedArray<ModuleComponent> modules_;
         ScopedPointer<WireManager> wires_;
 
-        LassoComponent<SelectableItem*> lasso_;
-        SelectionManager selection_;
-        SelectableItem* selectedItem_ = nullptr;
+        LassoComponent<ModuleComponent*> lasso_;
+        ScopedPointer<ModuleSelection> selection_;
+        ModuleComponent* selectedModule_ = nullptr;
         bool mouseDownSelectStatus_ = false;
         bool dragging_ = false;
 

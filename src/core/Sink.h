@@ -23,9 +23,9 @@ namespace e3 {
         void reset();
         bool contains(Module* module);
 
-        double zero_ = 0;
-        double* master_ = &zero_;
-        int16_t frameCounter_ = 0;
+        double zero_                 = 0;
+        double* audioOutPointer_    = &zero_;
+        int16_t frameCounter_        = 0;
         uint16_t controlRateDivisor_ = 1;
     };
 
@@ -51,11 +51,8 @@ namespace e3 {
             }
 
             for (int channel = audioBuffer.getNumChannels(); --channel >= 0;)  {
-                audioBuffer.addSample(channel, frame, (float)*master_);  // TODO: use double
+                audioBuffer.addSample(channel, frame, (float)*audioOutPointer_);  // TODO: use double
             }
-
-            //*out1++ = *master_;
-            //*out2++ = *master_;
         }
     }
 

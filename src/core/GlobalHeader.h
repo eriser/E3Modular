@@ -20,48 +20,6 @@
 
 namespace e3 {
 
-    //enum ModuleType {
-    //    kModuleUndefined = -1,
-    //    // system modules
-    //    kModuleMaster    = 0,
-    //    kModuleMidiGate  = 1,
-    //    kModuleMidiPitch = 2,
-    //    kModuleMidiInput = 3,
-    //    // audio
-    //    kModuleSineOscil = 10,
-    //    kModuleAdsrEnv   = 11,
-    //    kModuleDelay     = 12,
-    //};
-
-
-    //enum ProcessingType
-    //{
-    //    kProcessEvent = 1,
-    //    kProcessControl = 2,
-    //    kProcessAudio = 4
-
-    //};
-
-    //enum VoicingType
-    //{
-    //    kMonophonic = 0,
-    //    kPolyphonic = 1
-    //};
-
-    //enum ModuleStyle
-    //{
-    //    kModuleStyleNothing = 0,
-    //    kModuleStyleVisible = 1,
-    //    kModuleStyleLabel = 2
-    //};
-
-
-    //enum PortType
-    //{
-    //    kInport  = 0,
-    //    kOutport = 1
-    //};
-
     enum NumberFormat
     {
         kNumberInt     = 0,

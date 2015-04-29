@@ -15,7 +15,7 @@
 #include <core/BankSerializer.h>
 #include <core/CpuMeter.h>
 #include <modules/ModuleFactory.h>
-#include <modules/Master.h>
+#include <modules/AudioOutTerminal.h>
 #include <modules/SineOscil.h>
 
 
@@ -445,7 +445,7 @@ namespace e3 {
         //----------------------------------------------------------------------------------------
 
         static ModuleType testModuleTypes[] = {
-            kModuleMaster,
+            kModuleAudioOutTerminal,
             kModuleMidiGate,
             kModuleMidiPitch,
             kModuleMidiInput,
@@ -487,7 +487,7 @@ namespace e3 {
             using Module::disconnectPorts;
         };
 
-        class TestableMaster : public Master
+        class TestableAudioOutTerminal : public AudioOutTerminal
         {
         public:
             using Module::connectPort;
@@ -513,21 +513,21 @@ namespace e3 {
             }
 
             ScopedPointer<TestableSineOscil> sine_;
-            ScopedPointer<TestableMaster> master_;
+            ScopedPointer<TestableAudioOutTerminal> audioOutTerminal_;
 
             void connect()
             {
                 sine_ = new TestableSineOscil();
-                master_ = new TestableMaster();
+                audioOutTerminal_ = new TestableAudioOutTerminal();
                 EXPECT_NE(nullptr, sine_);
-                EXPECT_NE(nullptr, master_);
+                EXPECT_NE(nullptr, audioOutTerminal_);
 
                 sine_->id_ = 1;
-                master_->id_ = 0;
+                audioOutTerminal_->id_ = 0;
                 sine_->setNumVoices(1);
-                master_->setNumVoices(1);
+                audioOutTerminal_->setNumVoices(1);
                 sine_->update();
-                master_->update();
+                audioOutTerminal_->update();
 
                 Link link;
                 link.value_ = 1;    // modulation value
@@ -535,7 +535,7 @@ namespace e3 {
                 link.rightModule_ = 0;
                 link.leftPort_ = 0;
                 link.rightPort_ = 0;
-                sine_->connectPort(master_, &link);
+                sine_->connectPort(audioOutTerminal_, &link);
             }
         };
 
@@ -551,7 +551,7 @@ namespace e3 {
 
         TEST_F(ModuleTest, ParameterMap_setDefaultValues)
         {
-            ScopedPointer<Module> module = ModuleFactory::create(kModuleMaster);
+            ScopedPointer<Module> module = ModuleFactory::create(kModuleAudioOutTerminal);
             module->parameters_.setDefaultValues();
 
             Parameter& param = module->parameters_.at(0);
@@ -574,14 +574,14 @@ namespace e3 {
 
         TEST_F(ModuleTest, selectVoiceAdapter)
         {
-            TestableModule master(kModuleMaster, kMonophonic);
+            TestableModule audioOut(kModuleAudioOutTerminal, kMonophonic);
             TestableModule sine(kModuleSineOscil);
 
-            ASSERT_EQ(kMonophonic, master.voicingType_);
+            ASSERT_EQ(kMonophonic, audioOut.voicingType_);
             ASSERT_EQ(kPolyphonic, sine.voicingType_);
             
-            EXPECT_EQ(kAdapterNone, master.selectVoiceAdapter(kMonophonic));
-            EXPECT_EQ(kAdapterMonoToPoly, master.selectVoiceAdapter(kPolyphonic));
+            EXPECT_EQ(kAdapterNone, audioOut.selectVoiceAdapter(kMonophonic));
+            EXPECT_EQ(kAdapterMonoToPoly, audioOut.selectVoiceAdapter(kPolyphonic));
 
             EXPECT_EQ(kAdapterNone, sine.selectVoiceAdapter(kPolyphonic));
             EXPECT_EQ(kAdapterPolyToMono, sine.selectVoiceAdapter(kMonophonic));
@@ -593,7 +593,7 @@ namespace e3 {
             Port* port = sine_->getOutport(0);
             EXPECT_TRUE(port->isConnected());
 
-            master_->disconnectPorts();
+            audioOutTerminal_->disconnectPorts();
             sine_->disconnectPorts();
             EXPECT_FALSE(port->isConnected());
         }
@@ -602,7 +602,7 @@ namespace e3 {
         {
             connect();
             AudioOutport* outport = dynamic_cast<AudioOutport*>(sine_->getOutport(0));
-            AudioInport* inport   = dynamic_cast<AudioInport*>(master_->getInport(0));
+            AudioInport* inport   = dynamic_cast<AudioInport*>(audioOutTerminal_->getInport(0));
 
             outport->putValue(17, 0);
             double value = *inport->getBuffer();
@@ -623,7 +623,7 @@ namespace e3 {
 
             using Instrument::getModule;
             using Instrument::createModuleId;
-            using Instrument::hasMaster;
+            using Instrument::hasAudioOutTerminal;
             using Instrument::connectModule;
         };
 
@@ -676,8 +676,8 @@ namespace e3 {
         {
             Module* m = nullptr;
 
-            uint16_t id = instrument_.createModuleId(kModuleMaster);
-            EXPECT_EQ(kModuleMaster, id);
+            uint16_t id = instrument_.createModuleId(kModuleAudioOutTerminal);
+            EXPECT_EQ(kModuleAudioOutTerminal, id);
 
             // erase single element and append new element
             int n = instrument_.getNumModules();
@@ -692,7 +692,6 @@ namespace e3 {
                 EXPECT_TRUE(testModuleIdsAreUnique(instrument_));
             }
             
-            // erase all elements but kModuleMaster and append new element
             instrument_.deleteModules();
             m = instrument_.createAndAddModule(kModuleMidiInput);
 
@@ -700,9 +699,9 @@ namespace e3 {
             EXPECT_EQ(1, m->id_);
         }
 
-        TEST_F(InstrumentTest, hasMaster)
+        TEST_F(InstrumentTest, hasAudioOutTerminal)
         {
-            EXPECT_TRUE(instrument_.hasMaster());
+            EXPECT_TRUE(instrument_.hasAudioOutTerminal());
         }
 
 
@@ -796,34 +795,34 @@ namespace e3 {
                 EXPECT_EQ(32, instrument->numVoices_);
                 ASSERT_EQ(4, instrument->getNumModules());
 
-                Module* master = instrument->getModule(0);
-                Module* input  = instrument->getModule(1);
-                Module* sine   = instrument->getModule(2);
-                Module* adsr   = instrument->getModule(3);
+                Module* audioOut = instrument->getModule(0);
+                Module* input    = instrument->getModule(1);
+                Module* sine     = instrument->getModule(2);
+                Module* adsr     = instrument->getModule(3);
 
-                EXPECT_NE(nullptr, master);
+                EXPECT_NE(nullptr, audioOut);
                 EXPECT_NE(nullptr, input);
                 EXPECT_NE(nullptr, sine);
                 EXPECT_NE(nullptr, adsr);
 
-                EXPECT_EQ(kMonophonic, master->voicingType_);
+                EXPECT_EQ(kMonophonic, audioOut->voicingType_);
                 EXPECT_EQ(kPolyphonic, input->voicingType_);
                 EXPECT_EQ(kPolyphonic, sine->voicingType_);
                 EXPECT_EQ(kPolyphonic, adsr->voicingType_);
 
-                EXPECT_EQ(1, master->inports_.size());
+                EXPECT_EQ(1, audioOut->inports_.size());
                 EXPECT_EQ(2, input->outports_.size());
                 EXPECT_EQ(3, sine->inports_.size());
                 EXPECT_EQ(1, sine->outports_.size());
                 EXPECT_EQ(2, adsr->inports_.size());
                 EXPECT_EQ(1, adsr->outports_.size());
 
-                EXPECT_EQ("Master", master->label_);
+                EXPECT_EQ("AudioOut", audioOut->label_);
                 EXPECT_EQ("MidiInput", input->label_);
                 EXPECT_EQ("Sine", sine->label_);
                 EXPECT_EQ("ADSR", adsr->label_);
 
-                EXPECT_EQ(kModuleMaster, master->moduleType_);
+                EXPECT_EQ(kModuleAudioOutTerminal, audioOut->moduleType_);
                 EXPECT_EQ(kModuleMidiInput, input->moduleType_);
                 EXPECT_EQ(kModuleSineOscil, sine->moduleType_);
                 EXPECT_EQ(kModuleAdsrEnv, adsr->moduleType_);

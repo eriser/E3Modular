@@ -48,9 +48,6 @@
     <ClInclude Include="..\..\src\modules\Envelopes.h">
       <Filter>src\modules</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\modules\Master.h">
-      <Filter>src\modules</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\modules\MidiModules.h">
       <Filter>src\modules</Filter>
     </ClInclude>
@@ -147,11 +144,14 @@
     <ClInclude Include="..\..\src\gui\ModulePanel.h">
       <Filter>src\gui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\Selection.h">
-      <Filter>src\gui</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\gui\Wires.h">
       <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\ModuleSelection.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\modules\AudioOutTerminal.h">
+      <Filter>src\modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -192,9 +192,6 @@
       <Filter>src\modules</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\modules\Envelopes.cpp">
-      <Filter>src\modules</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\modules\Master.cpp">
       <Filter>src\modules</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\modules\MidiModules.cpp">
@@ -277,6 +274,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\gui\Wires.cpp">
       <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\modules\AudioOutTerminal.cpp">
+      <Filter>src\modules</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

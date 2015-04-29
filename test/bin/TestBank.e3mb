@@ -3,7 +3,7 @@
 <bank name="test" instrument="-1309405843">
   <instrument name="instrument_0" hash="-1309405843" category="default" comment="das einzig wahre" voices="32">
     <modules>
-        <module id="0" label="Master" type="0" poly="0">
+        <module id="0" label="AudioOut" type="0" poly="0">
           <param id="0" value="1"/>
         </module>
         <module id="1" label="MidiInput" type="3" poly="1">

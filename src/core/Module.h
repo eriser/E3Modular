@@ -22,16 +22,16 @@ namespace e3 {
     typedef void (Module::*ProcessFunctionPointer)(void) throw();
 
     enum ModuleType {
-        kModuleUndefined = -1,
+        kModuleUndefined        = -1,
         // system modules
-        kModuleMaster = 0,
-        kModuleMidiGate = 1,
-        kModuleMidiPitch = 2,
-        kModuleMidiInput = 3,
+        kModuleAudioOutTerminal = 0,
+        kModuleMidiGate         = 1,
+        kModuleMidiPitch        = 2,
+        kModuleMidiInput        = 3,
         // audio
-        kModuleSineOscil = 10,
-        kModuleAdsrEnv = 11,
-        kModuleDelay = 12,
+        kModuleSineOscil        = 10,
+        kModuleAdsrEnv          = 11,
+        kModuleDelay            = 12,
     };
 
 

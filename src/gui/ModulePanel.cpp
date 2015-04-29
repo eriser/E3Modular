@@ -14,9 +14,11 @@ namespace e3 {
 
     ModulePanel::ModulePanel(EditorPanel* owner) : 
         owner_(owner),
-        wires_(new WireManager(this))
+        selection_(new ModuleSelection()),
+        wires_(new WireManager())
     {      
-        selection_.addChangeListener(this);
+        selection_->addChangeListener(this);
+        wires_->addChangeListener(this);
     }
 
 
@@ -66,8 +68,6 @@ namespace e3 {
             outport->connect();
 
             wires_->addWire(outport->getPortPosition(), inport->getPortPosition(), link);
-
-            //ModuleComponent* source = getModule(link->leftModule_);
         }
     }
 
@@ -77,19 +77,20 @@ namespace e3 {
         Colour bkgndCol = findColour(Style::kContentBackground1ColourId);
         g.fillAll(bkgndCol);
 
-        //if (wireData_.wire_) {                                                     // draw the wire, that is just being created
-        //    wireData_.wire_->draw(g);
-        //}
         wires_->paint(g);
     }
 
 
     void ModulePanel::mouseDown(const MouseEvent& e)
     {
-        selectedItem_          = getModuleAt(e.getMouseDownPosition());
-        mouseDownSelectStatus_ = selection_.addToSelectionOnMouseDown(selectedItem_, e.mods);
+        Point<int> pos = e.getMouseDownPosition();
 
-        if (selection_.getNumSelected() == 0)
+        wires_->selectWiresInArea(Rectangle<int>(pos.x - 1, pos.y - 1, 2, 2));
+
+        selectedModule_        = getModuleAt(pos);
+        mouseDownSelectStatus_ = selection_->addToSelectionOnMouseDown(selectedModule_, e.mods);
+
+        if (selection_->getNumSelected() == 0)
         {
             addChildComponent(lasso_);
             lasso_.beginLasso(e, this);
@@ -97,7 +98,7 @@ namespace e3 {
         }
         else
         {
-            selection_.beginDrag(e);
+            selection_->beginDrag(e);
             dragging_ = true;
         }
     }
@@ -107,7 +108,7 @@ namespace e3 {
     {
         if(dragging_) 
         {
-            selection_.continueDrag(e);
+            selection_->continueDrag(e);
             repaint();
         } 
         else {
@@ -120,7 +121,7 @@ namespace e3 {
     void ModulePanel::mouseUp(const MouseEvent& e)
     {
         if (dragging_) {
-            selection_.endDrag(e);
+            selection_->endDrag(e);
         }  
         else {
             lasso_.endLasso();
@@ -128,21 +129,14 @@ namespace e3 {
         }
 
         bool wasDragging = dragging_ && e.getMouseDownPosition() != e.getPosition();
-        selection_.addToSelectionOnMouseUp(selectedItem_, e.mods, wasDragging, mouseDownSelectStatus_);
+        selection_->addToSelectionOnMouseUp(selectedModule_, e.mods, wasDragging, mouseDownSelectStatus_);
         dragging_ = false;
     }
 
 
-    void ModulePanel::findLassoItemsInArea(Array<SelectableItem*>& results, const Rectangle<int>& area)
+    void ModulePanel::findLassoItemsInArea(Array<ModuleComponent*>& results, const Rectangle<int>& area)
     {
-        for (int i = 0; i < wires_->getNumWires(); ++i)
-        {
-            Wire* wire      = wires_->getWire(i);
-            bool selectWire = wire->hitTest(area);
-
-            //selectWire ? results.addIfNotAlreadyThere(wire) : results.removeAllInstancesOf(wire);
-            wire->select(selectWire);
-        }
+        wires_->selectWiresInArea(area);
 
         for (int i = 0; i < modules_.size(); ++i)
         {
@@ -156,27 +150,15 @@ namespace e3 {
     }
 
 
-    SelectionManager& ModulePanel::getLassoSelection()
+    ModuleSelection& ModulePanel::getLassoSelection()
     {
-        return selection_;
+        return *selection_;
     }
 
 
-    void ModulePanel::changeListenerCallback(ChangeBroadcaster* broadcaster)
+    void ModulePanel::changeListenerCallback(ChangeBroadcaster*)
     {
-        ASSERT(broadcaster == &selection_);
-        int numSelected = selection_.getNumSelected();
-        TRACE("ModulePanel::changeListenerCallback: num selected: %d\n", numSelected);
-
-        //for (int i = 0; i < selection_.getNumSelected(); ++i)       // SelectableItem set doesn't select the items
-        //{
-        //    SelectableItem* item    = selection_.getSelectedItem(i);
-        //    ModuleComponent* module = dynamic_cast<ModuleComponent*>(item);
-        //    if (module != nullptr) {
-        //        wires_->updateWiresForModule(module);
-        //    }
-        //}
-        repaint();  // TODO: get bounding rect of all selected items to mimize painting
+        repaint();
     }
 
 
@@ -251,7 +233,8 @@ namespace e3 {
             getModule(link->leftModule_);
         ASSERT(module != nullptr);
 
-        if (module) {
+        if (module) 
+        {
             PortComponent* port = (portType == kInport) ?
                 module->getPort(link->rightPort_, kInport) :
                 module->getPort(link->leftPort_, kOutport);

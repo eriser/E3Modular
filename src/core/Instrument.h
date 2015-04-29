@@ -59,7 +59,7 @@ namespace e3 {
         int hash_;
 
     protected:
-        bool hasMaster()    { return nullptr != getModule(kModuleMaster); }
+        bool hasAudioOutTerminal();
         void connectModule(Module* target);
         uint16_t createModuleId(ModuleType type);
 

@@ -1,18 +1,18 @@
 
 
-#include "modules/Master.h"
+#include "modules/AudioOutTerminal.h"
 
 
 namespace e3 {
 
-    Master::Master() : Module(
-        kModuleMaster,
-        "Master",
+    AudioOutTerminal::AudioOutTerminal() : Module(
+        kModuleAudioOutTerminal,
+        "AudioOut",
         kMonophonic,
         kProcessAudio) 
     {
         addInport(0, "In", &audioInport_);
-        processFunction_ = static_cast< ProcessFunctionPointer >(&Master::processAudio);
+        processFunction_ = static_cast< ProcessFunctionPointer >(&AudioOutTerminal::processAudio);
        
         Parameter paramVolume(kParamVolume, "Volume", kControlSlider, 0.35);
         paramVolume.numberFormat_ = kNumberDecibel;
@@ -21,7 +21,7 @@ namespace e3 {
     }
 
     
-    void Master::updateInports()
+    void AudioOutTerminal::updateInports()
     {
         ASSERT(numVoices_ == 1);
         audioInport_.setNumVoices(numVoices_);
@@ -29,7 +29,7 @@ namespace e3 {
     }
 
 
-    void Master::setParameter(uint16_t paramId, double value, double, int16_t)
+    void AudioOutTerminal::setParameter(uint16_t paramId, double value, double, int16_t)
     {
         switch (paramId) {
         case kParamVolume: volume_ = value; break;
@@ -37,7 +37,7 @@ namespace e3 {
     }
 
 
-    void Master::processAudio() throw()
+    void AudioOutTerminal::processAudio() throw()
     {
         double input = *audioInportPointer_;
         *audioInportPointer_ = 0.0f;

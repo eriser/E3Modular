@@ -474,7 +474,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\PreferencesPanel.h" />
-    <ClInclude Include="..\..\src\gui\Selection.h" />
+    <ClInclude Include="..\..\src\gui\ModuleSelection.h" />
     <ClInclude Include="..\..\src\gui\SetupPanel.h" />
     <ClInclude Include="..\..\src\gui\TabComponent.h" />
     <ClInclude Include="..\..\src\gui\TableComponent.h" />
@@ -485,7 +485,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\gui\Wires.h" />
     <ClInclude Include="..\..\src\modules\Delay.h" />
     <ClInclude Include="..\..\src\modules\Envelopes.h" />
-    <ClInclude Include="..\..\src\modules\Master.h" />
+    <ClInclude Include="..\..\src\modules\AudioOutTerminal.h" />
     <ClInclude Include="..\..\src\modules\MidiModules.h" />
     <ClInclude Include="..\..\src\modules\ModuleFactory.h" />
     <ClInclude Include="..\..\src\modules\SineOscil.h" />
@@ -566,7 +566,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\gui\Wires.cpp" />
     <ClCompile Include="..\..\src\modules\Delay.cpp" />
     <ClCompile Include="..\..\src\modules\Envelopes.cpp" />
-    <ClCompile Include="..\..\src\modules\Master.cpp" />
+    <ClCompile Include="..\..\src\modules\AudioOutTerminal.cpp" />
     <ClCompile Include="..\..\src\modules\MidiModules.cpp" />
     <ClCompile Include="..\..\src\modules\ModuleFactory.cpp" />
     <ClCompile Include="..\..\src\modules\SineOscil.cpp" />

@@ -2,7 +2,6 @@
 #pragma once
 
 #include "JuceHeader.h"
-#include "gui/Selection.h"
 
 namespace e3 {
 
@@ -15,7 +14,7 @@ namespace e3 {
     // class Wire
     //--------------------------------------------------------------
 
-    class Wire : public SelectableItem
+    class Wire
     {
         friend class WireManager;
 
@@ -25,6 +24,9 @@ namespace e3 {
         bool hitTest(const Rectangle<int>& area);
         void getBoundingRect(Rectangle<int>& r);
 
+        void select(bool doSelect) { selected_ = doSelect; }
+        bool isSelected()          { return selected_; }
+
         void paint(Graphics& g);
 
     protected:
@@ -33,6 +35,7 @@ namespace e3 {
         Point<int> first_, last_;
         Link* link_;
         WireManager* manager_;
+        bool selected_ = false;
     };
 
 
@@ -40,22 +43,19 @@ namespace e3 {
     // class WireManager
     //--------------------------------------------------------------
 
-    class WireManager
+    class WireManager : public ChangeBroadcaster
     {
     public:
-        WireManager(ModulePanel* owner);
-
         void addWire(Point<int> first, Point<int> last, Link* link);
         int getNumWires() const;
         Wire* getWire(int index) const;
 
-        //void hitTest(Array<SelectableItem*>& results, const Rectangle<int>& area);
+        void selectWiresInArea(const Rectangle<int>& area);
         void updateWiresForModule(ModuleComponent* module, bool selectWire);
         void paint(Graphics& g);
 
     protected:
         OwnedArray<Wire> wires_;
-        ModulePanel* panel_;
     };
 
 

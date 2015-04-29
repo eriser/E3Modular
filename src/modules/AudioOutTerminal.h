@@ -7,11 +7,11 @@
 
 namespace e3 {
 
-    class Master : public Module 
+    class AudioOutTerminal : public Module 
     {
     public:
-        Master();
-        ~Master() override {}
+        AudioOutTerminal();
+        ~AudioOutTerminal() override {}
 
         void updateInports() override;
         void setParameter(uint16_t paramId, double value, double modulation = 0, int16_t voice = -1) override;

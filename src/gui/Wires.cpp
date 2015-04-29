@@ -92,10 +92,6 @@ namespace e3 {
     // class WireManager
     //--------------------------------------------------------------
 
-    WireManager::WireManager(ModulePanel* owner) : panel_(owner)
-    {}
-
-
     void WireManager::addWire(Point<int> first, Point<int> last, Link* link)
     {
         Wire* wire = new Wire(first, last, link, this);
@@ -115,20 +111,25 @@ namespace e3 {
     }
 
 
-    //void WireManager::hitTest(Array<SelectableItem*>& results, const Rectangle<int>& area)
-    //{
-    //    for (int i = 0; i < wires_.size(); ++i)
-    //    {
-    //        Wire* wire = wires_.getUnchecked(i);
-    //        if (wire->hitTest(area))
-    //        {
-    //            results.addIfNotAlreadyThere(wire);
-    //        }
-    //        else {
-    //            results.removeAllInstancesOf(wire);
-    //        }
-    //    }
-    //}
+    void WireManager::selectWiresInArea(const Rectangle<int>& area)
+    {
+        ModifierKeys modifiers = ModifierKeys::getCurrentModifiers();
+        bool needsRepaint = false;
+
+        for (int i = 0; i < wires_.size(); ++i)
+        {
+            Wire* wire       = getWire(i);
+            bool selectWire  = wire->hitTest(area);
+            needsRepaint    |= selectWire != wire->isSelected();
+
+            if (modifiers.isCtrlDown() && selectWire == true || !modifiers.isCtrlDown()) {
+                wire->select(selectWire);
+            }
+        }
+        if (needsRepaint) {
+            sendChangeMessage();
+        }
+    }
 
 
     void WireManager::updateWiresForModule(ModuleComponent* module, bool selectWire)
@@ -141,34 +142,20 @@ namespace e3 {
 
             if (link->leftModule_ == id || link->rightModule_ == id) 
             {
-                PortComponent* leftPort  = panel_->getPort(link, kOutport);
-                PortComponent* rightPort = panel_->getPort(link, kInport);
+                PortComponent* leftPort  = module->getPort(link, kOutport);
+                PortComponent* rightPort = module->getPort(link, kInport);
 
                 if (leftPort && rightPort)
                 {
                     Point<int> first, last;
                     wire->first_ = leftPort->getPortPosition();
-                    wire->last_ = rightPort->getPortPosition();
+                    wire->last_  = rightPort->getPortPosition();
 
                     wire->select(selectWire);
                 }
             }
         }
     }
-
-
-    //void WireManager::drag(Wire* wire)
-    //{
-    //    PortComponent* leftPort  = panel_->getPort(wire->link_, kOutport);
-    //    PortComponent* rightPort = panel_->getPort(wire->link_, kInport);
-
-    //    if (leftPort && rightPort)
-    //    { 
-    //        Point<int> first, last;
-    //        wire->first_ = leftPort->getPortPosition();
-    //        wire->last_  = rightPort->getPortPosition();
-    //    }
-    //}
 
 
     void WireManager::paint(Graphics& g)

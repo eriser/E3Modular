@@ -197,11 +197,11 @@ namespace e3 {
 
     uint16_t Instrument::createModuleId(ModuleType type)
     {
-        if (type == kModuleMaster) {
-            return (uint16_t)kModuleMaster;
+        if (type == kModuleAudioOutTerminal) {
+            return (uint16_t)kModuleAudioOutTerminal;
         }
 
-        uint16_t minId = kModuleMaster + 1;
+        uint16_t minId = kModuleAudioOutTerminal + 1;
         uint16_t maxId = (uint16_t)modules_.size();
         uint16_t id    = minId;
 
@@ -239,6 +239,13 @@ namespace e3 {
         }
         return false;
     }
+
+
+    bool Instrument::hasAudioOutTerminal()    
+    { 
+        return (getModule(kModuleAudioOutTerminal) != nullptr); 
+    }
+
 
 
 }  // namespace e3

@@ -3,7 +3,7 @@
 
 #include "core/Module.h"
 #include "core/Instrument.h"
-#include "modules/Master.h"
+#include "modules/AudioOutTerminal.h"
 #include "core/Sink.h"
 
 
@@ -18,21 +18,21 @@ namespace e3 {
     void Sink::reset()
     {
         ModuleList::clear();
-        master_ = &zero_;
+        audioOutPointer_ = &zero_;
     }
 
     
     void Sink::compile(Instrument* instrument)
     {
         reset();
-        //instrument->connectModules();
 
-        Master* master = dynamic_cast<Master*>(instrument->getModule(kModuleMaster));
-        if (nullptr == master)    // nothing to do
+        AudioOutTerminal* audioOut = dynamic_cast<AudioOutTerminal*>(instrument->getModule(kModuleAudioOutTerminal));
+        if (nullptr == audioOut)    // nothing to do
             return;
 
-        bool sentinel = false;
-        Module* module = master;
+        bool sentinel  = false;
+        Module* module = audioOut;
+
         std::queue< Module* > queue;
         queue.push(module);
 
@@ -60,28 +60,12 @@ namespace e3 {
                         queue.push(next);                 // enqueue sources of current node
                     }
                 }
-
-                
-                //for (size_t i = 0; i < module->outports_.size(); ++i)
-                //{
-                //    Outport* port = module->outports_[i];
-                //    const LinkList& targets = port->getTargets();
-
-                //    for (size_t i = 0; i < targets.size(); ++i)
-                //    {
-                //        const Link& link = targets.at(i);
-                //        Module* next = instrument->getModule(link.leftModule_);
-                //        if (next && next != module)
-                //            queue.push(next);                 // enqueue sources of current node
-                //    }
-                //}
             }
             queue.pop();
         }
 
         reverse(begin(), end());
-        master_ = &master->value_;
-        //master_ = &(dynamic_cast< Master* >(master)->value_);
+        audioOutPointer_ = &audioOut->value_;
     }
 
 

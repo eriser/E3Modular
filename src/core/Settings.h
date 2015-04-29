@@ -89,14 +89,6 @@ namespace e3 {
             "<Color argb = 'ffa21d08' name = 'moduleBorderFocused' />"
             "<Color argb = 'ff777777' name = 'wire1' />"
             "<Color argb = 'ffd08930' name = 'wire2' />"
-            "<Color argb = 'ffa21d08' name = 'master' />"
-            "<Color argb = 'ffbebdbb' name = 'masterPort1' />"
-            "<Color argb = 'ffcb4f3b' name = 'masterPort2' />"
-            "<Color argb = 'ffbebdbb' name = 'masterText1' />"
-            "<Color argb = 'ffdedede' name = 'masterText2' />"
-            "<Color argb = 'ffa21d08' name = 'masterFrame1' />"
-            "<Color argb = 'ffdadada' name = 'masterFrame2' />"
-            "<Color argb = 'ffeeeeee' name = 'masterFrame3' />"
             "</ Style>";
     };
 } // namespace e3 
