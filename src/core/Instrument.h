@@ -35,8 +35,8 @@ namespace e3 {
         void deleteModule(Module* module);
 
         void addLink(const Link& link);
-        const LinkList& getLinks() const              { return links_; }
-        void getLinksForModule(int16_t moduleId, LinkPointerList& list);
+        LinkList& getLinks()              { return links_; }
+        void getLinksForModule(int16_t moduleId, LinkPointerList& list, PortType portType);
 
         void setNumUnison(uint16_t numUnison)         { numUnison_    = numUnison; }
         void setUnisonSpread(uint16_t unisonSpread)   { unisonSpread_ = unisonSpread; }

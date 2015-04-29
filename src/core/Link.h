@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include "core/Port.h"
 #include "core/Parameter.h"
 
 
@@ -115,6 +116,22 @@ namespace e3 {
             iterator pos = find(link);
             return pos != end();
         }
+
+        
+        //void getLinksForModule(int16_t moduleId, LinkListTemplate<Link*>& list, PortType portType)
+        //{
+        //    for (LinkList::iterator it = begin(); it != end(); ++it)
+        //    {
+        //        T& link = *it;
+        //        if ((portType == kInport || portType == kPortUndefined) && link.rightModule_ == moduleId) {
+        //            list.add(&link);
+        //        }
+        //        else if ((portType == kOutport || portType == kPortUndefined) && link.leftModule_ == moduleId) {
+        //            list.add(&link);
+        //        }
+        //    }
+        //}
+
 
     private:
         iterator find(const T& link)

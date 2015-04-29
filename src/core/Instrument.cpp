@@ -39,35 +39,35 @@ namespace e3 {
     }
 
 
-    void Instrument::deleteModule(Module* module)
+    void Instrument::deleteModule(Module* module)       // TODO: remove all links to and from this module
     {
-        ModuleList targets;
+        //ModuleList targets;
         //getTargetModules(module, &targets);
 
         // remove the links at the targets
-        for (int16_t i = 0; i < (int16_t)targets.size(); i++)        
-        {
-            Module* next = targets.at(i);
-            for (uint16_t j = 0; j < next->links_.size();)
-            {
-                Link& link = next->getLink(j);
-                if (link.leftModule_ == module->id_) {
-                    next->links_.remove(link);
-                }
-                else j++;
-            }
-        }
+        //for (int16_t i = 0; i < (int16_t)targets.size(); i++)        
+        //{
+        //    Module* next = targets.at(i);
+        //    for (uint16_t j = 0; j < next->links_.size();)
+        //    {
+        //        Link& link = next->getLink(j);
+        //        if (link.leftModule_ == module->id_) {
+        //            next->links_.remove(link);
+        //        }
+        //        else j++;
+        //    }
+        //}
 
-        // disconnect ports of own links
-        for (int16_t i = 0; i < (int16_t)module->links_.size();)     
-        {
-            Link& link = module->getLink(i);
-            if (link.leftModule_ == module->id_)
-            {
-                module->links_.remove(link);
-            }
-            else i++;
-        }
+        //// disconnect ports of own links
+        //for (int16_t i = 0; i < (int16_t)module->links_.size();)     
+        //{
+        //    Link& link = module->getLink(i);
+        //    if (link.leftModule_ == module->id_)
+        //    {
+        //        module->links_.remove(link);
+        //    }
+        //    else i++;
+        //}
 
         // remove and delete module
         for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
@@ -87,12 +87,16 @@ namespace e3 {
     }
 
 
-    void Instrument::getLinksForModule(int16_t moduleId, LinkPointerList& list)
+    void Instrument::getLinksForModule(int16_t moduleId, LinkPointerList& list, PortType portType)
     {
+        //links_.getLinksForModule(moduleId, list, portType);
         for (LinkList::iterator it = links_.begin(); it != links_.end(); ++it)
         {
             Link& link = *it;
-            if (link.rightModule_ == moduleId) {
+            if ((portType == kInport || portType == kPortUndefined) && link.rightModule_ == moduleId) {
+                list.add(&link);
+            }
+            else if ((portType == kOutport || portType == kPortUndefined) && link.leftModule_ == moduleId) {
                 list.add(&link);
             }
         }

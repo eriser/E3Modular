@@ -15,7 +15,7 @@
 namespace e3 {
 
     ModuleComponent::ModuleComponent(ModulePanel* owner, Module* module, bool collapsed) :
-        owner_(owner),
+        panel_(owner),
         module_(module),
         collapsed_(collapsed)
     {
@@ -24,14 +24,6 @@ namespace e3 {
         calculateSize();
         //setVisible((module != nullptr) && (module->style_ & kModuleStyleVisible));
         //setColors();
-    }
-
-
-    ModuleComponent::~ModuleComponent()
-    {
-        for (WireMap::iterator it = wires_.begin(); it != wires_.end(); it++) {
-            delete it->second;
-        }
     }
 
 
@@ -68,8 +60,8 @@ namespace e3 {
     void ModuleComponent::continueDrag(const MouseEvent& e) 
     {
         dragger_.dragComponent(this, e, &dragConstrainer_);
-        updateWires();
-        owner_->checkSize();
+        panel_->checkSize();
+        panel_->updateWiresForModule(this, isSelected());
     }
 
 
@@ -77,7 +69,7 @@ namespace e3 {
     {
         Point<int> pos = getPosition();
         if (positionBeforeDragging_ != pos) {
-            owner_->storeModulePosition(module_->id_, pos);
+            panel_->storeModulePosition(module_->id_, pos);
         }
     }
 
@@ -115,7 +107,7 @@ namespace e3 {
             PortComponent* port = getPort(portId, portType);
             ASSERT(port);
             if (port != nullptr) {
-                pos = port->getPosition();
+                pos = port->getPortPosition();
             }
         }
         else
@@ -124,7 +116,7 @@ namespace e3 {
             pos.y = bounds.getY() + bounds.getHeight() / 2;
             pos.x = (portType == kInport) ? bounds.getX() + 1 : bounds.getRight() - 1;
 
-            Rectangle<int> rcParent = owner_->getLocalBounds();
+            Rectangle<int> rcParent = panel_->getLocalBounds();
             pos.addXY(-rcParent.getX(), -rcParent.getY());
         }
     }
@@ -192,204 +184,56 @@ namespace e3 {
     }
 
 
-    void ModuleComponent::createWires()
-    {
-        for (uint16_t i = 0; i < module_->links_.size(); i++)
-        {
-            Link& link             = module_->getLink(i);
-            PortComponent* inport  = getPort(link.rightPort_, kInport);
-            PortComponent* outport = owner_->getPort(link, kOutport);
-
-            inport->connect();
-            outport->connect();
-
-            ModuleComponent* source = owner_->getModule(link.leftModule_);
-            if (source != nullptr)
-            {
-                Wire* wire = new Wire(outport->getPosition(), inport->getPosition());
-                addWire(link, wire);
-            }
-        }
-    }
-
-
-    void ModuleComponent::addWire(const Link& link, Wire* wire)
-    {
-        WireMap::iterator pos = wires_.find(link);
-        ASSERT(pos == wires_.end());
-        ASSERT(wire);
-
-        wires_.insert(WireMap::value_type(link, wire));
-    }
-
-
-    Wire* ModuleComponent::getWire(const Link& link)
-    {
-        WireMap::iterator pos = wires_.find(link);
-        return (pos != wires_.end()) ? pos->second : nullptr;
-    }
-
-
-    void ModuleComponent::hitTest(Array<SelectableItem*>& results, const Rectangle<int>& area)
-    {
-        Rectangle<int> bounds = getBounds();
-        if (bounds.intersects(area)) {
-            results.addIfNotAlreadyThere(this);
-        }
-        else {
-            results.removeAllInstancesOf(this);
-        }
-        hitTestWires(results, area);
-    }
-
-
-    void ModuleComponent::hitTestWires(Array<SelectableItem*>& results, const Rectangle<int>& area)
-    {
-        for (WireMap::iterator it = wires_.begin(); it != wires_.end() && isVisible(); it++)
-        {
-            Wire* wire = it->second;
-            if (wire->hitTest(area))
-            {
-                results.addIfNotAlreadyThere(wire);
-            }
-            else {
-                results.removeAllInstancesOf(wire);
-            }
-        }
-    }
-
-
-    void ModuleComponent::paintWires(Graphics& g)
-    {
-        for (WireMap::iterator it = wires_.begin(); it != wires_.end() && isVisible(); it++) {
-            it->second->paint(g);
-        }
-    }
-
-
-    void ModuleComponent::updateWires()
-    {
-        for (uint16_t i = 0; i < module_->links_.size() && isVisible(); i++)
-        {
-            const Link& link = module_->getLink(i);
-            Wire* wire = getWire(link);
-            ASSERT(wire);
-
-            Point<int> pos;
-            getPortPosition(link.leftPort_, kInport, pos);
-            wire->back() = pos;
-
-            if (link.leftModule_ == module_->id_)     // link to self
-            {
-                getPortPosition(link.leftPort_, kOutport, pos);
-                wire->front() = pos;
-            }
-        }
-    }
-
-
-    //
-    //void ModuleComponent::removeWires(uint16_t targetId)          // remove all wires, from inputs and outputs
+    //void ModuleComponent::createWires()
     //{
-    //    for (uint16_t i = 0; i < data_->links_.size(); i++)      // iterate over all links from and to this box
-    //    {
-    //        Link& link = module_->getLink(i);
+        //for (uint16_t i = 0; i < module_->links_.size(); i++)
+        //{
+        //    Link& link             = module_->getLink(i);
+        //    PortComponent* inport  = getPort(link.rightPort_, kInport);
+        //    PortComponent* outport = panel_->getPort(link, kOutport);
 
-    //        if (link.leftModule_ == targetId) {         // remove wires connected to own inputs
-    //            removeWire(link, kInport);
-    //        }
+        //    inport->connect();
+        //    outport->connect();
 
-    //        if (module_->id_ == targetId)                    // remove wires connected to outputs of other box
-    //        {
-    //            PortComponent* outPort = owner_->getPort(link, kOutport);
-    //            outPort->disconnect(link);
-    //        }
-    //    }
+        //    ModuleComponent* source = panel_->getModule(link.leftModule_);
+        //    if (source != nullptr)
+        //    {
+        //        Wire* wire = new Wire(outport->getPortPosition(), inport->getPortPosition());
+        //        addWire(link, wire);
+        //    }
+        //}
     //}
 
- 
+
+    //void ModuleComponent::addWire(const Link& link, Wire* wire)
+    //{
+    //    WireMap::iterator pos = wires_.find(link);
+    //    ASSERT(pos == wires_.end());
+    //    ASSERT(wire);
+
+    //    wires_.insert(WireMap::value_type(link, wire));
+    //}
+
+
+    //Wire* ModuleComponent::getWire(const Link& link)
+    //{
+    //    WireMap::iterator pos = wires_.find(link);
+    //    return (pos != wires_.end()) ? pos->second : nullptr;
+    //}
+
+
+    void ModuleComponent::select(bool doSelect)
+    {
+        TRACE("ModuleComponent::select doSelect=%d\n", doSelect);
+        if (doSelect != isSelected()) {
+            panel_->updateWiresForModule(this, doSelect);
+        }
+        SelectableItem::select(doSelect);
+    }
+
+
+
     /*
-    void ModuleComponent::removeWire(const Link& linkInfo, PortType portType)
-    {
-        if (portType == kOutport)
-        {
-            ModulePort* outPort = getPort(linkInfo.outputId_, OUT_PORT);
-            outPort->disconnect(linkInfo);
-        }
-        else {
-            ModulePort* inPort = getPort(linkInfo.inputId_, IN_PORT);
-            inPort->disconnect(linkInfo);
-            deleteWire(linkInfo);
-        }
-    }
-
-
-    void ModuleComponent::positionWires(ModuleComponent* movedBox)
-    {
-        uint16_t targetId = movedBox->data_->id_;
-        CPoint pos;
-
-        for (uint16_t i = 0; i < data_->links_.size() && isVisible(); i++)
-        {
-            LinkInfo& linkInfo = data_->getLink(i);
-            Wire* wire = getWire(linkInfo);
-            ASSERT(wire);
-
-            if (movedBox != this) {
-                if (linkInfo.sourceId_ == targetId)
-                {
-                    movedBox->getDockPosition(linkInfo.outputId_, OUT_PORT, pos);
-                    wire->front() = pos;
-                }
-            }
-            else {
-                getDockPosition(linkInfo.inputId_, IN_PORT, pos);
-                wire->back() = pos;
-
-                if (linkInfo.sourceId_ == data_->id_)     // link to self
-                {
-                    getDockPosition(linkInfo.outputId_, OUT_PORT, pos);
-                    wire->front() = pos;
-                }
-            }
-        }
-    }
-
-
-    void ModuleComponent::deleteWire(const LinkInfo& linkInfo)
-    {
-        WireMap::iterator pos = wires_.find(linkInfo);
-        if (pos != wires_.end())
-        {
-            Wire* wire = pos->second;
-            wires_.erase(pos);
-            delete wire;
-        }
-        else ASSERT(false);
-    }
-
-
-    void ModuleComponent::hitTestWires(const CRect& rc, WireMap& map)
-    {
-        for (WireMap::iterator it = wires_.begin(); it != wires_.end() && isVisible(); it++)
-        {
-            Wire* wire = it->second;
-            if (wire->hitTest(rc))
-            {
-                map.insert(WireMap::value_type(it->first, it->second));
-            }
-        }
-    }
-
-
-    void ModuleComponent::moveTo(CRect& r)
-    {
-        setViewSize(r);
-        setMouseableArea(r);
-        data_->setPosition((INT16)r.left, (INT16)r.top);
-    }
-
-
     void ModuleComponent::collapseOrExpand(bool collapse)
     {
         if (collapse != data_->collapsed_)
@@ -398,7 +242,7 @@ namespace e3 {
             setPortVisibility();
             calculateSize();
 
-            owner_->onBoxResized(this);
+            panel_->onBoxResized(this);
         }
     }
 
@@ -489,7 +333,7 @@ namespace e3 {
             pos.y = bounds.getY() + bounds.getHeight() / 2;
             pos.x = (portType == kInport) ? bounds.getX() + 1 : bounds.getRight() - 1;
 
-            Rectangle<int> rcParent = owner_->getLocalBounds();
+            Rectangle<int> rcParent = panel_->getLocalBounds();
             pos.offset(-rcParent.getX(), -rcParent.getY());
         }
     }

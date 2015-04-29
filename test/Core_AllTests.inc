@@ -535,7 +535,6 @@ namespace e3 {
                 link.rightModule_ = 0;
                 link.leftPort_ = 0;
                 link.rightPort_ = 0;
-                master_->addLink(link);
                 sine_->connectPort(master_, &link);
             }
         };
@@ -571,32 +570,6 @@ namespace e3 {
 
             EXPECT_EQ(p1.id_, p2.id_);
             EXPECT_EQ(p1.defaultValue_, p2.defaultValue_);
-        }
-
-        TEST_F(ModuleTest, addAndRemoveLink)
-        {
-            TestableModule module(kModuleMaster);
-            module.id_ = 17;
-            Link link;
-            link.id_ = 19;
-            module.addLink(link);
-
-            EXPECT_EQ(1, module.links_.size());
-            EXPECT_EQ(17, link.rightModule_);
-            EXPECT_EQ(19, link.id_);
-
-            module.removeLink(link);
-            EXPECT_EQ(0, module.links_.size());
-            EXPECT_EQ(1, module.removedLinks_.size());
-
-            link.id_ = 0;
-            EXPECT_TRUE(module.removedLinks_.contains(link));
-
-            link = module.removedLinks_.get(link);
-            EXPECT_EQ(19, link.id_);
-
-            module.addLink(link);
-            EXPECT_EQ(0, module.removedLinks_.size());
         }
 
         TEST_F(ModuleTest, selectVoiceAdapter)
@@ -707,7 +680,8 @@ namespace e3 {
             EXPECT_EQ(kModuleMaster, id);
 
             // erase single element and append new element
-            for (uint16_t i = 1; i < instrument_.getNumModules(); i++)
+            int n = instrument_.getNumModules();
+            for (uint16_t i = 1; i < n; i++)
             {
                 m = instrument_.getModule(i);
                 ASSERT_NE(nullptr, m);
@@ -854,11 +828,6 @@ namespace e3 {
                 EXPECT_EQ(kModuleSineOscil, sine->moduleType_);
                 EXPECT_EQ(kModuleAdsrEnv, adsr->moduleType_);
 
-                ASSERT_EQ(1, master->links_.size());
-                ASSERT_EQ(0, input->links_.size());
-                ASSERT_EQ(1, sine->links_.size());
-                ASSERT_EQ(2, adsr->links_.size());
-
                 const LinkList& links = instrument->getLinks();
                 ASSERT_EQ(links.size(), 4);
                 EXPECT_EQ(links[0].leftModule_, 3);
@@ -877,13 +846,13 @@ namespace e3 {
                 checkMidiParameters(input->parameters_[2]);
                 checkMidiParameters(sine->parameters_[0]);
                 checkMidiParameters(sine->parameters_[1]);
-                checkMidiParameters(sine->links_[0]);
+                checkMidiParameters(instrument->getLinks()[1]);
                 checkMidiParameters(adsr->parameters_[0]);
                 checkMidiParameters(adsr->parameters_[1]);
                 checkMidiParameters(adsr->parameters_[2]);
                 checkMidiParameters(adsr->parameters_[3]);
-                checkMidiParameters(adsr->links_[0]);
-                checkMidiParameters(adsr->links_[1]);
+                checkMidiParameters(instrument->getLinks()[2]);
+                checkMidiParameters(instrument->getLinks()[3]);
 
                 LinkPointerList linksForAdsr;
                 instrument->getLinksForModule(adsr->id_, linksForAdsr);    

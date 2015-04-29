@@ -4,14 +4,13 @@
 #include <cstdint>
 
 #include "JuceHeader.h"
+#include "core/Port.h"
 //#include "core/GlobalHeader.h"
 
 
 namespace e3 {
 
     class Port;
-    //class ModuleComponent;
-
 
     class PortComponent : public Component
     {
@@ -29,7 +28,7 @@ namespace e3 {
         void mouseMove(const MouseEvent& e) override;
 
         bool hitTest(int x, int y) override;
-        Point<int> getPosition();
+        Point<int> getPortPosition();
 
         //bool testDocking(const Point<int>& pos);
         bool startDocking();

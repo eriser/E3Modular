@@ -89,9 +89,9 @@ namespace e3 {
         virtual void setParameter(uint16_t paramId, double value, double modulation = 0.f, int16_t voice = -1) {}
         const Parameter& getParameter(uint16_t parameterId) const;
 
-        void addLink(Link& link);
-        void removeLink(const Link& link);
-        Link& getLink(uint16_t index);
+        //void addLink(Link& link);
+        //void removeLink(const Link& link);
+        //Link& getLink(uint16_t index);
 
         Inport* getInport(uint16_t portId) const;
         Outport* getOutport(uint16_t portId) const;
@@ -114,7 +114,6 @@ namespace e3 {
         ModuleStyle style_;
 
         ParameterMap parameters_;
-        LinkList links_;
         LinkList removedLinks_;
         InportList inports_;
         OutportList outports_;

@@ -140,7 +140,7 @@ namespace e3 {
         }
 
 
-        Point<int> PortComponent::getPosition()
+        Point<int> PortComponent::getPortPosition()
         {
             Point<int> pos;
             pos.x = getPortType() == kInport ? 1 : getRight() - 1;

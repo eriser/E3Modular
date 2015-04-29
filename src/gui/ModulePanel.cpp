@@ -6,12 +6,15 @@
 #include "gui/EditorPanel.h"
 #include "gui/ModuleComponent.h"
 #include "gui/PortComponent.h"
+#include "gui/Wires.h"
 #include "gui/ModulePanel.h"
 
 
 namespace e3 {
 
-    ModulePanel::ModulePanel(EditorPanel* owner) : owner_(owner)
+    ModulePanel::ModulePanel(EditorPanel* owner) : 
+        owner_(owner),
+        wires_(new WireManager(this))
     {      
         selection_.addChangeListener(this);
     }
@@ -44,16 +47,27 @@ namespace e3 {
                         c->setTopLeftPosition(tokens[0].getIntValue(), tokens[1].getIntValue());
                     }
                 }
-                createWires();
+                createWires(instrument);
             }
         }
     }
 
 
-    void ModulePanel::createWires()
+    void ModulePanel::createWires(Instrument* instrument)
     {
-        for (int i = 0; i < modules_.size(); ++i) {
-            modules_[i]->createWires();
+        LinkList& links = instrument->getLinks();
+        for (LinkList::iterator it = links.begin(); it != links.end(); ++it)
+        {
+            Link* link             = &(*it);
+            PortComponent* inport  = getPort(link, kInport);
+            PortComponent* outport = getPort(link, kOutport);
+
+            inport->connect();
+            outport->connect();
+
+            wires_->addWire(outport->getPortPosition(), inport->getPortPosition(), link);
+
+            //ModuleComponent* source = getModule(link->leftModule_);
         }
     }
 
@@ -66,15 +80,13 @@ namespace e3 {
         //if (wireData_.wire_) {                                                     // draw the wire, that is just being created
         //    wireData_.wire_->draw(g);
         //}
-        for (int i = 0; i < modules_.size(); ++i) {     // draw exising wires
-            modules_[i]->paintWires(g);
-        }
+        wires_->paint(g);
     }
 
 
     void ModulePanel::mouseDown(const MouseEvent& e)
     {
-        selectedItem_ = getModuleAt(e.getMouseDownPosition());
+        selectedItem_          = getModuleAt(e.getMouseDownPosition());
         mouseDownSelectStatus_ = selection_.addToSelectionOnMouseDown(selectedItem_, e.mods);
 
         if (selection_.getNumSelected() == 0)
@@ -107,8 +119,7 @@ namespace e3 {
 
     void ModulePanel::mouseUp(const MouseEvent& e)
     {
-        if (dragging_) 
-        {
+        if (dragging_) {
             selection_.endDrag(e);
         }  
         else {
@@ -116,19 +127,31 @@ namespace e3 {
             removeChildComponent(&lasso_);
         }
 
-        selection_.addToSelectionOnMouseUp(selectedItem_, e.mods, false, mouseDownSelectStatus_);
+        bool wasDragging = dragging_ && e.getMouseDownPosition() != e.getPosition();
+        selection_.addToSelectionOnMouseUp(selectedItem_, e.mods, wasDragging, mouseDownSelectStatus_);
         dragging_ = false;
     }
 
 
     void ModulePanel::findLassoItemsInArea(Array<SelectableItem*>& results, const Rectangle<int>& area)
     {
-        for (int i = 0; i < modules_.size(); ++i) 
+        for (int i = 0; i < wires_->getNumWires(); ++i)
         {
-            modules_[i]->hitTest(results, area);
+            Wire* wire      = wires_->getWire(i);
+            bool selectWire = wire->hitTest(area);
+
+            //selectWire ? results.addIfNotAlreadyThere(wire) : results.removeAllInstancesOf(wire);
+            wire->select(selectWire);
         }
-        for (int i = 0; i < results.size(); ++i) {
-            results[i]->select();
+
+        for (int i = 0; i < modules_.size(); ++i)
+        {
+            ModuleComponent* module = modules_.getUnchecked(i);
+            Rectangle<int> bounds   = module->getBounds();
+            bool selectModule       = bounds.intersects(area);
+
+            selectModule ? results.addIfNotAlreadyThere(module) : results.removeAllInstancesOf(module);
+            module->select(selectModule);
         }
     }
 
@@ -142,20 +165,18 @@ namespace e3 {
     void ModulePanel::changeListenerCallback(ChangeBroadcaster* broadcaster)
     {
         ASSERT(broadcaster == &selection_);
-        TRACE("num selected items: %d\n", selection_.getNumSelected());
+        int numSelected = selection_.getNumSelected();
+        TRACE("ModulePanel::changeListenerCallback: num selected: %d\n", numSelected);
 
+        //for (int i = 0; i < selection_.getNumSelected(); ++i)       // SelectableItem set doesn't select the items
+        //{
+        //    SelectableItem* item    = selection_.getSelectedItem(i);
+        //    ModuleComponent* module = dynamic_cast<ModuleComponent*>(item);
+        //    if (module != nullptr) {
+        //        wires_->updateWiresForModule(module);
+        //    }
+        //}
         repaint();  // TODO: get bounding rect of all selected items to mimize painting
-    }
-
-
-    void ModulePanel::deselectAll()
-    {
-        const SelectionManager::ItemArray& a = selection_.getItemArray();
-        for (int i = 0; i < a.size(); ++i) {
-            a[i]->deselect();
-        }
-        //selection_.deselectAll();
-        repaint();
     }
 
 
@@ -204,6 +225,12 @@ namespace e3 {
     }
 
 
+    void ModulePanel::updateWiresForModule(ModuleComponent* module, bool select)
+    {
+        wires_->updateWiresForModule(module, select);
+    }
+
+
     ModuleComponent* ModulePanel::getModule(uint16_t id)
     {
         for (int i = 0; i < modules_.size(); ++i)
@@ -217,16 +244,20 @@ namespace e3 {
     }
 
 
-    PortComponent* ModulePanel::getPort(const Link& link, PortType portType)
+    PortComponent* ModulePanel::getPort(Link* link, PortType portType)
     {
-        PortComponent* port = nullptr;
-        ModuleComponent* module = getModule(link.leftModule_);
+        ModuleComponent* module = (portType == kInport) ? 
+            getModule(link->rightModule_) : 
+            getModule(link->leftModule_);
+        ASSERT(module != nullptr);
+
         if (module) {
-            port = (portType == kInport) ?
-                module->getPort(link.rightPort_, kInport) :
-                module->getPort(link.leftPort_, kOutport);
+            PortComponent* port = (portType == kInport) ?
+                module->getPort(link->rightPort_, kInport) :
+                module->getPort(link->leftPort_, kOutport);
+            return port;
         }
-        return port;
+        return nullptr;
     }
 
 } // namespace e3

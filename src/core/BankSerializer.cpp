@@ -117,7 +117,6 @@ namespace e3 {
                 module->voicingType_ = (VoicingType)e->getIntAttribute("voicing", module->voicingType_);
 
                 readParameters(e, module);
-                readModuleLinks(e, module);
             }
             catch (...) {
                 TRACE("module of type %d could not be created", type);
@@ -161,21 +160,6 @@ namespace e3 {
             catch (const std::out_of_range&) {
                 TRACE("parameter with id %d does not exist for module with id %d", id, module->id_);
             }
-        }
-    }
-
-
-    void BankSerializer::readModuleLinks(XmlElement* parent, Module* module)
-    {
-        forEachXmlChildElementWithTagName(*parent, e, "link")
-        {
-            Link link;
-            link.leftModule_ = (uint16_t)e->getIntAttribute("left_module");
-            link.leftPort_   = (uint16_t)e->getIntAttribute("left_port");
-            link.rightPort_  = (uint16_t)e->getIntAttribute("right_port");
-
-            readParameter(e, link);
-            module->addLink(link);
         }
     }
 
@@ -256,14 +240,8 @@ namespace e3 {
         e->setAttribute("label", module->label_);
         e->setAttribute("type", module->moduleType_);
         e->setAttribute("poly", module->voicingType_);
-        //e->setAttribute("x", module->xPos_);
-        //e->setAttribute("y", module->yPos_);
-        //if (module->collapsed_)
-        //    element->setAttribute("collapsed", module->collapsed_);
 
         writeParameters(e, module);
-        writeLinks(e, module);
-
     }
 
     void BankSerializer::writeParameters(XmlElement* const e, const Module* module)
@@ -294,23 +272,6 @@ namespace e3 {
 
         Parameter defaultParam;
         writeParameter(e, link, defaultParam);
-    }
-
-
-    void BankSerializer::writeLinks(XmlElement* const e, const Module* module)
-    {
-        const LinkList& links = module->links_;
-        for (LinkList::const_iterator it = links.begin(); it != links.end(); it++)
-        {
-            const Link& link = *it;
-            XmlElement* const el = e->createNewChildElement("link");
-            el->setAttribute("left_module", link.leftModule_);
-            el->setAttribute("left_port",   link.leftPort_);
-            el->setAttribute("right_port",  link.rightPort_);
-
-            Parameter defaultParam;
-            writeParameter(el, link, defaultParam);
-        }
     }
 
 

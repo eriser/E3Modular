@@ -50,7 +50,7 @@ namespace e3 {
                     push_back(module);
                 }
                 LinkPointerList links;
-                instrument->getLinksForModule(module->id_, links);
+                instrument->getLinksForModule(module->id_, links, kInport);
 
                 for (LinkPointerList::const_iterator it = links.begin(); it != links.end(); ++it)
                 {

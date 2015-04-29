@@ -11,9 +11,8 @@ namespace e3 {
     class SelectableItem 
     {
     public:
-        void select()     { selected_ = true; }
-        void deselect()   { selected_ = false; }
-        bool isSelected() { return selected_; }
+        virtual void select(bool doSelect) { selected_ = doSelect; }
+        virtual bool isSelected()          { return selected_; }
 
         virtual void beginDrag(const MouseEvent&)    {}
         virtual void continueDrag(const MouseEvent&) {}
@@ -27,8 +26,8 @@ namespace e3 {
     class SelectionManager : public SelectedItemSet<SelectableItem*>
     {
     public:
-        void itemSelected(SelectableItem* item) override    { item->select(); }
-        void itemDeselected(SelectableItem* item) override  { item->deselect(); }
+        void itemSelected(SelectableItem* item) override    { item->select(true); }
+        void itemDeselected(SelectableItem* item) override  { item->select(false); }
 
         bool addToSelectionOnMouseDown(SelectableItem* item, ModifierKeys modifiers)
         {

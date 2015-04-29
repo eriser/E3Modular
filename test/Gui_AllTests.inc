@@ -1,6 +1,6 @@
 
 #include "gui/Style.h"
-#include "gui/Wire.h"
+#include "gui/Wires.h"
 
 
 namespace e3 {

@@ -117,9 +117,6 @@
     <ClInclude Include="..\..\src\gui\EditableTableCell.h">
       <Filter>src\gui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\Wire.h">
-      <Filter>src\gui</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\gui\PortComponent.h">
       <Filter>src\gui</Filter>
     </ClInclude>
@@ -153,7 +150,7 @@
     <ClInclude Include="..\..\src\gui\Selection.h">
       <Filter>src\gui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\WireManager.h">
+    <ClInclude Include="..\..\src\gui\Wires.h">
       <Filter>src\gui</Filter>
     </ClInclude>
   </ItemGroup>
@@ -251,9 +248,6 @@
     <ClCompile Include="..\..\src\gui\EditableTableCell.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\Wire.cpp">
-      <Filter>src\gui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\gui\PortComponent.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
@@ -281,7 +275,7 @@
     <ClCompile Include="..\..\src\gui\ModulePanel.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\WireManager.cpp">
+    <ClCompile Include="..\..\src\gui\Wires.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,7 +1,9 @@
 
 #pragma once
 
+#include <cstdint>
 #include "JuceHeader.h"
+#include "core/Port.h"
 #include "gui/Selection.h"
 
 
@@ -11,6 +13,7 @@ namespace e3 {
     class EditorPanel;
     class ModuleComponent;
     class PortComponent;
+    class WireManager;
 
 
     class ModulePanel : public Component,
@@ -31,19 +34,20 @@ namespace e3 {
         SelectionManager& getLassoSelection() override;
         void findLassoItemsInArea(Array<SelectableItem*>& results, const Rectangle<int>& area) override;
         void changeListenerCallback(ChangeBroadcaster* broadcaster) override;
-        void deselectAll();
 
         void checkSize();
+        void updateWiresForModule(ModuleComponent* module, bool select);
         Rectangle<int> getUsedArea() const;
 
         ModuleComponent* getModule(uint16_t id);
-        PortComponent* getPort(const Link& link, PortType portType);
+        PortComponent* getPort(Link* link, PortType portType);
 
     protected: 
-        void createWires();
+        void createWires(Instrument* instrument);
         ModuleComponent* getModuleAt(const Point<int>& pos) const;
 
         OwnedArray<ModuleComponent> modules_;
+        ScopedPointer<WireManager> wires_;
 
         LassoComponent<SelectableItem*> lasso_;
         SelectionManager selection_;

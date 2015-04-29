@@ -22,14 +22,14 @@ namespace e3 {
     //------------------------------------------
 
     enum PortType {
-        kUndefined = 0,
-        kInport = 1,
-        kOutport = 2
+        kPortUndefined = 0,
+        kInport        = 1,
+        kOutport       = 2
     };
 
 
     enum VoiceAdapterType {
-        kAdapterNone = 0,
+        kAdapterNone       = 0,
         kAdapterMonoToPoly = 1,
         kAdapterPolyToMono = 2
     };
@@ -86,7 +86,7 @@ namespace e3 {
     protected:
         int id_                  = -1;
         uint16_t numVoices_      = 0;
-        PortType type_           = kUndefined;
+        PortType type_           = kPortUndefined;
         ControlType controlType_ = kControlHidden;
         std::string label_;
     };

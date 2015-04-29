@@ -35,7 +35,6 @@ namespace e3 {
         static void readLinks(XmlElement* parent, Instrument* instrument);
         static void readParameters(XmlElement* parent, Module* module);
         static void readParameter(XmlElement* parent, Parameter& p);
-        static void readModuleLinks(XmlElement* parent, Module* module);
 
         static void writeBank(XmlElement* const e, const Bank* const bank);
         static void writeInstrument(XmlElement* const e, Instrument* instrument);
@@ -43,7 +42,6 @@ namespace e3 {
         static void writeParameters(XmlElement* const e, const Module* module);
         static void writeParameter(XmlElement* const e, const Parameter& param, const Parameter& defaultParam);
         static void writeLink(XmlElement* const e, const Link& link);
-        static void writeLinks(XmlElement* const e, const Module* module);
 
         static File checkPath(const std::string& path);
         static void checkRoot(XmlElement* root);

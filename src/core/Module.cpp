@@ -136,31 +136,31 @@ namespace e3 {
     }
 
 
-    void Module::addLink(Link& link)
-    {
-        if (removedLinks_.contains(link))
-            removedLinks_.remove(link);
+    //void Module::addLink(Link& link)
+    //{
+    //    if (removedLinks_.contains(link))
+    //        removedLinks_.remove(link);
 
-        link.rightModule_ = id_;
-        links_.push_back(link);
-    }
-
-
-    void Module::removeLink(const Link& link)
-    {
-        links_.remove(link);
-
-        if (removedLinks_.contains(link)) {
-            removedLinks_.remove(link);
-        }
-        removedLinks_.push_back(link);
-    }
+    //    link.rightModule_ = id_;
+    //    links_.push_back(link);
+    //}
 
 
-    Link& Module::getLink(uint16_t index)
-    {
-        return links_.at(index);
-    }
+    //void Module::removeLink(const Link& link)
+    //{
+    //    links_.remove(link);
+
+    //    if (removedLinks_.contains(link)) {
+    //        removedLinks_.remove(link);
+    //    }
+    //    removedLinks_.push_back(link);
+    //}
+
+
+    //Link& Module::getLink(uint16_t index)
+    //{
+    //    return links_.at(index);
+    //}
 
     void Module::onMidiController(int, int)  {}
 
