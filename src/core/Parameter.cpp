@@ -10,7 +10,7 @@ namespace e3 {
     // class Parameter
     //----------------------------------------------------------------
 
-    Parameter::Parameter(uint16_t id, const std::string& label, ControlType controlType, double defaultValue) :
+    Parameter::Parameter(int id, const std::string& label, ControlType controlType, double defaultValue) :
         id_(id),
         defaultValue_(defaultValue),
         controlType_(controlType),
@@ -28,7 +28,7 @@ namespace e3 {
     }
 
 
-    bool ParameterMap::containsId(const uint16_t id) const
+    bool ParameterMap::containsId(const int id) const
     {
         return find(id) != end();
     }

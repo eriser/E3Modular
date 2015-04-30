@@ -19,10 +19,10 @@ namespace e3 {
     {
     public:
         Parameter() {}
-        Parameter(uint16_t id, const std::string& label, ControlType controlType, double defaultValue = 0);
+        Parameter(int id, const std::string& label, ControlType controlType, double defaultValue = 0);
 
 
-        uint16_t id_               = 0;
+        int id_                    = 0;
         ControlType controlType_   = kControlHidden;
         NumberFormat numberFormat_ = kNumberFloat;
         double value_              = 0;
@@ -42,13 +42,13 @@ namespace e3 {
     // class ParameterMap
     //-------------------------------------------
 
-    class ParameterMap : public std::map< uint16_t, Parameter >
+    class ParameterMap : public std::map< int, Parameter >
     {
     public:
         void add(const Parameter& moel);
 
         // Returns true, if a Parameter with the given id exists in the map.
-        bool containsId(const uint16_t id) const;
+        bool containsId(const int id) const;
 
         // Updates the Parameter in the map with the data of the given Parameter. 
         // Parameter is identified by model.id_;

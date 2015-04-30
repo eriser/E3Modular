@@ -52,7 +52,7 @@ namespace e3 {
     }
 
 
-    void Delay::setParameter( uint16_t paramId, double value, double, int16_t) 
+    void Delay::setParameter(int paramId, double value, double, int16_t) 
     {
         switch( paramId ) {
         case kParamDelaytime: delayTime_ = (uint32_t)( value * (double)(bufferSize_ - 1)); break;

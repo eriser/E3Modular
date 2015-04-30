@@ -158,7 +158,7 @@ namespace e3 {
     }
 
 
-    Module* Instrument::getModule(uint16_t moduleId) const
+    Module* Instrument::getModule(int moduleId) const
     {
         for (ModuleList::const_iterator it = modules_.begin(); it != modules_.end(); it++)
         {

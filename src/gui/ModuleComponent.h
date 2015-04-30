@@ -35,6 +35,10 @@ namespace e3 {
         PortComponent* getPort(int portId, PortType portType);
         PortComponent* getPort(Link* link, PortType portType);
         void getPortPosition(int portId, PortType portType, Point<int>& pos);
+        PortComponent* getPortAtPosition(const Point<int>& pos) const;
+
+        void portAction(PortComponent* port, PortAction action, const Point<int>& pos);
+
         //void collapseOrExpand(bool collapse);
         //bool isCollapsed();
 
@@ -47,7 +51,7 @@ namespace e3 {
 
     protected:
         void calculateSize();
-
+        PortComponent* getPortAtPosition(const Point<int>& pos, const OwnedArray<PortComponent>& list) const;
 
         //void setPortVisibility();
         //void deleteWire(const Link& link);

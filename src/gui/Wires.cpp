@@ -22,7 +22,6 @@ namespace e3 {
         manager_(manager)
     {
         ASSERT(manager_);
-        ASSERT(link_);
     }
 
 
@@ -35,9 +34,9 @@ namespace e3 {
     }
 
 
-    void Wire::getBoundingRect(Rectangle<int>& r)
+    Rectangle<int> Wire::getBoundingRect()
     {
-        r = Rectangle<int>(first_, last_);
+       return Rectangle<int>(first_, last_);
     }
 
 
@@ -92,10 +91,22 @@ namespace e3 {
     // class WireManager
     //--------------------------------------------------------------
 
+    WireManager::WireManager(ModulePanel* panel) :
+        panel_(panel),
+        dockingWire_(new Wire(Point<int>(), Point<int>(), nullptr, this))
+    {}
+
+
     void WireManager::addWire(Point<int> first, Point<int> last, Link* link)
     {
         Wire* wire = new Wire(first, last, link, this);
         wires_.add(wire);
+    }
+
+
+    void WireManager::removeWire(Wire* wire)
+    {
+        wires_.removeObject(wire, true);
     }
 
 
@@ -108,6 +119,22 @@ namespace e3 {
     Wire* WireManager::getWire(int index) const
     {
         return wires_.getUnchecked(index);
+    }
+
+
+    Wire* WireManager::getWire(int moduleId, int portId, bool mustBeSelected) const
+    {
+        for (int i = 0; i < wires_.size(); ++i)
+        {
+            Wire* wire = getWire(i);
+            Link* link = wire->link_;
+            if (link->rightModule_ == moduleId && link->rightPort_ == portId &&
+                (mustBeSelected == false || wire->isSelected()))
+            {
+                return wire;
+            }
+        }
+        return nullptr;
     }
 
 
@@ -124,10 +151,10 @@ namespace e3 {
 
             if (modifiers.isCtrlDown() && selectWire == true || !modifiers.isCtrlDown()) {
                 wire->select(selectWire);
+                if (needsRepaint) {
+                    panel_->repaint(wire->getBoundingRect());
+                }
             }
-        }
-        if (needsRepaint) {
-            sendChangeMessage();
         }
     }
 
@@ -140,7 +167,7 @@ namespace e3 {
             Link* link  = wire->link_;
             uint16_t id = module->getModuleId();
 
-            if (link->leftModule_ == id || link->rightModule_ == id) 
+            if (link && link->leftModule_ == id || link->rightModule_ == id) 
             {
                 PortComponent* leftPort  = module->getPort(link, kOutport);
                 PortComponent* rightPort = module->getPort(link, kInport);
@@ -148,8 +175,8 @@ namespace e3 {
                 if (leftPort && rightPort)
                 {
                     Point<int> first, last;
-                    wire->first_ = leftPort->getPortPosition();
-                    wire->last_  = rightPort->getPortPosition();
+                    wire->first_ = leftPort->getDockingPosition();
+                    wire->last_  = rightPort->getDockingPosition();
 
                     wire->select(selectWire);
                 }
@@ -163,7 +190,104 @@ namespace e3 {
         for (int i = 0; i < wires_.size(); ++i) {
             wires_.getUnchecked(i)->paint(g);
         }
+        if (action_ == kPortActionDock) {
+            dockingWire_->paint(g);
+        }
     }
 
+
+    void WireManager::startDocking(PortComponent* port, const Point<int>& pos)
+    {
+        leftPort_            = port;
+        dockingWire_->first_ = pos;
+        dockingWire_->last_  = pos;
+        action_              = kPortActionDock;
+    }
+
+
+    void WireManager::startUndocking(PortComponent* port)
+    {
+        dockingWire_->link_ = nullptr;
+
+        if (port->getNumConnections() >= 1)
+        {
+            int moduleId        = port->getModuleId();
+            int portId          = port->getPortId();
+            bool mustBeSelected = (port->getNumConnections() > 1);
+            Wire* wire          = getWire(moduleId, portId, mustBeSelected);
+
+            if (wire != nullptr) 
+            {
+                dockingWire_->link_ = wire->link_;
+                removeWire(wire);
+            }
+        }
+
+        if (dockingWire_->link_)
+        {
+            port->disconnect();
+
+            rightPort_           = port;
+            leftPort_            = panel_->getPort(dockingWire_->link_, kOutport);
+            dockingWire_->first_ = leftPort_->getDockingPosition();
+            dockingWire_->last_  = rightPort_->getDockingPosition();
+            action_              = kPortActionDock;
+        }
+    }
+
+
+    void WireManager::continueDocking(const Point<int>& pos)
+    {
+        if (action_ == kPortActionDock)
+        {
+            PortComponent* port = panel_->getPortAtPosition(pos);   // check if the mouse hits a port
+            if (port != nullptr)                                    // mouse hits a port and we inform the port
+            {
+                rightPort_ = port;
+                rightPort_->startDocking();
+            }
+            else if (rightPort_ != nullptr)                         // mouse has left the port
+            {
+                rightPort_->cancelDocking();
+                rightPort_ = nullptr;
+            }
+
+            dockingWire_->last_ = pos;
+            panel_->repaint();
+        }
+    }
+
+
+    void WireManager::endDocking(const Point<int>&)
+    {
+        if (action_ == kPortActionDock) 
+        {
+            if (leftPort_ != nullptr && rightPort_ != nullptr) 
+            {
+                Link* link = new Link();
+                link->leftModule_ = leftPort_->getModuleId();
+                link->rightModule_ = rightPort_->getModuleId();
+                link->leftPort_ = leftPort_->getPortId();
+                link->rightPort_ = rightPort_->getPortId();
+
+                Point<int> pos = rightPort_->getDockingPosition();
+                addWire(dockingWire_->first_, pos, link);
+                leftPort_->connect();
+                rightPort_->connect();
+            }
+            else if (leftPort_ != nullptr) {
+                leftPort_->disconnect();
+            }
+
+            action_              = kPortActionIdle;
+            dockingWire_->first_ = Point<int>();
+            dockingWire_->last_  = Point<int>();
+            dockingWire_->link_  = nullptr;
+            leftPort_            = nullptr;
+            rightPort_           = nullptr;
+
+            panel_->repaint();
+        }
+    }
 
 } // namespace e3

@@ -86,22 +86,22 @@ namespace e3 {
 
         virtual void setSampleRate(double sampleRate);
         virtual void setNumVoices(uint16_t numVoices);
-        virtual void setParameter(uint16_t paramId, double value, double modulation = 0.f, int16_t voice = -1) {}
-        const Parameter& getParameter(uint16_t parameterId) const;
+        virtual void setParameter(int paramId, double value, double modulation = 0.f, int16_t voice = -1) {}
+        const Parameter& getParameter(int parameterId) const;
 
         //void addLink(Link& link);
         //void removeLink(const Link& link);
         //Link& getLink(uint16_t index);
 
-        Inport* getInport(uint16_t portId) const;
-        Outport* getOutport(uint16_t portId) const;
-        AudioOutport* getAudioOutport(uint16_t portId) const;
-        AudioInport* getAudioInport(uint16_t portId) const;
-        EventOutport* getEventOutport(uint16_t portId) const;
-        EventInport* getEventInport(uint16_t portId) const;
+        Inport* getInport(int portId) const;
+        Outport* getOutport(int portId) const;
+        AudioOutport* getAudioOutport(int portId) const;
+        AudioInport* getAudioInport(int portId) const;
+        EventOutport* getEventOutport(int portId) const;
+        EventInport* getEventInport(int portId) const;
 
-        double* connectTargetWithSource(uint16_t portId);
-        void disconnectTargetFromSource(uint16_t portId);
+        double* connectTargetWithSource(int portId);
+        void disconnectTargetFromSource(int portId);
 
         virtual void onMidiController(int controllerNum, int value);
 

@@ -16,7 +16,7 @@ namespace e3 {
         
         void processAudio() throw();
         void resume() override;
-        void setParameter( uint16_t paramId, double value, double modulation=0.f, int16_t voice=-1 ) override;
+        void setParameter(int paramId, double value, double modulation=0.f, int16_t voice=-1) override;
         void setSampleRate(double sampleRate) override;
 
         enum ParamId {

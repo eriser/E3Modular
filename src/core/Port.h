@@ -28,6 +28,15 @@ namespace e3 {
     };
 
 
+    enum PortAction {
+        kPortActionIdle             = 0,
+        kPortActionDock             = 1,
+        kPortActionUndock           = 2,
+        kPortActionContinueDocking  = 3,
+        kPortActionEndDocking       = 4
+    };
+
+
     enum VoiceAdapterType {
         kAdapterNone       = 0,
         kAdapterMonoToPoly = 1,
@@ -206,8 +215,8 @@ namespace e3 {
     class EventInport : public Inport
     {
     public:
-        Module* module_  = nullptr;
-        int16_t paramId_ = -1;
+        Module* module_ = nullptr;
+        int paramId_    = -1;
 
         void disconnectAll() override;
         bool isConnected() override;

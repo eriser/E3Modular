@@ -1,6 +1,7 @@
 
 #include <algorithm>
 
+#include <e3_Trace.h>
 #include <e3_Exception.h>
 #include "core/GlobalHeader.h"
 #include "core/Module.h"
@@ -16,13 +17,40 @@ namespace e3 {
         state_(kIdle)
         {
             ASSERT(port_ != nullptr);
-            //repaint();
         }
 
 
-        void PortComponent::mouseEnter(const MouseEvent& e)
+        void PortComponent::paint(Graphics& g)
         {
-            return mouseMove(e);
+            Colour col1 = findColour(Style::kModulePort1ColourId);
+            Colour col2 = findColour(Style::kModulePort2ColourId);
+            Colour col = (numConnections_ > 0) ? col2 : col1;
+
+            g.setColour(col);
+
+            if ((state_ & kHover) || (state_ & kDocking))	    // draw port square
+            {
+                g.fillRect(rcDock_.expanded(2, 2));
+            }
+            else {
+                g.fillRect(rcDock_);
+            }
+
+            if (numConnections_ > 0) {
+                g.drawRect(rcConnector_);
+            }
+
+            if ((state_ & kHover) || (state_ & kDocking))	 // draw label
+            {
+                //g.setColour(findColour(Style::kModuleColourId));
+                g.setColour(col);
+                g.fillRect(rcBkgnd_);
+
+                int align = (getPortType() == kInport) ? Justification::centredLeft : Justification::centredRight;
+                g.setFont(10);
+                g.setColour(findColour(Style::kModuleText1ColourId).darker());
+                g.drawText(port_->getLabel(), rcText_, align, true);
+            }
         }
 
 
@@ -30,42 +58,129 @@ namespace e3 {
         {
             if (getPortType() == kInport)
             {
-                rcSquare_    = Rectangle<int>(4,  3, 6,  6);
-                rcConnector_ = Rectangle<int>(0,  5, 4,  2);
+                rcDock_      = Rectangle<int>(4,  3, 6,  6);
+                rcConnector_ = Rectangle<int>(-1,  5, 5,  2);
                 rcHover_     = Rectangle<int>(0,  0, 12, getHeight());
-                rcText_      = Rectangle<int>(14, 0, 38, getHeight());
-                rcBkgnd_     = Rectangle<int>(10, 0, 42, getHeight());
+                rcText_      = Rectangle<int>(14, 1, 38, 10);
+                rcBkgnd_     = Rectangle<int>(10, 1, 42, 10);
             }
             else {
-                rcSquare_    = Rectangle<int>(getWidth() - 10, 3, 6,  6);
-                rcConnector_ = Rectangle<int>(getWidth() - 4,  5, 4,  2);
+                rcDock_      = Rectangle<int>(getWidth() - 10, 3, 6,  6);
+                rcConnector_ = Rectangle<int>(getWidth() - 5,  5, 5,  2);
                 rcHover_     = Rectangle<int>(getWidth() - 12, 0, 12, getHeight());
-                rcText_      = Rectangle<int>(getWidth() - 52, 0, 38, getHeight());
-                rcBkgnd_     = Rectangle<int>(getWidth() - 54, 0, 42, getHeight());
+                rcText_      = Rectangle<int>(getWidth() - 54, 1, 38, 10);
+                rcBkgnd_     = Rectangle<int>(getWidth() - 54, 1, 42, 10);
             }
+        }
+
+
+        void PortComponent::mouseEnter(const MouseEvent& e)
+        {
+            mouseMove(e);
         }
 
 
         void PortComponent::mouseExit(const MouseEvent&)
         {
-            state_ &= ~kHover;
-            repaint(rcBkgnd_);
+            if ((state_ & kDocking) == false) {
+                state_ &= ~kHover;
+            }
+            repaint();
         }
 
 
         void PortComponent::mouseDown(const MouseEvent& e)
         {
-            return mouseMove(e);
+            if (isDockingPosition(e.getMouseDownPosition())) 
+            {
+                switch (port_->getType()) {
+                case kInport:  owner_->portAction(this, kPortActionUndock, getDockingPosition()); break;
+                case kOutport: owner_->portAction(this, kPortActionDock, getDockingPosition()); break;
+                }
+            }
         }
 
 
-        void PortComponent::mouseMove(const MouseEvent &e)
+        void PortComponent::mouseDrag(const MouseEvent& e)
+        {
+            if (isDockingPosition(e.getMouseDownPosition()))
+            {
+                Point<int> pos = translateToParent(e.getPosition())
+                    .translated(getPortType() == kInport ? 0 : getWidth(), getY());
+
+                owner_->portAction(this, kPortActionContinueDocking, pos);
+            }
+        }
+
+
+        void PortComponent::mouseMove(const MouseEvent& e)
         {
             uint16_t oldState = state_;
-            setHoverState(e.getMouseDownPosition());
+            Point<int> pos = e.getPosition();
+            hitTest(pos.x, pos.y) ? state_ |= kHover : state_ &= ~kHover; 
             if (state_ != oldState) {
-                repaint(rcBkgnd_);
+                repaint();
             }
+        }
+
+
+        void PortComponent::mouseUp(const MouseEvent& e)
+        {
+            if (isDockingPosition(e.getMouseDownPosition()))
+            {
+                owner_->portAction(this, kPortActionEndDocking, translateToParent(e.getPosition()));
+            }
+        }
+
+
+        bool PortComponent::startDocking()
+        {
+            state_ |= kDocking;
+            repaint();
+            
+            return true;
+        }
+
+
+        void PortComponent::cancelDocking()
+        {
+            state_ &= ~kDocking;
+            repaint();
+        }
+
+
+       void PortComponent::connect()
+        {
+            numConnections_++;
+            state_ &= ~kDocking;
+        }
+
+
+       void PortComponent::disconnect()
+       {
+           ASSERT(numConnections_ >= 1);
+           if (numConnections_ >= 1) {
+               --numConnections_;
+            }
+
+            state_ &= ~kDocking;
+        }
+
+
+        Point<int> PortComponent::getDockingPosition()
+        {
+            Point<int> pos;
+            pos.x = getPortType() == kInport ? 1 : getRight() - 1;
+            pos.y = getY() + rcConnector_.getY() + 1;
+            
+            return translateToParent(pos);
+        }
+
+
+        bool PortComponent::isDockingPosition(const Point<int>& pos) const
+        {
+            Rectangle<int> dock = rcDock_.getUnion(rcConnector_);
+            return dock.contains(pos);
         }
 
 
@@ -75,133 +190,24 @@ namespace e3 {
         }
 
 
-        //bool PortComponent::testDocking(const Point<int>& pos)
-        //{
-        //    Point<int> p(pos);
-        //    translateFromParent(p);
-        //    return hitTest(p.x, p.y);
-        //}
-
-
-        bool PortComponent::startDocking()
-        {
-            //translateFromParent(pos);
-            //bool result = setHoverState(pos);
-            bool result = false;
-
-            if (result)
-            {
-                //getPortPosition(pos);
-                state_ |= kDocking;
-                repaint(rcBkgnd_);
-            }
-            return result;
-        }
-
-
-        void PortComponent::endDocking()
-        {
-            if (numConnections_ == 0) {
-                state_ &= ~kConnected;
-            }
-            //translateFromParent(pos);
-            state_ &= ~kDocking;
-            //setHoverState(pos);
-            repaint(rcBkgnd_);
-        }
-
-
-       void PortComponent::connect()
-        {
-            //translateFromParent(pos);
-            //setHoverState(pos);
-            numConnections_++;
-            //getPortPosition(pos);
-            state_ |= kConnected;
-        }
-
-
-        void PortComponent::disconnect()
-        {
-            ASSERT(numConnections_ >= 1);
-            numConnections_--;
-
-            state_ &= ~kDocking;
-            if (numConnections_ == 0) {
-                state_ &= ~kConnected;
-            }
-        }
-
-
-        bool PortComponent::setHoverState(const Point<int>& pos)
-        {
-            hitTest(pos.x, pos.y) ? state_ |= kHover : state_ &= ~kHover;
-            return state_ & kHover;
-        }
-
-
-        Point<int> PortComponent::getPortPosition()
-        {
-            Point<int> pos;
-            pos.x = getPortType() == kInport ? 1 : getRight() - 1;
-            pos.y = getY() + getHeight() / 2;
-            
-            translateToParent(pos);
-            return pos;
-        }
-
-
-        void PortComponent::translateFromParent(Point<int>& pos)
+        Point<int> PortComponent::translateFromParent(const Point<int>& pos)
         {
             Rectangle<int> rcParent = owner_->getBounds();
-            pos.addXY(-rcParent.getX(), -rcParent.getX());
+            return pos.translated(-rcParent.getX(), -rcParent.getX());
         }
 
 
-        void PortComponent::translateToParent(Point<int>& pos)
+        Point<int> PortComponent::translateToParent(const Point<int>& pos)
         {
             Rectangle<int> rcParent = owner_->getBounds();
-            pos.addXY(rcParent.getX(), rcParent.getY());
+            return pos.translated(rcParent.getX(), rcParent.getY());
         }
 
 
-        void PortComponent::paint(Graphics& g)
-        {
-            Colour colPort1 = findColour(Style::kModulePort1ColourId);
-            Colour colPort2 = findColour(Style::kModulePort2ColourId);
-            colPort1        = (state_ & kConnected) ? colPort2 : colPort1;
-
-            g.setColour( colPort1 );
-
-            if( state_ & (kHover || kDocking) )	    // draw port square
-            {
-                Rectangle<int> rcFrame( rcSquare_ );
-                rcFrame.expand( 1, 1 );
-                g.fillRect( rcFrame );
-            }
-            else {
-                g.fillRect(rcSquare_);
-            }
-
-            if (numConnections_ > 0) {
-                g.drawRect( rcConnector_);
-            }
-
-            if( state_ & (kHover || kDocking) )	    // draw label
-            {
-                //Rectangle<int> rcClip = g.getClipBounds();
-                //g.reduceClipRegion(rcBkgnd_);
-                
-                g.setColour(findColour(Style::kModuleColourId));
-                g.fillRect( rcBkgnd_);
-                
-                int align = (getPortType() == kInport) ? Justification::centredLeft : Justification::centredRight;
-                g.setFont(9);
-                g.setColour(findColour(Style::kModuleText1ColourId));
-                g.drawText(port_->getLabel(), rcText_, align, true);
-                
-                //g.reduceClipRegion(rcClip);
-            }
+        int PortComponent::getModuleId() const         
+        { 
+            return owner_->getModuleId(); 
         }
+
 
 } // namespace e3

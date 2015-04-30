@@ -130,7 +130,7 @@ namespace e3 {
     }
 
 
-    const Parameter& Module::getParameter(uint16_t parameterId) const
+    const Parameter& Module::getParameter(int parameterId) const
     {
         return parameters_.at(parameterId);
     }
@@ -193,49 +193,49 @@ namespace e3 {
     }
 
 
-    Outport* Module::getOutport(uint16_t portId) const
+    Outport* Module::getOutport(int portId) const
     {
-        return portId < outports_.size() ? outports_.at(portId) : nullptr;
+        return portId < (int)outports_.size() ? outports_.at(portId) : nullptr;
     }
 
     
-    Inport* Module::getInport(uint16_t portId) const
+    Inport* Module::getInport(int portId) const
     {
-        return portId < inports_.size() ? inports_.at(portId) : nullptr;
+        return portId < (int)inports_.size() ? inports_.at(portId) : nullptr;
     }
 
 
-    AudioOutport* Module::getAudioOutport(uint16_t portId) const
+    AudioOutport* Module::getAudioOutport(int portId) const
     {
         Outport* port = getOutport(portId);
         return dynamic_cast<AudioOutport*>(port);
     }
 
 
-    AudioInport* Module::getAudioInport(uint16_t portId) const
+    AudioInport* Module::getAudioInport(int portId) const
     {
         Inport* port = getInport(portId);
         return dynamic_cast<AudioInport*>(port);
     }
 
 
-    EventOutport* Module::getEventOutport(uint16_t portId) const
+    EventOutport* Module::getEventOutport(int portId) const
     {
         Outport* port = getOutport(portId);
         return dynamic_cast<EventOutport*>(port);
     }
 
 
-    EventInport* Module::getEventInport(uint16_t portId) const
+    EventInport* Module::getEventInport(int portId) const
     {
         Inport* port = getInport(portId);
         return dynamic_cast<EventInport*>(port);
     }
 
 
-    double* Module::connectTargetWithSource(uint16_t portId)
+    double* Module::connectTargetWithSource(int portId)
     {
-        VERIFY(portId >= 0 && portId < inports_.size());
+        VERIFY(portId >= 0 && portId < (int)inports_.size());
         VERIFY(numVoices_ > 0);
 
         AudioInport* inport = dynamic_cast<AudioInport*>(inports_.at(portId));
@@ -246,9 +246,9 @@ namespace e3 {
     }
 
 
-    void Module::disconnectTargetFromSource(uint16_t portId)
+    void Module::disconnectTargetFromSource(int portId)
     {
-        VERIFY(portId >= 0 && portId < inports_.size());
+        VERIFY(portId >= 0 && portId < (int)inports_.size());
 
         AudioInport* inport = dynamic_cast<AudioInport*>(inports_.at(portId));
         inport->disconnect();

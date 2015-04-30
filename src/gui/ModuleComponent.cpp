@@ -27,21 +27,82 @@ namespace e3 {
     }
 
 
-    Module* ModuleComponent::getModule() const   { return module_; }
-    uint16_t ModuleComponent::getModuleId() const { return module_->id_; }
+    void ModuleComponent::createPorts()
+    {
+        for (size_t i = 0; i < module_->inports_.size(); i++)
+        {
+            Port* port = module_->inports_[i];
+            PortComponent* component = new PortComponent(port, this);
+            inports_.add(component);
+            addAndMakeVisible(component);
+        }
+
+        for (size_t i = 0; i < module_->outports_.size(); i++)
+        {
+            Port* port = module_->outports_[i];
+            PortComponent* component = new PortComponent(port, this);
+            outports_.add(component);
+            addAndMakeVisible(component);
+        }
+    }
+
+
+    void ModuleComponent::resized()
+    {
+        dragConstrainer_.setMinimumOnscreenAmounts(getHeight(), getWidth(), 0, 0);
+    }
+
+
+    void ModuleComponent::calculateSize()
+    {
+        Rectangle<int> content = getLocalBounds();
+
+        if (collapsed_ == false)
+        {
+            int numPorts = jmax(inports_.size(), outports_.size());
+            int height = portHeight_ + numPorts * portHeight_;
+            content.setHeight(height);
+        }
+        else {
+            content.setHeight(portHeight_ * 2);
+        }
+        int width = 100;
+        content.setWidth(width);
+
+        int portWidth = width / 2;
+        int top = portHeight_ / 2;
+        int offset = top;
+
+        for (int i = 0; i < inports_.size(); i++)
+        {
+            inports_[i]->setBounds(Rectangle<int>(0, offset, portWidth, portHeight_));
+            offset += portHeight_;
+        }
+
+        offset = top;
+        for (int i = 0; i < outports_.size(); i++)
+        {
+            outports_[i]->setBounds(Rectangle<int>(width - portWidth, offset, portWidth, portHeight_));
+            offset += portHeight_;
+        }
+        setBounds(content);
+    }
 
 
     void ModuleComponent::paint(Graphics& g)
     {
+        Rectangle<int> r = getLocalBounds();
+
         Colour bkgndCol = findColour(Style::kModuleColourId);
-        g.fillAll(bkgndCol);
+        g.setColour(bkgndCol);
+        g.fillRect(r);
 
         int id = Style::kModuleBorderNormalColourId;
         if (isSelected()) id = Style::kModuleBorderSelectedColourId;
         if (hasKeyboardFocus(true)) id = Style::kModuleBorderFocusedColourId;
 
         g.setColour(findColour(id));
-        g.drawRect(getLocalBounds());
+        g.drawRect(r);
 
         g.setColour(findColour(Style::kModuleText1ColourId));
         g.drawText(module_->label_, 0, 0, getWidth(), getHeight(), Justification::centred, true);
@@ -84,6 +145,10 @@ namespace e3 {
     }
 
 
+    Module* ModuleComponent::getModule() const   { return module_; }
+    uint16_t ModuleComponent::getModuleId() const { return module_->id_; }
+
+
     PortComponent* ModuleComponent::getPort(int portId, PortType portType)
     {
         PortList& list = (portType == kInport) ? inports_ : outports_;
@@ -113,7 +178,7 @@ namespace e3 {
             PortComponent* port = getPort(portId, portType);
             ASSERT(port);
             if (port != nullptr) {
-                pos = port->getPortPosition();
+                pos = port->getDockingPosition();
             }
         }
         else
@@ -128,104 +193,34 @@ namespace e3 {
     }
 
 
-    void ModuleComponent::createPorts()
+    PortComponent* ModuleComponent::getPortAtPosition(const Point<int>& pos) const
     {
-        for (size_t i = 0; i < module_->inports_.size(); i++)
-        {
-            Port* port = module_->inports_[i];
-            PortComponent* component = new PortComponent(port, this);
-            inports_.add(component);
-            addAndMakeVisible(component);
+        PortComponent* port = getPortAtPosition(pos, inports_);
+        if (port == nullptr) {
+            port = getPortAtPosition(pos, outports_);
         }
-
-        for (size_t i = 0; i < module_->outports_.size(); i++)
-        {
-            Port* port = module_->outports_[i];
-            PortComponent* component = new PortComponent(port, this);
-            outports_.add(component);
-            addAndMakeVisible(component);
-        }
+        return port;
     }
 
 
-    void ModuleComponent::resized()
+    PortComponent* ModuleComponent::getPortAtPosition(const Point<int>& pos, const OwnedArray<PortComponent>& list) const
     {
-        dragConstrainer_.setMinimumOnscreenAmounts(getHeight(), getWidth(), 0, 0);
+        for (int i = 0; i < list.size(); ++i)
+        {
+            PortComponent* port = list.getUnchecked(i);
+            Point<int> p = port->getLocalPoint(this, pos);
+            if (port->isDockingPosition(p)) {
+                return port;
+            }
+        }
+        return nullptr;
     }
 
 
-    void ModuleComponent::calculateSize()
-    {
-        Rectangle<int> content = getLocalBounds();
-
-        if (collapsed_ == false)
-        {
-            int numPorts = jmax(inports_.size(), outports_.size());
-            int height   = portHeight_ + numPorts * portHeight_;
-            content.setHeight(height);
-        }
-        else {
-            content.setHeight(portHeight_ * 2);
-        }
-        int width = 100;
-        content.setWidth(width);
-
-        int portWidth = width / 2;
-        int top       = portHeight_ / 2;
-        int offset    = top;
-
-        for (int i = 0; i < inports_.size(); i++)
-        {
-            inports_[i]->setBounds(Rectangle<int>(0, offset, portWidth, portHeight_));
-            offset += portHeight_;
-        }
-
-        offset = top;
-        for (int i = 0; i < outports_.size(); i++)
-        {
-            outports_[i]->setBounds(Rectangle<int>(width - portWidth, offset, portWidth, portHeight_));
-            offset += portHeight_;
-        }
-        setBounds(content);
+    void ModuleComponent::portAction(PortComponent* port, PortAction action, const Point<int>& pos)   
+    { 
+        panel_->portAction(port, action, pos); 
     }
-
-
-    //void ModuleComponent::createWires()
-    //{
-        //for (uint16_t i = 0; i < module_->links_.size(); i++)
-        //{
-        //    Link& link             = module_->getLink(i);
-        //    PortComponent* inport  = getPort(link.rightPort_, kInport);
-        //    PortComponent* outport = panel_->getPort(link, kOutport);
-
-        //    inport->connect();
-        //    outport->connect();
-
-        //    ModuleComponent* source = panel_->getModule(link.leftModule_);
-        //    if (source != nullptr)
-        //    {
-        //        Wire* wire = new Wire(outport->getPortPosition(), inport->getPortPosition());
-        //        addWire(link, wire);
-        //    }
-        //}
-    //}
-
-
-    //void ModuleComponent::addWire(const Link& link, Wire* wire)
-    //{
-    //    WireMap::iterator pos = wires_.find(link);
-    //    ASSERT(pos == wires_.end());
-    //    ASSERT(wire);
-
-    //    wires_.insert(WireMap::value_type(link, wire));
-    //}
-
-
-    //Wire* ModuleComponent::getWire(const Link& link)
-    //{
-    //    WireMap::iterator pos = wires_.find(link);
-    //    return (pos != wires_.end()) ? pos->second : nullptr;
-    //}
 
 
     void ModuleComponent::select(bool doSelect)
@@ -236,7 +231,6 @@ namespace e3 {
         }
         selected_ = doSelect;
     }
-
 
 
     /*

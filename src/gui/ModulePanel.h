@@ -24,6 +24,8 @@ namespace e3 {
         ModulePanel(EditorPanel* owner);
 
         void paint(Graphics& g) override;
+        void ModulePanel::paintOverChildren(Graphics& g) override;
+
         void createModules(Instrument* instrument, XmlElement* instrumentXml);
         void storeModulePosition(uint16_t moduleId, Point<int> pos);
 
@@ -39,12 +41,16 @@ namespace e3 {
         void updateWiresForModule(ModuleComponent* module, bool select);
         Rectangle<int> getUsedArea() const;
 
-        ModuleComponent* getModule(uint16_t id);
+        ModuleComponent* getModule(int id);
         PortComponent* getPort(Link* link, PortType portType);
+
+        ModuleComponent* getModuleAtPosition(const Point<int>& pos) const;
+        PortComponent* getPortAtPosition(const Point<int>& pos) const;
+
+        void portAction(PortComponent* port, PortAction action, const Point<int>& pos);
 
     protected: 
         void createWires(Instrument* instrument);
-        ModuleComponent* getModuleAt(const Point<int>& pos) const;
 
         OwnedArray<ModuleComponent> modules_;
         ScopedPointer<WireManager> wires_;

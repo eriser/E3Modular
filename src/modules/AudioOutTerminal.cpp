@@ -29,7 +29,7 @@ namespace e3 {
     }
 
 
-    void AudioOutTerminal::setParameter(uint16_t paramId, double value, double, int16_t)
+    void AudioOutTerminal::setParameter(int paramId, double value, double, int16_t)
     {
         switch (paramId) {
         case kParamVolume: volume_ = value; break;

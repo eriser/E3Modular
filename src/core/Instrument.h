@@ -27,7 +27,7 @@ namespace e3 {
         void setSampleRate(double sampleRate);
         void setNumVoices(uint16_t numVoices);
 
-        Module* getModule(uint16_t moduleId) const;
+        Module* getModule(int moduleId) const;
         const ModuleList& getModules() const { return modules_;  }
         int getNumModules() const            { return modules_.size(); }
 

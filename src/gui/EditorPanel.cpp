@@ -2,8 +2,6 @@
 #include "core/GlobalHeader.h"
 #include "core/Module.h"
 #include "core/Instrument.h"
-//#include "gui/PortComponent.h"
-//#include "gui/ModuleComponent.h"
 #include "gui/ModulePanel.h"
 #include "gui/ParameterPanel.h"
 #include "gui/EditorPanel.h"

@@ -42,10 +42,10 @@ namespace e3 {
         bool operator!=(const Link* other) const   { return !(this == other); }
         bool operator>(const  Link& other) const   { return !(*this == other && *this < other); }
 
-        uint16_t leftModule_  = 0;  // module that sends data into the link
-        uint16_t rightModule_ = 0;  // module to where the link is sending. This module is the owner of the link.
-        uint16_t leftPort_    = 0;  // port within the left module
-        uint16_t rightPort_   = 0;  // port within the right module
+        int leftModule_  = 0;  // module that sends data into the link
+        int rightModule_ = 0;  // module to where the link is sending. This module is the owner of the link.
+        int leftPort_    = 0;  // port within the left module
+        int rightPort_   = 0;  // port within the right module
     };
 
 

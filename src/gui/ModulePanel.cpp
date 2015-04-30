@@ -15,10 +15,9 @@ namespace e3 {
     ModulePanel::ModulePanel(EditorPanel* owner) : 
         owner_(owner),
         selection_(new ModuleSelection()),
-        wires_(new WireManager())
+        wires_(new WireManager(this))
     {      
         selection_->addChangeListener(this);
-        wires_->addChangeListener(this);
     }
 
 
@@ -67,7 +66,7 @@ namespace e3 {
             inport->connect();
             outport->connect();
 
-            wires_->addWire(outport->getPortPosition(), inport->getPortPosition(), link);
+            wires_->addWire(outport->getDockingPosition(), inport->getDockingPosition(), link);
         }
     }
 
@@ -76,7 +75,11 @@ namespace e3 {
     {
         Colour bkgndCol = findColour(Style::kContentBackground1ColourId);
         g.fillAll(bkgndCol);
+    }
 
+
+    void ModulePanel::paintOverChildren(Graphics& g)
+    {
         wires_->paint(g);
     }
 
@@ -87,7 +90,7 @@ namespace e3 {
 
         wires_->selectWiresInArea(Rectangle<int>(pos.x - 1, pos.y - 1, 2, 2));
 
-        selectedModule_        = getModuleAt(pos);
+        selectedModule_        = getModuleAtPosition(pos);
         mouseDownSelectStatus_ = selection_->addToSelectionOnMouseDown(selectedModule_, e.mods);
 
         if (selection_->getNumSelected() == 0)
@@ -162,29 +165,6 @@ namespace e3 {
     }
 
 
-    ModuleComponent* ModulePanel::getModuleAt(const Point<int>& pos) const
-    {
-        for (int i = 0; i < modules_.size(); ++i) {
-            ModuleComponent* m = modules_[i];
-            if (m->getBounds().contains(pos)) {
-                return m;
-            }
-        }
-        return nullptr;
-    }
-
-
-    void ModulePanel::storeModulePosition(uint16_t moduleId, Point<int> pos)
-    {
-        if (panelXml_ != nullptr) {
-            XmlElement* e = panelXml_->getChildByAttribute("id", String(moduleId));
-            if (e != nullptr) {
-                e->setAttribute("pos", pos.toString());
-            }
-        }
-    }
-
-
     Rectangle<int> ModulePanel::getUsedArea() const
     {
         Rectangle<int> result;
@@ -194,6 +174,17 @@ namespace e3 {
             result = result.getUnion(r);
         }
         return result;
+    }
+
+
+    void ModulePanel::portAction(PortComponent* port, PortAction action, const Point<int>& pos)
+    {
+        switch (action) {
+        case kPortActionDock:            wires_->startDocking(port, pos); break;
+        case kPortActionUndock:          wires_->startUndocking(port); break;
+        case kPortActionContinueDocking: wires_->continueDocking(pos); break;
+        case kPortActionEndDocking:      wires_->endDocking(pos); break;
+        }
     }
 
 
@@ -213,7 +204,7 @@ namespace e3 {
     }
 
 
-    ModuleComponent* ModulePanel::getModule(uint16_t id)
+    ModuleComponent* ModulePanel::getModule(int id)
     {
         for (int i = 0; i < modules_.size(); ++i)
         {
@@ -241,6 +232,42 @@ namespace e3 {
             return port;
         }
         return nullptr;
+    }
+
+
+    ModuleComponent* ModulePanel::getModuleAtPosition(const Point<int>& pos) const
+    {
+        for (int i = 0; i < modules_.size(); ++i) {
+            ModuleComponent* m = modules_[i];
+            if (m->getBounds().contains(pos)) {
+                return m;
+            }
+        }
+        return nullptr;
+    }
+
+
+    PortComponent* ModulePanel::getPortAtPosition(const Point<int>& pos) const
+    {
+        ModuleComponent* module = getModuleAtPosition(pos);
+        if (module != nullptr)
+        {
+            Point<int> p1 = module->getLocalPoint(this, pos);
+            TRACE("ModulePanel::getPortAtPosition pos=%s\n", p1.toString().toRawUTF8());
+            return module->getPortAtPosition(p1);
+        }
+        return nullptr;
+    }
+
+
+    void ModulePanel::storeModulePosition(uint16_t moduleId, Point<int> pos)
+    {
+        if (panelXml_ != nullptr) {
+            XmlElement* e = panelXml_->getChildByAttribute("id", String(moduleId));
+            if (e != nullptr) {
+                e->setAttribute("pos", pos.toString());
+            }
+        }
     }
 
 } // namespace e3
