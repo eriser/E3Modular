@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include "core/Port.h"
+#include <sstream>
 #include "core/Parameter.h"
 
 
@@ -42,10 +42,65 @@ namespace e3 {
         bool operator!=(const Link* other) const   { return !(this == other); }
         bool operator>(const  Link& other) const   { return !(*this == other && *this < other); }
 
-        int leftModule_  = 0;  // module that sends data into the link
-        int rightModule_ = 0;  // module to where the link is sending. This module is the owner of the link.
-        int leftPort_    = 0;  // port within the left module
-        int rightPort_   = 0;  // port within the right module
+
+        bool isLeftValid() const
+        {
+            return ( leftModule_ >= 0 && leftPort_ >= 0 );
+        }
+
+
+        bool isRightValid() const
+        {
+            return (rightModule_ >= 0 && rightPort_ >= 0);
+        }
+
+
+        bool isValid() const
+        {
+            return isLeftValid() && isRightValid();
+        }
+
+
+        bool isSameModule() const
+        {
+            return (leftModule_ == rightModule_);
+        }
+
+
+        bool isSamePort() const
+        {
+            return isSameModule() && (leftPort_ == rightPort_);
+        }
+
+
+        void resetLeft()
+        {
+            leftModule_ = -1;
+            leftPort_   = -1;
+        }
+
+
+        void resetRight()
+        {
+            rightModule_ = -1;
+            rightPort_   = -1;
+        }
+
+
+        std::string toString() const
+        {
+            std::ostringstream os;
+            os << "Link: (" << label_ << ") ";
+            os << "leftModule:" << leftModule_ << " rightModule:" << rightModule_;
+            os << " leftPort:" << leftPort_ << " rightPort:" << rightPort_;
+            return os.str();
+        }
+
+
+        int leftModule_  = -1;  // source module
+        int leftPort_    = -1;  // outport of source module
+        int rightModule_ = -1;  // target module
+        int rightPort_   = -1;  // inport of target module
     };
 
 
@@ -60,11 +115,11 @@ namespace e3 {
     public:
         T& get(const T& link)
         {
-            iterator pos = find(link);
+            const_iterator pos = find(link);
             if (pos == end()) {
                 THROW(std::out_of_range, "Link not found");
             }
-            return *pos;
+            return const_cast<T&>(*pos);
         }
 
 
@@ -82,7 +137,7 @@ namespace e3 {
 
         void replace(const T& link)
         {
-            iterator pos = find(link);
+            iterator pos = std::find( begin(), end(), link );
             ASSERT(pos != end());
 
             if (pos != end()) {
@@ -93,7 +148,7 @@ namespace e3 {
 
         size_t remove(const T& link)
         {
-            iterator pos = find(link);
+            const_iterator pos = find(link);
             ASSERT(pos != end());
 
             if (pos != end()) {
@@ -105,7 +160,7 @@ namespace e3 {
 
         int16_t getIndex(const T& link)
         {
-            iterator pos = find(link);
+            const_iterator pos = find(link);
 
             return pos == end() ? -1 : (int16_t)(pos - begin());
         }
@@ -113,28 +168,13 @@ namespace e3 {
 
         bool contains(const T& link)
         {
-            iterator pos = find(link);
+            const_iterator pos = find(link);
             return pos != end();
         }
 
-        
-        //void getLinksForModule(int16_t moduleId, LinkListTemplate<Link*>& list, PortType portType)
-        //{
-        //    for (LinkList::iterator it = begin(); it != end(); ++it)
-        //    {
-        //        T& link = *it;
-        //        if ((portType == kInport || portType == kPortUndefined) && link.rightModule_ == moduleId) {
-        //            list.add(&link);
-        //        }
-        //        else if ((portType == kOutport || portType == kPortUndefined) && link.leftModule_ == moduleId) {
-        //            list.add(&link);
-        //        }
-        //    }
-        //}
-
 
     private:
-        iterator find(const T& link)
+        const_iterator find(const T& link) const
         {
             return std::find(begin(), end(), link);
         }

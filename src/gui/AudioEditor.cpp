@@ -8,6 +8,8 @@
 #include "gui/Style.h"
 #include "gui/Resources.h"
 #include "gui/EditorPanel.h"
+#include "gui/ModulePanel.h"
+#include "gui/ParameterPanel.h"
 #include "gui/BrowserPanel.h"
 #include "gui/SetupPanel.h"
 #include "gui/TabComponent.h"
@@ -18,9 +20,9 @@
 
 namespace e3 {
 
-    AudioEditor::AudioEditor(Processor* owner) :
-        AudioProcessorEditor(owner),
-        processor_(owner)
+    AudioEditor::AudioEditor(Processor* processor) :
+        AudioProcessorEditor(processor),
+        processor_(processor)
     {
         createComponents();
         restoreWindowState();
@@ -35,7 +37,7 @@ namespace e3 {
         processor_->getPolyphony()->monitorUpdateSignal.Connect(monitor_.get(), &MonitorComponent::monitor);
         
         browserPanel_->updateContents(processor_->getBankXml());
-        editorPanel_->showInstrument(processor_->getInstrument(), browserPanel_->getSelectedInstrumentXml());
+        modulePanel_->createModules(processor_, browserPanel_->getSelectedInstrumentXml());
     }
 
 
@@ -126,9 +128,13 @@ namespace e3 {
 
     void AudioEditor::createComponents()
     {
-        editorPanel_  = new EditorPanel();
-        browserPanel_ = new BrowserPanel();
-        setupPanel_   = new SetupPanel();
+        modulePanel_    = new ModulePanel();
+        parameterPanel_ = new ParameterPanel();
+        editorPanel_    = new EditorPanel();
+        browserPanel_   = new BrowserPanel();
+        setupPanel_     = new SetupPanel();
+
+        editorPanel_->setContent(modulePanel_, parameterPanel_);
 
         tabPanel_ = new TabComponent(TabbedButtonBar::TabsAtBottom, 10);
         tabPanel_->addTab("Editor", Colours::transparentBlack, editorPanel_, false, kEditorPanel);
@@ -165,7 +171,7 @@ namespace e3 {
             processor_->openBank(path);
             browserPanel_->updateContents(processor_->getBankXml());
             processor_->loadInstrument();
-            editorPanel_->showInstrument(processor_->getInstrument(), browserPanel_->getSelectedInstrumentXml());
+            modulePanel_->createModules(processor_, browserPanel_->getSelectedInstrumentXml());
         }
     }
 
@@ -201,12 +207,12 @@ namespace e3 {
 
     void AudioEditor::onLoadInstrument()
     {
-        XmlElement* e = browserPanel_->getSelectedInstrumentXml();
-        if (e != nullptr)
+        XmlElement* xml = browserPanel_->getSelectedInstrumentXml();
+        if (xml != nullptr)
         {
-            int hash = e->getIntAttribute("hash");
+            int hash = xml->getIntAttribute("hash");
             processor_->loadInstrument(hash);
-            editorPanel_->showInstrument(processor_->getInstrument(), e);
+            modulePanel_->createModules(processor_, xml);
         }
     }
 

@@ -1,15 +1,10 @@
 
 #pragma once
 
-#include <cstdint>
-#include <map>
 #include "JuceHeader.h"
 
 namespace e3
 {
-    class Instrument;
-    //class PortComponent;
-    //class ModuleComponent;
     class ModulePanel;
     class ParameterPanel;
 
@@ -17,25 +12,13 @@ namespace e3
     class EditorPanel : public Component
     {
     public:
-        EditorPanel();
-
+        void setContent(ModulePanel* modulePanel, ParameterPanel* parameterPanel);
         void resized() override;
-        Rectangle<int> getViewportBounds() const { return viewport_.getBounds(); }
-
-        void showInstrument(Instrument* instrument, XmlElement* instrumentXml);
-
-
-        //PortComponent* getPort(const Link& link, PortType portType);
-        //ModuleComponent* getModule(uint16_t id);
-
 
     protected:
         Viewport viewport_;
-        ScopedPointer<ModulePanel> modulePanel_;
-        ScopedPointer<ParameterPanel> parameterPanel_;
-        //typedef std::map< uint16_t, ModuleComponent* > ModuleComponentMap;
-        //
-        //OwnedArray<ModuleComponent> modules_;
+        ModulePanel* modulePanel_;
+        ParameterPanel* parameterPanel_;
     };
 
 

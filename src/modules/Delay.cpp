@@ -5,29 +5,29 @@
 namespace e3 {
 
     Delay::Delay() : Module(
-        kModuleDelay,
+        ModuleTypeDelay,
         "Delay",
-        kPolyphonic,
-        kProcessAudio)
+        Polyphonic,
+        ProcessAudio)
     {
         addInport(0, "In", &audioInport_);
         addOutport(0, "Out", &audioOutport_);
 
         processFunction_ = static_cast< ProcessFunctionPointer >(&Delay::processAudio);
 
-        Parameter paramTime(kParamDelaytime, "Time", kControlSlider, 0.5);
+        Parameter paramTime(ParamDelaytime, "Time", ControlSlider, 0.5);
         paramTime.unit_ = "sec";
-        paramTime.numberFormat_ = kNumberFloat;
+        paramTime.numberFormat_ = NumberFloat;
         parameters_.add(paramTime);
 
-        Parameter paramRepeats(kParamFeedback, "Repeats", kControlSlider, 0.5);
+        Parameter paramRepeats(ParamFeedback, "Repeats", ControlSlider, 0.5);
         paramRepeats.unit_ = "sec";
-        paramRepeats.numberFormat_ = kNumberFloat;
+        paramRepeats.numberFormat_ = NumberFloat;
         parameters_.add(paramRepeats);
 
-        Parameter paramGain(kParamGain, "Gain", kControlSlider, 0.5);
+        Parameter paramGain(ParamGain, "Gain", ControlSlider, 0.5);
         paramGain.unit_ = "db";
-        paramGain.numberFormat_ = kNumberDecibel;
+        paramGain.numberFormat_ = NumberDecibel;
         parameters_.add(paramGain);
     }
 
@@ -55,9 +55,9 @@ namespace e3 {
     void Delay::setParameter(int paramId, double value, double, int16_t) 
     {
         switch( paramId ) {
-        case kParamDelaytime: delayTime_ = (uint32_t)( value * (double)(bufferSize_ - 1)); break;
-        case kParamFeedback:  feedback_  = value; break;
-        case kParamGain:	  gain_      = value; break;
+        case ParamDelaytime: delayTime_ = (uint32_t)( value * (double)(bufferSize_ - 1)); break;
+        case ParamFeedback:  feedback_  = value; break;
+        case ParamGain:	  gain_      = value; break;
         }
     }
 

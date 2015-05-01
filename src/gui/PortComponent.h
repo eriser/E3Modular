@@ -32,11 +32,12 @@ namespace e3 {
         Point<int> getDockingPosition();
         bool isDockingPosition(const Point<int>& pos) const;
 
-        bool startDocking();
-        void cancelDocking();
+        void setDockingState();
+        void unsetDockingState();
+        void setRejectState();
+        void setConnectedState();
+        void setDisconnectedState();
 
-        void connect();
-        void disconnect();
         uint16_t getNumConnections() const { return numConnections_; }
 
         int getModuleId() const;
@@ -44,17 +45,16 @@ namespace e3 {
         PortType getPortType() const       { return port_->getType(); }
 
         enum State {
-            kIdle      = 0,
-            kHover     = 1,
-            kDocking   = 2
+            Idle    = 0,
+            Hover   = 1,
+            Docking = 2,
+            Reject  = 4
         };
 
 
     protected:
-        Point<int> translateFromParent(const Point<int>& pos);
-        Point<int> translateToParent(const Point<int>& pos);
-
-        //bool setHoverState(const Point<int>& pos);
+        Point<int> translateFromParent(const Point<int>& pos) const;
+        Point<int> translateToParent(const Point<int>& pos) const;
 
         Port* port_;
         ModuleComponent* owner_;

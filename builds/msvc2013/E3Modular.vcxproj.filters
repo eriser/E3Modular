@@ -51,9 +51,6 @@
     <ClInclude Include="..\..\src\modules\MidiModules.h">
       <Filter>src\modules</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\modules\SineOscil.h">
-      <Filter>src\modules</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\core\Bank.h">
       <Filter>src\core</Filter>
     </ClInclude>
@@ -153,6 +150,9 @@
     <ClInclude Include="..\..\src\modules\AudioOutTerminal.h">
       <Filter>src\modules</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\modules\SineOscillator.h">
+      <Filter>src\modules</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp">
@@ -195,9 +195,6 @@
       <Filter>src\modules</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\modules\MidiModules.cpp">
-      <Filter>src\modules</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\modules\SineOscil.cpp">
       <Filter>src\modules</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\Sink.cpp">
@@ -276,6 +273,9 @@
       <Filter>src\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\modules\AudioOutTerminal.cpp">
+      <Filter>src\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\modules\SineOscillator.cpp">
       <Filter>src\modules</Filter>
     </ClCompile>
   </ItemGroup>

@@ -26,7 +26,7 @@ namespace e3 {
     {
         reset();
 
-        AudioOutTerminal* audioOut = dynamic_cast<AudioOutTerminal*>(instrument->getModule(kModuleAudioOutTerminal));
+        AudioOutTerminal* audioOut = dynamic_cast<AudioOutTerminal*>(instrument->getModule(ModuleTypeAudioOutTerminal));
         if (nullptr == audioOut)    // nothing to do
             return;
 
@@ -44,20 +44,22 @@ namespace e3 {
                 sentinel = instrument->checkSentinel(module);
             }
 
-            if (module->processingType_ & (kProcessAudio | kProcessEvent))
+            if (module->processingType_ & (ProcessAudio | ProcessEvent))
             {
-                if (contains(module) == false) {
-                    push_back(module);
-                }
-                LinkPointerList links;
-                instrument->getLinksForModule(module->id_, links, kInport);
-
-                for (LinkPointerList::const_iterator it = links.begin(); it != links.end(); ++it)
+                if (contains(module) == false) 
                 {
-                    Link* link = *it;
-                    Module* next = instrument->getModule(link->leftModule_);
-                    if (next && next != module) {
-                        queue.push(next);                 // enqueue sources of current node
+                    push_back(module);
+
+                    LinkPointerList links;
+                    instrument->getLinksForModule( module->id_, PortTypeInport, links );
+
+                    for (LinkPointerList::const_iterator it = links.begin(); it != links.end(); ++it)
+                    {
+                        Link* link = *it;
+                        Module* next = instrument->getModule( link->leftModule_ );
+                        if (next && next != module) {
+                            queue.push( next );                 // enqueue sources of current module
+                        }
                     }
                 }
             }

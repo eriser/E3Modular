@@ -1,7 +1,4 @@
 
-#include "core/GlobalHeader.h"
-#include "core/Module.h"
-#include "core/Instrument.h"
 #include "gui/ModulePanel.h"
 #include "gui/ParameterPanel.h"
 #include "gui/EditorPanel.h"
@@ -9,10 +6,10 @@
 
 namespace e3
 {
-    EditorPanel::EditorPanel()
+    void EditorPanel::setContent(ModulePanel* modulePanel, ParameterPanel* parameterPanel)
     {
-        modulePanel_    = new ModulePanel(this);
-        parameterPanel_ = new ParameterPanel();
+        modulePanel_    = modulePanel;
+        parameterPanel_ = parameterPanel;
 
         viewport_.setViewedComponent(modulePanel_, false);
         viewport_.setFocusContainer(true);
@@ -22,19 +19,13 @@ namespace e3
     }
 
 
-    void EditorPanel::showInstrument(Instrument* instrument, XmlElement* instrumentXml)
-    {
-        modulePanel_->createModules(instrument, instrumentXml);
-    }
-
-
     void EditorPanel::resized()
     {
         Rectangle<int> content = getLocalBounds();
         int separator = jmax(300, (int)(content.getWidth() * 0.75));
 
         viewport_.setBounds(content.withWidth(separator));      // this is the visible area
-        modulePanel_->checkSize();
+        modulePanel_->checkViewport();
     }
 
 } // namespace e3

@@ -22,18 +22,18 @@ namespace e3 {
 
     enum NumberFormat
     {
-        kNumberInt     = 0,
-        kNumberFloat   = 1,
-        kNumberDecibel = 2
+        NumberInt     = 0,
+        NumberFloat   = 1,
+        NumberDecibel = 2
     };
 
     enum ControlType
     {
-        kControlHidden   = 0,
-        kControlSlider   = 1,
-        kControlBiSlider = 2,
-        kControlCheckbox = 3,
-        kControlNumEdit  = 4
+        ControlHidden   = 0,
+        ControlSlider   = 1,
+        ControlBiSlider = 2,
+        ControlCheckbox = 3,
+        ControlNumEdit  = 4
     };
 
 

@@ -19,6 +19,8 @@ namespace e3 {
     class Processor;
     class TabComponent;
     class EditorPanel;
+    class ModulePanel;
+    class ParameterPanel;
     class BrowserPanel;
     class SetupPanel;
     class MonitorComponent;
@@ -57,6 +59,8 @@ namespace e3 {
         ScopedPointer<EditorPanel>  editorPanel_;
         ScopedPointer<BrowserPanel> browserPanel_;
         ScopedPointer<SetupPanel> setupPanel_;
+        ScopedPointer<ModulePanel> modulePanel_;
+        ScopedPointer<ParameterPanel> parameterPanel_;
         ScopedPointer<MonitorComponent> monitor_;
         ScopedPointer<ResizableCornerComponent> resizer_;
 

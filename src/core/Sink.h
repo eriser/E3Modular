@@ -42,11 +42,11 @@ namespace e3 {
             {
                 if (frameCounter_ == controlRateDivisor_)
                 {
-                    if ((*m)->processingType_ & kProcessControl)
+                    if ((*m)->processingType_ & ProcessControl)
                         (*m)->processControl();
                 }
 
-                if ((*m)->processFunction_ != NULL)
+                if ((*m)->processFunction_ != nullptr)
                     ((*m)->*(*m)->processFunction_)();
             }
 

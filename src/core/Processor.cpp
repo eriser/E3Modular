@@ -23,31 +23,37 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 namespace e3 {
 
     Processor::Processor() : AudioProcessor(),
-        polyphony_(new Polyphony()),
-        bank_(new Bank()),
-        sink_(new Sink()),
-        cpuMeter_(new CpuMeter())
+        polyphony_( new Polyphony() ),
+        bank_( new Bank() ),
+        sink_( new Sink() ),
+        cpuMeter_( new CpuMeter() )
     {
         Settings::getInstance().load();
     }
 
 
-    void Processor::prepareToPlay(double sampleRate, int)
+    Processor::~Processor()
     {
-        sink_->setSampleRate(sampleRate);
-        cpuMeter_->setSampleRate((uint32_t)sampleRate);
+        if (sink_ != nullptr)  delete sink_;
+    }
+
+
+    void Processor::prepareToPlay( double sampleRate, int )
+    {
+        sink_->setSampleRate( sampleRate );
+        cpuMeter_->setSampleRate( (uint32_t)sampleRate );
 
         if (instrument_ == nullptr)
         {
-            openBank(Settings::getInstance().getRecentBankPath());
+            openBank( Settings::getInstance().getRecentBankPath() );
             loadInstrument();
         }
         else {
             try {
-                instrument_->setSampleRate(sampleRate);
+                instrument_->setSampleRate( sampleRate );
             }
             catch (const std::exception& e) {
-                TRACE(e.what());
+                TRACE( e.what() );
             }
         }
     }
@@ -59,112 +65,27 @@ namespace e3 {
     }
 
 
-    void Processor::openBank(const std::string& path)
-    {
-        bank_->open(path);
-    }
-
-
-    void Processor::newBank()
-    {
-        bank_->createNewBank();
-    }
-
-
-    void Processor::saveBank(const std::string& path)
-    {
-        bank_->save(path);
-    }
-
-
-    void Processor::loadInstrument(int hash, bool saveCurrent)
-    {
-        suspend();
-
-        if (instrument_ != nullptr && saveCurrent) {
-            instrument_->resetModules();
-            bank_->saveInstrument(instrument_);
-        }
-
-        instrument_ = bank_->loadInstrument(hash);
-        if (instrument_ != nullptr)
-        {
-            uint16_t numVoices = instrument_->numVoices_;
-            polyphony_->setNumVoices(numVoices);
-
-            instrument_->initModules(polyphony_.get(), getSampleRate());
-            //instrument_->updateModules(getSampleRate(), numVoices);
-            instrument_->connectModules(); 
-
-            sink_->compile(instrument_);
-        }
-
-        resume();
-    }
-
-
     bool Processor::isPlugin() const
     {
-        ASSERT(wrapperType != wrapperType_Undefined);
+        ASSERT( wrapperType != wrapperType_Undefined );
         return wrapperType != wrapperType_Standalone;
     }
 
 
     AudioProcessorEditor* Processor::createEditor()
     {
-        return new AudioEditor(this);
+        return new AudioEditor( this );
     }
 
 
-    void Processor::processBlock(AudioSampleBuffer& audioBuffer, MidiBuffer& midiBuffer)
-    {
-        const ScopedLock scopedLock(lock_);
-        cpuMeter_->start();
-        audioBuffer.clear();    // input not implemented
-
-        int startSample  = 0;
-        int totalSamples = audioBuffer.getNumSamples();
-        int numSamples   = totalSamples;
-
-        MidiBuffer::Iterator midiIterator(midiBuffer);
-        midiIterator.setNextSamplePosition(startSample);
-        MidiMessage msg(0xf4, 0.0);
-        int midiEventPos;
-        bool hasEvent;
-
-        while (numSamples > 0)
-        {
-            hasEvent  = midiIterator.getNextEvent(msg, midiEventPos);
-            hasEvent &= midiEventPos < startSample + numSamples;
-
-            const int numSamplesNow = hasEvent ? midiEventPos - startSample : numSamples;
-
-            if (numSamplesNow > 0) {
-                sink_->process(audioBuffer, startSample, numSamplesNow);
-            }
-
-            if (hasEvent) {
-                polyphony_->handleMidiMessage(msg);
-            }
-
-            startSample += numSamplesNow;
-            numSamples  -= numSamplesNow;
-        }
-
-        if (cpuMeter_->stop(totalSamples)) {
-            polyphony_->monitorCpuMeterEvent(cpuMeter_->getPercent());
-        }
-    }
-
-
-    void Processor::getStateInformation(MemoryBlock&)
+    void Processor::getStateInformation( MemoryBlock& )
     {
         // You should use this method to store your parameters in the memory block.
         // You could do that either as raw data, or use the XML or ValueTree classes
         // as intermediaries to make it easy to save and load complex data.
     }
 
-    void Processor::setStateInformation(const void*, int)
+    void Processor::setStateInformation( const void*, int )
     {
         // You should use this method to restore your parameters from this memory block,
         // whose contents will have been created by the getStateInformation() call.
@@ -177,6 +98,134 @@ namespace e3 {
     }
 
 
+    void Processor::openBank( const std::string& path )
+    {
+        bank_->open( path );
+    }
+
+
+    void Processor::newBank()
+    {
+        bank_->createNewBank();
+    }
+
+
+    void Processor::saveBank( const std::string& path )
+    {
+        bank_->save( path );
+    }
+
+
+    void Processor::loadInstrument( int hash, bool saveCurrent )
+    {
+        suspend();
+
+        if (instrument_ != nullptr && saveCurrent) {
+            bank_->saveInstrument( instrument_ );
+        }
+
+        instrument_ = bank_->loadInstrument( hash );
+        if (instrument_ != nullptr)
+        {
+            uint16_t numVoices = instrument_->numVoices_;
+            polyphony_->setNumVoices( numVoices );
+            initInstrument();
+        }
+
+        resume();
+    }
+
+
+    void Processor::initInstrument()
+    {
+        instrument_->initModules( polyphony_, getSampleRate() );
+        instrument_->connectModules();
+
+        sink_->compile( instrument_ );
+    }
+
+
+    void Processor::resetAndInitInstrument()
+    {
+        instrument_->resetModules();
+        initInstrument();
+    }
+
+
+    Link* Processor::addLink( Link* link )
+    {
+        Link* result = nullptr;
+        suspend();
+        try {
+            result = instrument_->addLink( link );
+            resetAndInitInstrument();
+        }
+        catch (const std::exception& e) {
+            TRACE( e.what() );
+            return nullptr;
+        }
+        resume();
+        return result;
+    }
+
+
+    void Processor::removeLink( Link* link )
+    {
+        suspend();
+        try {
+            instrument_->removeLink( link );
+            resetAndInitInstrument();
+        }
+        catch (const std::exception& e) {
+            TRACE( e.what() );
+            //checkAppState();
+            return;
+        }
+        resume();
+    }
+
+
+    void Processor::processBlock( AudioSampleBuffer& audioBuffer, MidiBuffer& midiBuffer )
+    {
+        const ScopedLock scopedLock( lock_ );
+        cpuMeter_->start();
+        audioBuffer.clear();    // input not implemented
+
+        int startSample  = 0;
+        int totalSamples = audioBuffer.getNumSamples();
+        int numSamples   = totalSamples;
+
+        MidiBuffer::Iterator midiIterator( midiBuffer );
+        midiIterator.setNextSamplePosition( startSample );
+        MidiMessage msg( 0xf4, 0.0 );
+        int midiEventPos;
+        bool hasEvent;
+
+        while (numSamples > 0)
+        {
+            hasEvent  = midiIterator.getNextEvent( msg, midiEventPos );
+            hasEvent &= midiEventPos < startSample + numSamples;
+
+            const int numSamplesNow = hasEvent ? midiEventPos - startSample : numSamples;
+
+            if (numSamplesNow > 0) {
+                sink_->process( audioBuffer, startSample, numSamplesNow );
+            }
+
+            if (hasEvent) {
+                polyphony_->handleMidiMessage( msg );
+            }
+
+            startSample += numSamplesNow;
+            numSamples  -= numSamplesNow;
+        }
+
+        if (cpuMeter_->stop( totalSamples )) {
+            polyphony_->monitorCpuMeterEvent( cpuMeter_->getPercent() );
+        }
+    }
+
+
     //------------------------------------------------------------------------------
     // Processing
     //------------------------------------------------------------------------------
@@ -185,9 +234,9 @@ namespace e3 {
     {
         bool nested = isSuspended();
 
-        if (!nested) 
+        if (!nested)
         {
-            suspendProcessing(true);
+            suspendProcessing( true );
             if (instrument_) {
                 instrument_->suspendModules();
             }
@@ -196,13 +245,13 @@ namespace e3 {
     }
 
 
-    void Processor::resume(bool nested)
+    void Processor::resume( bool nested )
     {
         if (nested) {
             return;
         }
         if (isSuspended()) {
-            suspendProcessing(false);
+            suspendProcessing( false );
             if (instrument_) {
                 instrument_->resumeModules();
             }

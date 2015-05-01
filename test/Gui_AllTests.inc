@@ -1,4 +1,5 @@
 
+
 #include "gui/Style.h"
 #include "gui/Wires.h"
 
@@ -44,8 +45,7 @@ namespace e3 {
             Rectangle<int> r1(10, 10, 100, 100);
             Wire w(r1.getTopRight(), r1.getBottomLeft());
 
-            Rectangle<int> r2;
-            w.getBoundingRect(r2);
+            Rectangle<int> r2 = w.getBoundingRect();
             EXPECT_EQ(r1, r2);
 
             Rectangle<int> r3(0, 0, 90, 90);

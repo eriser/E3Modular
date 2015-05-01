@@ -488,7 +488,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\modules\AudioOutTerminal.h" />
     <ClInclude Include="..\..\src\modules\MidiModules.h" />
     <ClInclude Include="..\..\src\modules\ModuleFactory.h" />
-    <ClInclude Include="..\..\src\modules\SineOscil.h" />
+    <ClInclude Include="..\..\src\modules\SineOscillator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Lib\juce\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.cpp">
@@ -569,7 +569,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\modules\AudioOutTerminal.cpp" />
     <ClCompile Include="..\..\src\modules\MidiModules.cpp" />
     <ClCompile Include="..\..\src\modules\ModuleFactory.cpp" />
-    <ClCompile Include="..\..\src\modules\SineOscil.cpp" />
+    <ClCompile Include="..\..\src\modules\SineOscillator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

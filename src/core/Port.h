@@ -13,6 +13,7 @@
 namespace e3 {
 
     class Module;
+    class Link;
     class Inport;
     class Outport;
 
@@ -22,25 +23,25 @@ namespace e3 {
     //------------------------------------------
 
     enum PortType {
-        kPortUndefined = 0,
-        kInport        = 1,
-        kOutport       = 2
+        PortTypeUndefined = 0,
+        PortTypeInport    = 1,
+        PortTypeOutport   = 2
     };
 
 
     enum PortAction {
-        kPortActionIdle             = 0,
-        kPortActionDock             = 1,
-        kPortActionUndock           = 2,
-        kPortActionContinueDocking  = 3,
-        kPortActionEndDocking       = 4
+        PortActionIdle             = 0,
+        PortActionDocking          = 1,
+        PortActionUndocking        = 2,
+        PortActionContinueDocking  = 3,
+        PortActionEndDocking       = 4
     };
 
 
     enum VoiceAdapterType {
-        kAdapterNone       = 0,
-        kAdapterMonoToPoly = 1,
-        kAdapterPolyToMono = 2
+        AdapterNone       = 0,
+        AdapterMonoToPoly = 1,
+        AdapterPolyToMono = 2
     };
 
     
@@ -76,11 +77,7 @@ namespace e3 {
         Port(PortType type) : type_(type)  {}
         virtual ~Port() {}
 
-        //virtual void connect() {}
-        //virtual void disconnect()  {}
         virtual void disconnectAll() = 0;
-        //virtual void connect(Link*, Module*, VoiceAdapterType) {}
-        //virtual void disconnect(Module*, Link*) {}
         virtual bool isConnected() { return false;  }
 
         virtual void setNumVoices(uint16_t numVoices);
@@ -95,8 +92,8 @@ namespace e3 {
     protected:
         int id_                  = -1;
         uint16_t numVoices_      = 0;
-        PortType type_           = kPortUndefined;
-        ControlType controlType_ = kControlHidden;
+        PortType type_           = PortTypeUndefined;
+        ControlType controlType_ = ControlHidden;
         std::string label_;
     };
 
@@ -109,7 +106,7 @@ namespace e3 {
     class Outport : public Port
     {
     public:
-        Outport() : Port(kOutport) {}
+        Outport() : Port(PortTypeOutport) {}
 
         virtual void connect(Module*, Link*, VoiceAdapterType) {}
         virtual void disconnect(Module*, Link*) {}
@@ -148,7 +145,7 @@ namespace e3 {
     class Inport : public Port
     {
     public: 
-        Inport() : Port(kInport)  {}
+        Inport() : Port(PortTypeInport)  {}
 
         virtual void connect()    {}
         virtual void disconnect() {}
@@ -190,15 +187,15 @@ namespace e3 {
             __assume(adapter < 3);
             switch (adapter)
             {
-            case kAdapterNone:
+            case AdapterNone:
                 *(ptr + voice) += val; 	                     // add value to existing value, per voice
                 break;
-            case kAdapterMonoToPoly:
+            case AdapterMonoToPoly:
                 for (uint16_t i = 0; i < numVoices_; i++) {  // add value to all voices of target
                     *(ptr + i) += val;
                 }
                 break;
-            case kAdapterPolyToMono:
+            case AdapterPolyToMono:
                 *ptr += val; 	                              // add value only to voice 0
                 break;
             }

@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <string>
 #include "core/Module.h"
 
 
@@ -12,13 +13,16 @@ namespace e3 {
     public:
         MidiGate();
 
-        void initSignals() override;
-        void resetSignals() override;
+        void connectSignals() override;
+        void disconnectSignals() override;
         void onMidiGate( double gate, uint16_t voice);
+
+        std::string debugLabel_ = "MidiGate";
 
     protected:
         EventOutport gateOutport_;
     };
+
 
     class MidiPitch : public Module 
     {
@@ -30,25 +34,27 @@ namespace e3 {
             VoicingType voicingType,
             ProcessingType processingType);
 
-        void initSignals() override;
-        void resetSignals() override;
+        void connectSignals() override;
+        void disconnectSignals() override;
 
         void initVoices() override;
-        void setParameter( uint16_t paramId, double value, double modulation=0.f, int16_t voice=-1 );
+        void setParameter(int paramId, double value, double modulation=0.f, int16_t voice=-1) override;
         void onMidiNote( double pitch, double gate, uint16_t voice );
         void onMidiPitchbend(int value);
         
         void processControl() throw() override;
 
+        std::string debugLabel_ = "MidiPitch";
+
     protected:
         void createParameters();
-        void calcGlide( double freq, uint16_t voice );
-        void setGlideTime( double time );
+        void calcGlide(double freq, uint16_t voice);
+        void setGlideTime(double time);
 
         enum Params { 
-            kParamBendRange  = 0,
-            kParamGlideTime  = 1,
-            kParamGlideAuto  = 2,
+            ParamBendRange  = 0,
+            ParamGlideTime  = 1,
+            ParamGlideAuto  = 2,
         };
 
         Buffer< double > glideDeltaBuffer_, glideTargetBuffer_, freqBuffer_;
@@ -72,9 +78,11 @@ namespace e3 {
     public:
         MidiInput();
 
-        void initSignals() override;
-        void resetSignals() override;
+        void connectSignals() override;
+        void disconnectSignals() override;
         void onMidiNote(double pitch, double gate, uint16_t voice);
+
+        std::string debugLabel_ = "MidiInput";
 
     protected:
         EventOutport gateOutport_;

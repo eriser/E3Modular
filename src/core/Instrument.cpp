@@ -10,7 +10,7 @@ namespace e3 {
 
     Instrument::Instrument()
     {
-        modules_.reserve(100);
+        modules_.reserve( 100 );
     }
 
     Instrument::~Instrument()
@@ -29,17 +29,17 @@ namespace e3 {
     }
 
 
-    Module* Instrument::createAndAddModule(ModuleType type)
+    Module* Instrument::createAndAddModule( ModuleType type )
     {
-        Module* module = ModuleFactory::create(type);
-        modules_.push_back(module);
-        module->id_ = createModuleId(type);
+        Module* module = ModuleFactory::create( type );
+        modules_.push_back( module );
+        module->id_ = createModuleId( type );
 
         return module;
     }
 
 
-    void Instrument::deleteModule(Module* module)       // TODO: remove all links to and from this module
+    void Instrument::deleteModule( Module* module )       // TODO: remove all links to and from this module
     {
         //ModuleList targets;
         //getTargetModules(module, &targets);
@@ -74,41 +74,49 @@ namespace e3 {
         {
             if ((*it)->id_ == module->id_) {
                 delete *it;
-                modules_.erase(it);
+                modules_.erase( it );
                 break;
             }
         }
     }
 
 
-    void Instrument::addLink(const Link& link)
+    Link* Instrument::addLink( Link* link )
     {
-        links_.add(link);
+        links_.add( *link );
+        return &links_.back();
     }
 
 
-    void Instrument::getLinksForModule(int16_t moduleId, LinkPointerList& list, PortType portType)
+    void Instrument::removeLink( Link* link )
     {
-        //links_.getLinksForModule(moduleId, list, portType);
+        links_.remove( *link );
+    }
+
+
+    void Instrument::getLinksForModule( int moduleId, PortType portType, LinkPointerList& list)
+    {
+        list.clear();
+
         for (LinkList::iterator it = links_.begin(); it != links_.end(); ++it)
         {
             Link& link = *it;
-            if ((portType == kInport || portType == kPortUndefined) && link.rightModule_ == moduleId) {
-                list.add(&link);
+            if ((portType == PortTypeInport || portType == PortTypeUndefined) && link.rightModule_ == moduleId) {
+                list.add( &link );
             }
-            else if ((portType == kOutport || portType == kPortUndefined) && link.leftModule_ == moduleId) {
-                list.add(&link);
+            else if ((portType == PortTypeOutport || portType == PortTypeUndefined) && link.leftModule_ == moduleId) {
+                list.add( &link );
             }
         }
     }
 
 
-    void Instrument::initModules(Polyphony* polyphony, double sampleRate)
+    void Instrument::initModules( Polyphony* polyphony, double sampleRate )
     {
         for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             Module* m = *it;
-            m->init(polyphony, sampleRate);
+            m->init( polyphony, sampleRate );
         }
     }
 
@@ -126,39 +134,25 @@ namespace e3 {
     {
         for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
-            connectModule(*it);
-        }
-    }
-
-
-    void Instrument::connectModule(Module* target)
-    {
-        for (LinkList::iterator it = links_.begin(); it != links_.end(); ++it)
-        {
-            Link* link = &(*it);
-            if (link->rightModule_ == target->id_)
+            Module* target = (*it);
+            for (LinkList::iterator it = links_.begin(); it != links_.end(); ++it)
             {
-                Module* source = getModule(link->leftModule_);
-                ASSERT(source);
-                if (source) {
-                    source->connectPort(target, link);
+                Link* link = &(*it);
+                if (link->rightModule_ == target->id_)
+                {
+                    Module* source = getModule( link->leftModule_ );
+                    ASSERT( source );
+                    if (source) {
+                        source->connectPort( target, link );
+                    }
                 }
             }
         }
-
-        //for (uint16_t i = 0; i < target->links_.size(); i++)
-        //{
-        //    Link& link = target->getLink(i);
-        //    Module* source = getModule(link.leftModule_);
-        //    ASSERT(source);
-        //    if (source) {
-        //        source->connectPort(target, &link);
-        //    }
-        //}
     }
 
 
-    Module* Instrument::getModule(int moduleId) const
+
+    Module* Instrument::getModule( int moduleId ) const
     {
         for (ModuleList::const_iterator it = modules_.begin(); it != modules_.end(); it++)
         {
@@ -170,45 +164,44 @@ namespace e3 {
     }
 
 
-    void Instrument::setSampleRate(double sampleRate)
+    void Instrument::setSampleRate( double sampleRate )
     {
         for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             Module* m = *it;
-            m->setSampleRate(sampleRate);
+            m->setSampleRate( sampleRate );
         }
     }
 
 
-    void Instrument::setNumVoices(uint16_t numVoices)
+    void Instrument::setNumVoices( uint16_t numVoices )
     {
-        //numVoices_ = (numVoices == 0) ? numVoices_ : numVoices;
-        ASSERT(numVoices > 0);
+        ASSERT( numVoices > 0 );
         numVoices_ = numVoices;
 
         for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             Module* m = *it;
-            m->setNumVoices(numVoices_);
+            m->setNumVoices( numVoices_ );
             m->update();
         }
     }
 
 
-    uint16_t Instrument::createModuleId(ModuleType type)
+    int Instrument::createModuleId( ModuleType type )
     {
-        if (type == kModuleAudioOutTerminal) {
-            return (uint16_t)kModuleAudioOutTerminal;
+        if (type == ModuleTypeAudioOutTerminal) {
+            return (int)ModuleTypeAudioOutTerminal;
         }
 
-        uint16_t minId = kModuleAudioOutTerminal + 1;
-        uint16_t maxId = (uint16_t)modules_.size();
-        uint16_t id    = minId;
+        int minId = ModuleTypeAudioOutTerminal + 1;
+        int maxId = (uint16_t)modules_.size();
+        int id    = minId;
 
         for (; id <= maxId; id++) {
-            if (nullptr == getModule(id)) break;
+            if (nullptr == getModule( id )) break;
         }
-        ASSERT(id <= maxId);
+        ASSERT( id <= maxId );
         return id;
     }
 
@@ -229,21 +222,21 @@ namespace e3 {
     }
 
 
-    bool Instrument::checkSentinel(Module* module)
+    bool Instrument::checkSentinel( Module* module )
     {
-        if (module->moduleType_ == kModuleAdsrEnv)
+        if (module->moduleType_ == ModuleTypeAdsrEnvelope)
         {
-            ADSREnv* adsr = dynamic_cast< ADSREnv* >(module);
-            adsr->setSentinel(true);
+            ADSREnvelope* adsr = dynamic_cast<ADSREnvelope*>(module);
+            adsr->setSentinel( true );
             return true;
         }
         return false;
     }
 
 
-    bool Instrument::hasAudioOutTerminal()    
-    { 
-        return (getModule(kModuleAudioOutTerminal) != nullptr); 
+    bool Instrument::hasAudioOutTerminal()
+    {
+        return (getModule( ModuleTypeAudioOutTerminal ) != nullptr);
     }
 
 

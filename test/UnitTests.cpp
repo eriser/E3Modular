@@ -1,4 +1,5 @@
 
+#include "JuceHeader.h"
 #include <gtest/gtest.h>
 
 #include "LibCommon_AllTests.inc"

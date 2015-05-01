@@ -159,14 +159,23 @@ namespace e3 {
         ASSERT(target);
         ASSERT(link);
 
-        int16_t index = targets_.getIndex(link);
-        removeTarget(link);
-        ASSERT(index >= 0);
-
-        if (index >= 0)
+        if (link != nullptr && target != nullptr)
         {
-            audioOutBuffer_.remove(index);
-            target->disconnectTargetFromSource(link->rightPort_);
+            int16_t portId = targets_.getIndex( link );
+            ASSERT( portId >= 0 && portId < (int)target->getNumInports() );
+            removeTarget( link );
+
+            if (portId >= 0)
+            {
+                audioOutBuffer_.remove( portId );
+
+                AudioInport* inport = target->getAudioInport( portId );
+                ASSERT( inport );
+                if (inport)
+                    inport->disconnect();
+
+                //target->updatePorts();
+            }
         }
     }
 
@@ -251,15 +260,15 @@ namespace e3 {
             __assume(adapter < 3);
             switch (adapter)
             {
-            case kAdapterNone:
+            case AdapterNone:
                 targetModule->setParameter(inport->paramId_, value, modulation, voice);
                 break;
-            case kAdapterMonoToPoly:
+            case AdapterMonoToPoly:
                 for (uint16_t i = 0; i<numVoices_; i++) {
                     targetModule->setParameter(inport->paramId_, value, modulation, i);
                 }
                 break;
-            case kAdapterPolyToMono:
+            case AdapterPolyToMono:
                 targetModule->setParameter(inport->paramId_, value, modulation, 0);
                 break;
             }

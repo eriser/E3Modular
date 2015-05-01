@@ -22,24 +22,24 @@ namespace e3 {
         setInterceptsMouseClicks(false, true);  // owner handles selection, focus and dragging
         createPorts();
         calculateSize();
-        //setVisible((module != nullptr) && (module->style_ & kModuleStyleVisible));
+        //setVisible((module != nullptr) && (module->style_ & ModuleStyleVisible));
         //setColors();
     }
 
 
     void ModuleComponent::createPorts()
     {
-        for (size_t i = 0; i < module_->inports_.size(); i++)
+        for (int i = 0; i < module_->getNumInports(); i++)
         {
-            Port* port = module_->inports_[i];
+            Port* port = module_->getInport(i);
             PortComponent* component = new PortComponent(port, this);
             inports_.add(component);
             addAndMakeVisible(component);
         }
 
-        for (size_t i = 0; i < module_->outports_.size(); i++)
+        for (int i = 0; i < module_->getNumOutports(); i++)
         {
-            Port* port = module_->outports_[i];
+            Port* port = module_->getOutport(i);
             PortComponent* component = new PortComponent(port, this);
             outports_.add(component);
             addAndMakeVisible(component);
@@ -105,7 +105,7 @@ namespace e3 {
         g.drawRect(r);
 
         g.setColour(findColour(Style::kModuleText1ColourId));
-        g.drawText(module_->label_, 0, 0, getWidth(), getHeight(), Justification::centred, true);
+        g.drawText(module_->getLabel(), 0, 0, getWidth(), getHeight(), Justification::centred, true);
     }
 
 
@@ -121,7 +121,7 @@ namespace e3 {
     void ModuleComponent::continueDrag(const MouseEvent& e) 
     {
         dragger_.dragComponent(this, e, &dragConstrainer_);
-        panel_->checkSize();
+        panel_->checkViewport();
         panel_->updateWiresForModule(this, isSelected());
     }
 
@@ -130,7 +130,7 @@ namespace e3 {
     {
         Point<int> pos = getPosition();
         if (positionBeforeDragging_ != pos) {
-            panel_->storeModulePosition(module_->id_, pos);
+            panel_->storeModulePosition(module_->getId(), pos);
         }
     }
 
@@ -146,12 +146,12 @@ namespace e3 {
 
 
     Module* ModuleComponent::getModule() const   { return module_; }
-    uint16_t ModuleComponent::getModuleId() const { return module_->id_; }
+    int ModuleComponent::getModuleId() const     { return module_->getId(); }
 
 
     PortComponent* ModuleComponent::getPort(int portId, PortType portType)
     {
-        PortList& list = (portType == kInport) ? inports_ : outports_;
+        PortList& list = (portType == PortTypeInport) ? inports_ : outports_;
 
         for (int i = 0; i < list.size(); i++)
         {
@@ -185,7 +185,7 @@ namespace e3 {
         {
             Rectangle<int> bounds = getLocalBounds();
             pos.y = bounds.getY() + bounds.getHeight() / 2;
-            pos.x = (portType == kInport) ? bounds.getX() + 1 : bounds.getRight() - 1;
+            pos.x = (portType == PortTypeInport) ? bounds.getX() + 1 : bounds.getRight() - 1;
 
             Rectangle<int> rcParent = panel_->getLocalBounds();
             pos.addXY(-rcParent.getX(), -rcParent.getY());
@@ -331,7 +331,7 @@ namespace e3 {
         {
             Rectangle<int> bounds = getLocalBounds();
             pos.y = bounds.getY() + bounds.getHeight() / 2;
-            pos.x = (portType == kInport) ? bounds.getX() + 1 : bounds.getRight() - 1;
+            pos.x = (portType == PortTypeInport) ? bounds.getX() + 1 : bounds.getRight() - 1;
 
             Rectangle<int> rcParent = panel_->getLocalBounds();
             pos.offset(-rcParent.getX(), -rcParent.getY());

@@ -19,14 +19,14 @@ namespace e3 {
     {
     public:
         Parameter() {}
-        Parameter(int id, const std::string& label, ControlType controlType, double defaultValue = 0);
+        Parameter(int id, const std::string& label, ControlType controlType, double defaultValue = 1);
 
 
         int id_                    = 0;
-        ControlType controlType_   = kControlHidden;
-        NumberFormat numberFormat_ = kNumberFloat;
-        double value_              = 0;
-        double defaultValue_       = 0;
+        ControlType controlType_   = ControlHidden;
+        NumberFormat numberFormat_ = NumberFloat;
+        double value_              = 1;
+        double defaultValue_       = 1;
         double veloSens_           = 0;
         double keyTrack_           = 0;
         double resolution_         = 1;

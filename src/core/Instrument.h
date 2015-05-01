@@ -18,33 +18,35 @@ namespace e3 {
         ~Instrument();
 
         void deleteModules();
-        void initModules(Polyphony* polyphony, double sampleRate);
+        void initModules( Polyphony* polyphony, double sampleRate );
         void resetModules();
         void connectModules();
         void resumeModules();
         void suspendModules();
 
-        void setSampleRate(double sampleRate);
-        void setNumVoices(uint16_t numVoices);
+        void setSampleRate( double sampleRate );
+        void setNumVoices( uint16_t numVoices );
 
-        Module* getModule(int moduleId) const;
-        const ModuleList& getModules() const { return modules_;  }
+        Module* getModule( int moduleId ) const;
+        const ModuleList& getModules() const { return modules_; }
         int getNumModules() const            { return modules_.size(); }
 
-        Module* createAndAddModule(ModuleType type);
-        void deleteModule(Module* module);
+        Module* createAndAddModule( ModuleType type );
+        void deleteModule( Module* module );
 
-        void addLink(const Link& link);
-        LinkList& getLinks()              { return links_; }
-        void getLinksForModule(int16_t moduleId, LinkPointerList& list, PortType portType);
+        Link* addLink( Link* link );
+        void removeLink( Link* link );
+        LinkList& getLinks()                          { return links_; }
+        void getLinksForModule( int moduleId, PortType portType, LinkPointerList& list );
 
-        void setNumUnison(uint16_t numUnison)         { numUnison_    = numUnison; }
-        void setUnisonSpread(uint16_t unisonSpread)   { unisonSpread_ = unisonSpread; }
-        void setHold(bool hold)                       { hold_         = hold; }
-        void setRetrigger(bool retrigger)             { retrigger_    = retrigger; }
-        void setLegato(bool legato)                   { legato_       = legato; }
 
-        bool checkSentinel(Module* module);
+        void setNumUnison( uint16_t numUnison )         { numUnison_    = numUnison; }
+        void setUnisonSpread( uint16_t unisonSpread )   { unisonSpread_ = unisonSpread; }
+        void setHold( bool hold )                       { hold_         = hold; }
+        void setRetrigger( bool retrigger )             { retrigger_    = retrigger; }
+        void setLegato( bool legato )                   { legato_       = legato; }
+
+        bool checkSentinel( Module* module );
 
         uint16_t numVoices_    = 1;
         uint16_t numUnison_    = 1;
@@ -60,12 +62,11 @@ namespace e3 {
 
     protected:
         bool hasAudioOutTerminal();
-        void connectModule(Module* target);
-        uint16_t createModuleId(ModuleType type);
+        int createModuleId( ModuleType type );
 
         ModuleList modules_;
         LinkList links_;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Instrument)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( Instrument )
     };
 }  // namespace e3

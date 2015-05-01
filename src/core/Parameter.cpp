@@ -22,9 +22,9 @@ namespace e3 {
     // class ParameterMap
     //----------------------------------------------------------------
 
-    void ParameterMap::add(const Parameter& model)
+    void ParameterMap::add(const Parameter& p)
     {
-        insert(std::make_pair(model.id_, model));
+        insert(std::make_pair(p.id_, p));
     }
 
 
@@ -34,17 +34,17 @@ namespace e3 {
     }
 
     
-    void ParameterMap::update(const Parameter& model)
+    void ParameterMap::update(const Parameter& p)
     {
-        at(model.id_) = model;
+        at(p.id_) = p;
     }
 
     void ParameterMap::setDefaultValues()
     {
         for (auto it = begin(); it != end(); it++) 
         {
-            Parameter& model = it->second;
-            model.value_ = model.defaultValue_;
+            Parameter& p = it->second;
+            p.value_ = p.defaultValue_;
         }
     }
 

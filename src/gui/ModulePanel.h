@@ -9,6 +9,7 @@
 
 namespace e3 {
 
+    class Processor;
     class Instrument;
     class EditorPanel;
     class ModuleComponent;
@@ -21,13 +22,13 @@ namespace e3 {
                         public ChangeListener
     {
     public:
-        ModulePanel(EditorPanel* owner);
+        ModulePanel();
 
         void paint(Graphics& g) override;
         void ModulePanel::paintOverChildren(Graphics& g) override;
 
-        void createModules(Instrument* instrument, XmlElement* instrumentXml);
-        void storeModulePosition(uint16_t moduleId, Point<int> pos);
+        void createModules(Processor* processor, XmlElement* instrumentXml);
+        void storeModulePosition(int moduleId, Point<int> pos);
 
         void mouseDown(const MouseEvent& e) override;
         void mouseDrag(const MouseEvent& e) override;
@@ -37,7 +38,7 @@ namespace e3 {
         void findLassoItemsInArea(Array<ModuleComponent*>& results, const Rectangle<int>& area) override;
         void changeListenerCallback(ChangeBroadcaster* broadcaster) override;
 
-        void checkSize();
+        void checkViewport();
         void updateWiresForModule(ModuleComponent* module, bool select);
         Rectangle<int> getUsedArea() const;
 
@@ -49,8 +50,11 @@ namespace e3 {
 
         void portAction(PortComponent* port, PortAction action, const Point<int>& pos);
 
+        Processor* getProcessor()
+            const;
+
     protected: 
-        void createWires(Instrument* instrument);
+        void createWires(LinkList& links);
 
         OwnedArray<ModuleComponent> modules_;
         ScopedPointer<WireManager> wires_;
@@ -62,7 +66,7 @@ namespace e3 {
         bool dragging_ = false;
 
         XmlElement* panelXml_;
-        EditorPanel* owner_;
+        Processor* processor_;
     };
 
 

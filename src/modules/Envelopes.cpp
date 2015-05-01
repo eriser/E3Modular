@@ -6,51 +6,51 @@
 namespace e3 {
 
 
-    ADSREnv::ADSREnv() : Module(
-        kModuleAdsrEnv,
+    ADSREnvelope::ADSREnvelope() : Module(
+        ModuleTypeAdsrEnvelope,
         "ADSR",
-        kPolyphonic,
-        (ProcessingType)(kProcessAudio | kProcessControl))
+        Polyphonic,
+        (ProcessingType)(ProcessAudio | ProcessControl))
     {
         addInport(0, "In", &audioInport_);
         addInport(1, "Gate", &gateInport_);
         addOutport(0, "Out", &audioOutport_);
 
-        processFunction_ = static_cast< ProcessFunctionPointer >(&ADSREnv::processAudio);
+        processFunction_ = static_cast< ProcessFunctionPointer >(&ADSREnvelope::processAudio);
         
-        Parameter paramIn(kParamIn, "In", kControlHidden); // TODO: what is this good for?
+        Parameter paramIn(ParamAudioIn, "In", ControlHidden); // TODO: what is this good for?
         parameters_.add(paramIn);
 
-        Parameter paramGate(kParamGate, "Gate", kControlHidden);
+        Parameter paramGate(ParamGate, "Gate", ControlHidden);
         parameters_.add(paramGate);
 
-        Parameter paramAttack(kParamAttack, "Attack", kControlSlider, 0.1);
+        Parameter paramAttack(ParamAttack, "Attack", ControlSlider, 0.1);
         paramAttack.valueShaper_ = { 0, 1.2, 96, 6 };
         paramAttack.unit_ = "sec";
-        paramAttack.numberFormat_ = kNumberFloat;
+        paramAttack.numberFormat_ = NumberFloat;
         parameters_.add(paramAttack);
 
-        Parameter paramDecay(kParamDecay, "Decay", kControlSlider);
+        Parameter paramDecay(ParamDecay, "Decay", ControlSlider);
         paramDecay.valueShaper_ = { 0, 1, 100, 6 };
         paramDecay.unit_ = "sec";
-        paramDecay.numberFormat_ = kNumberFloat;
+        paramDecay.numberFormat_ = NumberFloat;
         parameters_.add(paramDecay);
 
-        Parameter paramSustain(kParamSustain, "Sustain", kControlSlider, 0.75);
+        Parameter paramSustain(ParamSustain, "Sustain", ControlSlider, 0.75);
         paramSustain.valueShaper_ = { 0, 1, 100, 6 };
         paramSustain.unit_ = "db";
-        paramSustain.numberFormat_ = kNumberDecibel;
+        paramSustain.numberFormat_ = NumberDecibel;
         parameters_.add(paramSustain);
 
-        Parameter paramRelease(kParamRelease, "Release", kControlSlider);
+        Parameter paramRelease(ParamRelease, "Release", ControlSlider);
         paramRelease.valueShaper_ = { 0, 1, 100, 6 };
         paramRelease.unit_ = "sec";
-        paramRelease.numberFormat_ = kNumberFloat;
+        paramRelease.numberFormat_ = NumberFloat;
         parameters_.add(paramRelease);
     }
 
 
-    void ADSREnv::initVoices()
+    void ADSREnvelope::initVoices()
     {
         value_        = valueBuffer_.resize( numVoices_, 0 );
         target_       = targetBuffer_.resize( numVoices_, 0 );
@@ -65,14 +65,14 @@ namespace e3 {
     }
 
 
-    void ADSREnv::updateInports()
+    void ADSREnvelope::updateInports()
     {
         audioInport_.setNumVoices(numVoices_);
         audioInportPointer_ = audioInport_.getBuffer();
     }
 
 
-    void ADSREnv::setSampleRate( double sampleRate )
+    void ADSREnvelope::setSampleRate( double sampleRate )
     {
         double oldRate = sampleRate_;
         Module::setSampleRate(sampleRate);
@@ -85,28 +85,28 @@ namespace e3 {
     }
 
 
-    void ADSREnv::setParameter( uint16_t paramId, double value, double modulation, int16_t voice )
+    void ADSREnvelope::setParameter(int paramId, double value, double modulation, int16_t voice)
     {
         voice = std::min<int16_t>( numVoices_-1, voice );
 
         switch( paramId )
         {
-        case kParamGate:
+        case ParamGate:
             if( voice > -1 )
             {
                 double velo = value * modulation + ( 1 - modulation );
                 value > 0 ? keyOn( velo, voice ) : keyOff( voice );
                 break;
             }
-        case kParamAttack:  setAttackRate( value, voice ); break;
-        case kParamDecay:   setDecayRate( value, voice ); break;
-        case kParamSustain: setSustainLevel( value, voice ); break;
-        case kParamRelease: setReleaseRate( value, voice ); break;
+        case ParamAttack:  setAttackRate( value, voice ); break;
+        case ParamDecay:   setDecayRate( value, voice ); break;
+        case ParamSustain: setSustainLevel( value, voice ); break;
+        case ParamRelease: setReleaseRate( value, voice ); break;
         }
     }
 
 
-    void ADSREnv::setAttackRate( double time, int16_t voice )
+    void ADSREnvelope::setAttackRate( double time, int16_t voice )
     {
         double rate = calcRate( time * 0.71 );
 
@@ -123,7 +123,7 @@ namespace e3 {
     }
 
 
-    void ADSREnv::setDecayRate( double time, int16_t voice )
+    void ADSREnvelope::setDecayRate( double time, int16_t voice )
     {
         double rate = calcRate( time * 0.089 );
 
@@ -136,7 +136,7 @@ namespace e3 {
     }
 
 
-    void ADSREnv::setSustainLevel( double level, int16_t voice )
+    void ADSREnvelope::setSustainLevel( double level, int16_t voice )
     {
         if( voice > -1 ) {
             sustainLevel_[voice] = level;
@@ -147,7 +147,7 @@ namespace e3 {
     }
 
 
-    void ADSREnv::setReleaseRate( double time, int16_t voice )
+    void ADSREnvelope::setReleaseRate( double time, int16_t voice )
     {
         double rate = calcRate( time*0.106f );
 
@@ -164,26 +164,26 @@ namespace e3 {
     }
 
 
-    void ADSREnv::keyOn( double amplitude, uint16_t voice )
+    void ADSREnvelope::keyOn( double amplitude, uint16_t voice )
     {
         value_[voice]    = 0.0f;
         target_[voice]   = 1.f;
-        state_[voice]    = kStateAttack;
+        state_[voice]    = StateAttack;
 
         delta_[voice]    = attackRate_[voice];
         velocity_[voice] = amplitude;
     }
 
 
-    void ADSREnv::keyOff( uint16_t voice )
+    void ADSREnvelope::keyOff( uint16_t voice )
     {
         target_[voice] = 0.0f;
-        state_[voice]  = kStateRelease;
+        state_[voice]  = StateRelease;
         delta_[voice]  = releaseRate_[voice];
     }
 
 
-    double ADSREnv::calcRate( double time )
+    double ADSREnvelope::calcRate( double time )
     {
         time        = std::max<double>( 0.0001, time );
         double rate = 1 / ((double)sampleRate_ * time * 2);
@@ -192,7 +192,7 @@ namespace e3 {
     }
 
 
-    void ADSREnv::processAudio() throw()
+    void ADSREnvelope::processAudio() throw()
     {
         uint32_t maxVoices = std::min<uint32_t>( numVoices_, polyphony_->numSounding_ );
         
@@ -209,7 +209,7 @@ namespace e3 {
     }
 
 
-    void ADSREnv::processControl() throw()
+    void ADSREnvelope::processControl() throw()
     {
         uint16_t maxVoices = std::min<uint16_t>( numVoices_, polyphony_->numSounding_ );
 
@@ -220,25 +220,25 @@ namespace e3 {
             __assume( state_[v] <= 4 );
             switch( state_[v] ) 
             {
-            case kStateAttack:
+            case StateAttack:
                 if( value_[v] >= target_[v] ) 
                 {
                     delta_[v]  = decayRate_[v];
                     target_[v] = sustainLevel_[v];
-                    state_[v]  = kStateDecay;
+                    state_[v]  = StateDecay;
                 }
                 break;
-            case kStateDecay:
+            case StateDecay:
                 if( value_[v] <= sustainLevel_[v] ) 
                 {
                     delta_[v] = 0.f;
-                    state_[v] = kStateSustain;
+                    state_[v] = StateSustain;
                 }
                 break;
-            case kStateRelease:
+            case StateRelease:
                 if( value_[v] <= 0.0001f ) 
                 {
-                    state_[v] = kStateDone;
+                    state_[v] = StateDone;
 
                     if( sentinel_ ) {
                         polyphony_->endVoice( v );

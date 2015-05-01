@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <string>
 #include "core/Module.h"
 
 
@@ -20,15 +21,17 @@ namespace e3 {
         void setSampleRate(double sampleRate) override;
 
         enum ParamId {
-            kParamDelaytime = 1,
-            kParamFeedback  = 2,
-            kParamGain      = 3
+            ParamDelaytime = 1,
+            ParamFeedback  = 2,
+            ParamGain      = 3
         };
+
+        std::string debugLabel_ = "Delay";
 
     protected:
         void updateBuffer();
 
-        uint32_t delayTime_ = 0;
+        uint32_t delayTime_  = 0;
         double feedback_     = 0;
         double gain_         = 0;
         uint32_t bufferSize_ = 0;

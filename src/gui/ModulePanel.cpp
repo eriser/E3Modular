@@ -1,9 +1,9 @@
 
 #include <e3_Trace.h>
 
+#include "core/Processor.h"
 #include "core/Instrument.h"
 #include "gui/Style.h"
-#include "gui/EditorPanel.h"
 #include "gui/ModuleComponent.h"
 #include "gui/PortComponent.h"
 #include "gui/Wires.h"
@@ -12,8 +12,7 @@
 
 namespace e3 {
 
-    ModulePanel::ModulePanel(EditorPanel* owner) : 
-        owner_(owner),
+    ModulePanel::ModulePanel() : 
         selection_(new ModuleSelection()),
         wires_(new WireManager(this))
     {      
@@ -21,12 +20,16 @@ namespace e3 {
     }
 
 
-    void ModulePanel::createModules(Instrument* instrument, XmlElement* instrumentXml)
+    void ModulePanel::createModules(Processor* processor, XmlElement* instrumentXml)
     {
         removeAllChildren();
         modules_.clear();
 
-        if (instrument != nullptr && instrumentXml != nullptr) {
+        processor_ = processor;
+        Instrument* instrument = processor_->getInstrument();
+
+        if (instrument != nullptr && instrumentXml != nullptr) 
+        {
             panelXml_ = instrumentXml->getChildByName("module_panel");
             if (panelXml_)
             {
@@ -48,23 +51,22 @@ namespace e3 {
                         c->setTopLeftPosition(tokens[0].getIntValue(), tokens[1].getIntValue());
                     }
                 }
-                createWires(instrument);
+                createWires(instrument->getLinks());
             }
         }
     }
 
 
-    void ModulePanel::createWires(Instrument* instrument)
+    void ModulePanel::createWires(LinkList& links)
     {
-        LinkList& links = instrument->getLinks();
         for (LinkList::iterator it = links.begin(); it != links.end(); ++it)
         {
             Link* link             = &(*it);
-            PortComponent* inport  = getPort(link, kInport);
-            PortComponent* outport = getPort(link, kOutport);
+            PortComponent* inport  = getPort(link, PortTypeInport);
+            PortComponent* outport = getPort(link, PortTypeOutport);
 
-            inport->connect();
-            outport->connect();
+            inport->setConnectedState();
+            outport->setConnectedState();
 
             wires_->addWire(outport->getDockingPosition(), inport->getDockingPosition(), link);
         }
@@ -180,17 +182,17 @@ namespace e3 {
     void ModulePanel::portAction(PortComponent* port, PortAction action, const Point<int>& pos)
     {
         switch (action) {
-        case kPortActionDock:            wires_->startDocking(port, pos); break;
-        case kPortActionUndock:          wires_->startUndocking(port); break;
-        case kPortActionContinueDocking: wires_->continueDocking(pos); break;
-        case kPortActionEndDocking:      wires_->endDocking(pos); break;
+        case PortActionDocking:         wires_->startDocking(port, pos); break;
+        case PortActionUndocking:       wires_->startUndocking(port); break;
+        case PortActionContinueDocking: wires_->continueDocking(pos); break;
+        case PortActionEndDocking:      wires_->endDocking(pos); break;
         }
     }
 
 
-    void ModulePanel::checkSize()
+    void ModulePanel::checkViewport()
     {
-        Rectangle<int> minimum = owner_->getViewportBounds();
+        Rectangle<int> minimum = getParentComponent()->getBounds();     // this is a viewport
         Rectangle<int> used    = getUsedArea();
         Rectangle<int> needed  = minimum.getUnion(used);
 
@@ -219,17 +221,28 @@ namespace e3 {
 
     PortComponent* ModulePanel::getPort(Link* link, PortType portType)
     {
-        ModuleComponent* module = (portType == kInport) ? 
-            getModule(link->rightModule_) : 
-            getModule(link->leftModule_);
-        ASSERT(module != nullptr);
-
-        if (module) 
+        ModuleComponent* module = nullptr;
+        
+        if (portType == PortTypeInport && link->isRightValid())
         {
-            PortComponent* port = (portType == kInport) ?
-                module->getPort(link->rightPort_, kInport) :
-                module->getPort(link->leftPort_, kOutport);
-            return port;
+            module = getModule( link->rightModule_ );
+            ASSERT( module );
+        }
+
+        if (portType == PortTypeOutport && link->isLeftValid())
+        {
+            module = getModule( link->leftModule_ );
+            ASSERT( module );
+        }
+
+        if (module != nullptr)
+        {
+            if (portType == PortTypeInport) {
+                return module->getPort( link->rightPort_, PortTypeInport );
+            }
+            else if (portType == PortTypeOutport) {
+                return module->getPort( link->leftPort_, PortTypeOutport );
+            }
         }
         return nullptr;
     }
@@ -253,14 +266,13 @@ namespace e3 {
         if (module != nullptr)
         {
             Point<int> p1 = module->getLocalPoint(this, pos);
-            TRACE("ModulePanel::getPortAtPosition pos=%s\n", p1.toString().toRawUTF8());
             return module->getPortAtPosition(p1);
         }
         return nullptr;
     }
 
 
-    void ModulePanel::storeModulePosition(uint16_t moduleId, Point<int> pos)
+    void ModulePanel::storeModulePosition(int moduleId, Point<int> pos)
     {
         if (panelXml_ != nullptr) {
             XmlElement* e = panelXml_->getChildByAttribute("id", String(moduleId));
@@ -269,5 +281,8 @@ namespace e3 {
             }
         }
     }
+
+
+    Processor* ModulePanel::getProcessor() const    { return processor_; }
 
 } // namespace e3

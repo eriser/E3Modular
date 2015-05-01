@@ -21,7 +21,7 @@ namespace e3 {
         voicingType_(voicingType),
         processingType_(processingType),
         style_(style),
-        mono_(voicingType_ == kMonophonic)
+        mono_(voicingType_ == Monophonic)
     {}
 
 
@@ -45,7 +45,7 @@ namespace e3 {
 
         initVoices();
         initParameters();
-        initSignals();
+        connectSignals();
 
         updateParameters();
         updatePorts();
@@ -54,15 +54,14 @@ namespace e3 {
 
     void Module::reset()
     {
-        resetSignals();
+        disconnectSignals();
         disconnectPorts();
         resetData();
         resetParameters();
 
-        sampleRate_      = 0;
-        numVoices_       = 0;
-        polyphony_       = nullptr;
-        processFunction_ = nullptr;
+        sampleRate_ = 0;
+        numVoices_  = 0;
+        polyphony_  = nullptr;
     }
 
 
@@ -233,28 +232,28 @@ namespace e3 {
     }
 
 
-    double* Module::connectTargetWithSource(int portId)
-    {
-        VERIFY(portId >= 0 && portId < (int)inports_.size());
-        VERIFY(numVoices_ > 0);
+    //double* Module::connectTargetWithSource(int portId)
+    //{
+    //    VERIFY(portId >= 0 && portId < (int)inports_.size());
+    //    VERIFY(numVoices_ > 0);
 
-        AudioInport* inport = dynamic_cast<AudioInport*>(inports_.at(portId));
-        inport->connect();
+    //    AudioInport* inport = dynamic_cast<AudioInport*>(inports_.at(portId));
+    //    inport->connect();
 
-        //checkPorts();
-        return inport->getBuffer();
-    }
+    //    //checkPorts();
+    //    return inport->getBuffer();
+    //}
 
 
-    void Module::disconnectTargetFromSource(int portId)
-    {
-        VERIFY(portId >= 0 && portId < (int)inports_.size());
+    //void Module::disconnectTargetFromSource(int portId)
+    //{
+    //    VERIFY(portId >= 0 && portId < (int)inports_.size());
 
-        AudioInport* inport = dynamic_cast<AudioInport*>(inports_.at(portId));
-        inport->disconnect();
+    //    AudioInport* inport = dynamic_cast<AudioInport*>(inports_.at(portId));
+    //    inport->disconnect();
 
-        updatePorts();
-    }
+    //    updatePorts();
+    //}
 
 
     void Module::connectPort(Module* target, Link* link)
@@ -277,8 +276,8 @@ namespace e3 {
 
     VoiceAdapterType Module::selectVoiceAdapter(VoicingType otherVoicingType) const
     {
-        return (voicingType_ == otherVoicingType) ? kAdapterNone :
-            (voicingType_ == kMonophonic) ? kAdapterMonoToPoly : kAdapterPolyToMono;
+        return (voicingType_ == otherVoicingType) ? AdapterNone :
+            (voicingType_ == Monophonic) ? AdapterMonoToPoly : AdapterPolyToMono;
     }
 
 

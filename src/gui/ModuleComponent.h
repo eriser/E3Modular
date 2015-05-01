@@ -46,7 +46,7 @@ namespace e3 {
         //void drawBackgroundRect(Graphics& g, Rectangle<int>& updateRect);
 
         Module* getModule() const;
-        uint16_t getModuleId() const;
+        int getModuleId() const;
 
 
     protected:

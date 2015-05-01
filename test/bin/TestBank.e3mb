@@ -24,7 +24,7 @@
     </modules>
     <links>
         <link left_module="3" right_module="0" left_port="0" right_port="0" value="1"/>
-        <link left_module="1" right_module="2" left_port="0" right_port="0" value="1" label="MidiFreq-&gt;Freq"/>
+        <link left_module="1" right_module="2" left_port="0" right_port="0" value="1" label="MidiPitch-&gt;Freq"/>
         <link left_module="1" right_module="3" left_port="1" right_port="1" value="1" label="Gate"/>
         <link left_module="2" right_module="3" left_port="0" right_port="0" value="1" label="Sine-&gt;In"/>
     </links>

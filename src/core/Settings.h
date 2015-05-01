@@ -21,7 +21,7 @@ namespace e3 {
         XmlElement* getRoot() { return root_; }
         XmlElement* getElement(const std::string& name) const;
 
-        Style* getStyle() const;
+        Style* getStyle() const;        //TODO: remove references to gui-folder from core-folder
             
         void setPath(const std::string& path);
         const std::string getPath()             { return file_.getFullPathName().toStdString(); }

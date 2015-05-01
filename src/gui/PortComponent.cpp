@@ -14,7 +14,7 @@ namespace e3 {
     PortComponent::PortComponent(Port* port, ModuleComponent* owner) :
         port_(port),
         owner_(owner),
-        state_(kIdle)
+        state_(Idle)
         {
             ASSERT(port_ != nullptr);
         }
@@ -24,29 +24,37 @@ namespace e3 {
         {
             Colour col1 = findColour(Style::kModulePort1ColourId);
             Colour col2 = findColour(Style::kModulePort2ColourId);
-            Colour col = (numConnections_ > 0) ? col2 : col1;
+            Colour col  = (numConnections_ > 0) ? col2 : col1;
 
-            g.setColour(col);
-
-            if ((state_ & kHover) || (state_ & kDocking))	    // draw port square
+            if (state_ & Reject)
             {
-                g.fillRect(rcDock_.expanded(2, 2));
+                g.setColour( Colours::red );
+                g.fillEllipse(rcDock_.expanded(3, 3).toFloat());
+                g.setColour( Colours::white );
+                g.fillRect( rcDock_.reduced( 0, 2 ) );
+            }
+            else if ((state_ & Hover) || (state_ & Docking))	    // draw port square
+            {
+                g.setColour( col );
+                g.fillRect( rcDock_.expanded( 2, 2 ) );
             }
             else {
-                g.fillRect(rcDock_);
+                g.setColour( col );
+                g.fillRect( rcDock_ );
             }
 
-            if (numConnections_ > 0) {
-                g.drawRect(rcConnector_);
+            if (numConnections_ > 0 && !(state_ && Reject)) {
+                g.setColour( col );
+                g.drawRect( rcConnector_ );
             }
 
-            if ((state_ & kHover) || (state_ & kDocking))	 // draw label
+            if ((state_ & Hover) || (state_ & Docking))	 // draw label
             {
                 //g.setColour(findColour(Style::kModuleColourId));
                 g.setColour(col);
                 g.fillRect(rcBkgnd_);
 
-                int align = (getPortType() == kInport) ? Justification::centredLeft : Justification::centredRight;
+                int align = (getPortType() == PortTypeInport) ? Justification::centredLeft : Justification::centredRight;
                 g.setFont(10);
                 g.setColour(findColour(Style::kModuleText1ColourId).darker());
                 g.drawText(port_->getLabel(), rcText_, align, true);
@@ -56,7 +64,7 @@ namespace e3 {
 
         void PortComponent::resized()
         {
-            if (getPortType() == kInport)
+            if (getPortType() == PortTypeInport)
             {
                 rcDock_      = Rectangle<int>(4,  3, 6,  6);
                 rcConnector_ = Rectangle<int>(-1,  5, 5,  2);
@@ -82,8 +90,8 @@ namespace e3 {
 
         void PortComponent::mouseExit(const MouseEvent&)
         {
-            if ((state_ & kDocking) == false) {
-                state_ &= ~kHover;
+            if ((state_ & Docking) == false) {
+                state_ &= ~Hover;
             }
             repaint();
         }
@@ -94,8 +102,8 @@ namespace e3 {
             if (isDockingPosition(e.getMouseDownPosition())) 
             {
                 switch (port_->getType()) {
-                case kInport:  owner_->portAction(this, kPortActionUndock, getDockingPosition()); break;
-                case kOutport: owner_->portAction(this, kPortActionDock, getDockingPosition()); break;
+                case PortTypeInport:  owner_->portAction(this, PortActionUndocking, getDockingPosition()); break;
+                case PortTypeOutport: owner_->portAction(this, PortActionDocking, getDockingPosition()); break;
                 }
             }
         }
@@ -106,9 +114,9 @@ namespace e3 {
             if (isDockingPosition(e.getMouseDownPosition()))
             {
                 Point<int> pos = translateToParent(e.getPosition())
-                    .translated(getPortType() == kInport ? 0 : getWidth(), getY());
+                    .translated(getPortType() == PortTypeInport ? 0 : getWidth(), getY());
 
-                owner_->portAction(this, kPortActionContinueDocking, pos);
+                owner_->portAction(this, PortActionContinueDocking, pos);
             }
         }
 
@@ -117,7 +125,7 @@ namespace e3 {
         {
             uint16_t oldState = state_;
             Point<int> pos = e.getPosition();
-            hitTest(pos.x, pos.y) ? state_ |= kHover : state_ &= ~kHover; 
+            hitTest(pos.x, pos.y) ? state_ |= Hover : state_ &= ~Hover; 
             if (state_ != oldState) {
                 repaint();
             }
@@ -128,49 +136,55 @@ namespace e3 {
         {
             if (isDockingPosition(e.getMouseDownPosition()))
             {
-                owner_->portAction(this, kPortActionEndDocking, translateToParent(e.getPosition()));
+                owner_->portAction(this, PortActionEndDocking, translateToParent(e.getPosition()));
             }
         }
 
 
-        bool PortComponent::startDocking()
+        void PortComponent::setDockingState()
         {
-            state_ |= kDocking;
-            repaint();
-            
-            return true;
-        }
-
-
-        void PortComponent::cancelDocking()
-        {
-            state_ &= ~kDocking;
+            state_ |= Docking;
             repaint();
         }
 
 
-       void PortComponent::connect()
+        void PortComponent::setRejectState()
+        {
+            state_ |= Reject;
+            repaint();
+        }
+
+
+        void PortComponent::unsetDockingState()
+        {
+            state_ &= ~Docking;
+            state_ &= ~Reject;
+            repaint();
+        }
+
+
+       void PortComponent::setConnectedState()
         {
             numConnections_++;
-            state_ &= ~kDocking;
+            state_ &= ~Docking;
         }
 
 
-       void PortComponent::disconnect()
+       void PortComponent::setDisconnectedState()
        {
            ASSERT(numConnections_ >= 1);
            if (numConnections_ >= 1) {
                --numConnections_;
             }
 
-            state_ &= ~kDocking;
+            state_ &= ~Docking;
         }
 
 
         Point<int> PortComponent::getDockingPosition()
         {
             Point<int> pos;
-            pos.x = getPortType() == kInport ? 1 : getRight() - 1;
+            pos.x = getPortType() == PortTypeInport ? 1 : getRight() - 1;
             pos.y = getY() + rcConnector_.getY() + 1;
             
             return translateToParent(pos);
@@ -179,8 +193,7 @@ namespace e3 {
 
         bool PortComponent::isDockingPosition(const Point<int>& pos) const
         {
-            Rectangle<int> dock = rcDock_.getUnion(rcConnector_);
-            return dock.contains(pos);
+            return rcHover_.contains( pos );
         }
 
 
@@ -190,14 +203,14 @@ namespace e3 {
         }
 
 
-        Point<int> PortComponent::translateFromParent(const Point<int>& pos)
+        Point<int> PortComponent::translateFromParent(const Point<int>& pos) const
         {
             Rectangle<int> rcParent = owner_->getBounds();
             return pos.translated(-rcParent.getX(), -rcParent.getX());
         }
 
 
-        Point<int> PortComponent::translateToParent(const Point<int>& pos)
+        Point<int> PortComponent::translateToParent(const Point<int>& pos) const
         {
             Rectangle<int> rcParent = owner_->getBounds();
             return pos.translated(rcParent.getX(), rcParent.getY());

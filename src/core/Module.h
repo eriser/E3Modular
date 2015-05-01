@@ -22,38 +22,39 @@ namespace e3 {
     typedef void (Module::*ProcessFunctionPointer)(void) throw();
 
     enum ModuleType {
-        kModuleUndefined        = -1,
+        ModuleTypeUndefined        = -1,
+        
         // system modules
-        kModuleAudioOutTerminal = 0,
-        kModuleMidiGate         = 1,
-        kModuleMidiPitch        = 2,
-        kModuleMidiInput        = 3,
+        ModuleTypeAudioOutTerminal = 0,
+        ModuleTypeMidiGate         = 1,
+        ModuleTypeMidiPitch        = 2,
+        ModuleTypeMidiInput        = 3,
+        
         // audio
-        kModuleSineOscil        = 10,
-        kModuleAdsrEnv          = 11,
-        kModuleDelay            = 12,
+        ModuleTypeSineOscillator   = 10,
+        ModuleTypeAdsrEnvelope     = 11,
+        ModuleTypeDelay            = 12,
     };
 
 
     enum ProcessingType
     {
-        kProcessEvent = 1,
-        kProcessControl = 2,
-        kProcessAudio = 4
-
+        ProcessEvent   = 1,
+        ProcessControl = 2,
+        ProcessAudio   = 4
     };
 
     enum VoicingType
     {
-        kMonophonic = 0,
-        kPolyphonic = 1
+        Monophonic = 0,
+        Polyphonic = 1
     };
 
     enum ModuleStyle
     {
-        kModuleStyleNothing = 0,
-        kModuleStyleVisible = 1,
-        kModuleStyleLabel = 2
+        ModuleStyleNothing = 0,
+        ModuleStyleVisible = 1,
+        ModuleStyleLabel   = 2
     };
 
     
@@ -65,6 +66,7 @@ namespace e3 {
     class Module
     {
         friend class Instrument;
+        friend class Sink;
 
     protected:
         Module(
@@ -72,7 +74,7 @@ namespace e3 {
             const std::string& label,
             VoicingType voicingType,
             ProcessingType processingType,
-            ModuleStyle style = (ModuleStyle)(kModuleStyleVisible | kModuleStyleLabel));
+            ModuleStyle style = (ModuleStyle)(ModuleStyleVisible | ModuleStyleLabel));
 
     public:
         virtual ~Module();
@@ -81,18 +83,28 @@ namespace e3 {
         virtual void processEvent(double value, uint16_t voices) throw() {}
         virtual void processControl() throw () {}
 
+        virtual void onMidiController( int controllerNum, int value );
+
         virtual void suspend() {}
         virtual void resume() {}
 
         virtual void setSampleRate(double sampleRate);
         virtual void setNumVoices(uint16_t numVoices);
+
         virtual void setParameter(int paramId, double value, double modulation = 0.f, int16_t voice = -1) {}
         const Parameter& getParameter(int parameterId) const;
 
-        //void addLink(Link& link);
-        //void removeLink(const Link& link);
-        //Link& getLink(uint16_t index);
+        int getNumParameters() const                 { return parameters_.size(); }
+        const ParameterMap& getParameters() const    { return parameters_; }
+        void updateParameter( const Parameter& p )   { parameters_.update( p ); }
+        void setDefaultParameters()                  { parameters_.setDefaultValues(); }
 
+        const InportList& getInports() const         { return inports_; }
+        const OutportList& getOutports() const       { return outports_; }
+
+        int getNumInports() const                    { return inports_.size(); }
+        int getNumOutports() const                   { return outports_.size(); }
+        
         Inport* getInport(int portId) const;
         Outport* getOutport(int portId) const;
         AudioOutport* getAudioOutport(int portId) const;
@@ -100,27 +112,28 @@ namespace e3 {
         EventOutport* getEventOutport(int portId) const;
         EventInport* getEventInport(int portId) const;
 
-        double* connectTargetWithSource(int portId);
-        void disconnectTargetFromSource(int portId);
+        int getId() const                           { return id_; }
+        void setId( int id )                        { id_ = id; }
+        const std::string& getLabel() const         { return label_; }
+        void setLabel( const std::string& label )   { label_ = label; }
+        VoicingType getVoicingType() const          { return voicingType_; }
+        void setVoicingType( VoicingType type )       { voicingType_ = type; }
 
-        virtual void onMidiController(int controllerNum, int value);
+        const ModuleType moduleType_;
+        const ProcessingType processingType_;
+        const ModuleStyle style_;
 
-    public:
+    protected:
         std::string label_;
-        int16_t id_ = -1;
-        ModuleType moduleType_;
+        int id_ = -1;
         VoicingType voicingType_;
-        ProcessingType processingType_;
-        ModuleStyle style_;
 
         ParameterMap parameters_;
-        LinkList removedLinks_;
         InportList inports_;
         OutportList outports_;
 
         ProcessFunctionPointer processFunction_ = nullptr;
 
-    protected:
         // Constructs all member and initializes them with the current sample rate and number of voices.
         // No links are created.
         virtual void init(Polyphony* polyphony, double sampleRate);
@@ -132,11 +145,11 @@ namespace e3 {
         // Deletes all members and links. After reset the module is in the same state as before init().
         virtual void reset();
 
-        virtual void initSignals() {}
+        virtual void connectSignals() {}
         virtual void initVoices() {}
         virtual void initParameters();
 
-        virtual void resetSignals() {}
+        virtual void disconnectSignals() {}
         virtual void disconnectPorts();
         virtual void resetData()  {}
         virtual void resetParameters()  {}
@@ -149,13 +162,17 @@ namespace e3 {
         void addInport(int id, const std::string& label, Inport* port);
         void addOutport(int id, const std::string& label, Outport* port);
         void connectPort(Module* target, Link* link);
-        VoiceAdapterType selectVoiceAdapter(VoicingType otherVoicingType) const;
+        VoiceAdapterType selectVoiceAdapter(VoicingType other) const;
 
         double sampleRate_   = INITIAL_SAMPLERATE;
         uint16_t numVoices_  = 0;
         bool mono_           = false;
 
         Polyphony* polyphony_ = nullptr;
+
+    private: // Make non copyable and prevent C4512
+        Module( const Module& ) = delete;
+        Module& operator=(const Module&) = delete;
     };
 
     typedef std::vector<Module*> ModuleList;

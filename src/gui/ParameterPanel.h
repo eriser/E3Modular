@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <cstdint>
 #include "JuceHeader.h"
+
 
 namespace e3
 {

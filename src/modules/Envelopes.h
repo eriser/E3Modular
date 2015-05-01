@@ -1,24 +1,25 @@
 
 #pragma once
 
+#include <string>
 #include "core/Module.h"
 
 namespace e3 {
 
-    class ADSREnv : public Module
+    class ADSREnvelope : public Module
     {
     public:
         enum ParamId {
-            kParamIn       = 0,         // TODO: what's the use?
-            kParamGate     = 1,
-            kParamAttack   = 2,
-            kParamDecay    = 3,
-            kParamSustain  = 4,
-            kParamRelease  = 5,
-            kParamNumParams
+            ParamAudioIn  = 0,         // TODO: what's the use?
+            ParamGate     = 1,
+            ParamAttack   = 2,
+            ParamDecay    = 3,
+            ParamSustain  = 4,
+            ParamRelease  = 5,
+            ParamNumParams
         };
 
-        ADSREnv();
+        ADSREnvelope();
 
         void initVoices() override;
         void updateInports() override;
@@ -26,12 +27,12 @@ namespace e3 {
         void processAudio() throw();
         void processControl() throw() override;
 
-        void setParameter( uint16_t paramId, double value, double modulation=0.f, int16_t voice=-1 );
-        void setSentinel( bool sentinel ) { sentinel_ = sentinel; }
+        void setParameter(int paramId, double value, double modulation=0.f, int16_t voice=-1) override;
+        void setSentinel(bool sentinel) { sentinel_ = sentinel; }
 
     protected:  
-        void keyOn( double amplitude, uint16_t voice );
-        void keyOff( uint16_t voice );
+        void keyOn(double amplitude, uint16_t voice);
+        void keyOff(uint16_t voice);
 
         void setSampleRate(double sampleRate);
 
@@ -42,6 +43,8 @@ namespace e3 {
         void setReleaseRate( double time, int16_t voice=-1 );
         
         double calcRate( double time );
+
+        std::string debugLabel_ = "ADSREnvelope";
 
         Buffer<double> valueBuffer_, targetBuffer_, deltaBuffer_, velocityBuffer_;
         double *value_, *target_, *delta_, *velocity_;
@@ -63,11 +66,11 @@ namespace e3 {
         double* audioInportPointer_ = nullptr;
 
         enum State {
-            kStateAttack,
-            kStateDecay,
-            kStateSustain,
-            kStateRelease,
-            kStateDone    
+            StateAttack,
+            StateDecay,
+            StateSustain,
+            StateRelease,
+            StateDone    
         };
     };
 } // namespace e3

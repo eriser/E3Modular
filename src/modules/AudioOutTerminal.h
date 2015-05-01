@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <string>
 #include "core/Port.h"
 #include "core/Module.h"
 
@@ -19,8 +20,10 @@ namespace e3 {
         void processAudio() throw();
 
         enum {
-            kParamVolume,
+            ParamVolume,
         };
+
+        std::string debugLabel_ = "AudioOutTerminal";
         double value_ = 0;
 
     protected:
