@@ -591,21 +591,21 @@ namespace e3 {
         {
             connect();
             Port* port = sine_->getOutport( 0 );
-            EXPECT_TRUE( port->isConnected() );
+            EXPECT_TRUE( port->getNumConnections() > 0 );
 
             audioOutTerminal_->disconnectPorts();
             sine_->disconnectPorts();
-            EXPECT_FALSE( port->isConnected() );
+            EXPECT_FALSE( port->getNumConnections() > 0 );
         }
 
         TEST_F( ModuleTest, sendThroughPorts )
         {
             connect();
-            AudioOutport* outport = dynamic_cast<AudioOutport*>(sine_->getOutport( 0 ));
-            AudioInport* inport   = dynamic_cast<AudioInport*>(audioOutTerminal_->getInport( 0 ));
+            Outport* outport = sine_->getOutport( 0 );
+            Inport* inport   = audioOutTerminal_->getInport( 0 );
 
-            outport->putValue( 17, 0 );
-            double value = *inport->getBuffer();
+            outport->putAudio( 17, 0 );
+            double value = *inport->getAudioBuffer();
             EXPECT_EQ( 17, value );
         }
 

@@ -15,12 +15,12 @@ namespace e3 {
 
         void connectSignals() override;
         void disconnectSignals() override;
-        void onMidiGate( double gate, uint16_t voice);
+        void onMidiGate( double gate, int voice);
 
         std::string debugLabel_ = "MidiGate";
 
     protected:
-        EventOutport gateOutport_;
+        Outport gateOutport_;
     };
 
 
@@ -38,8 +38,8 @@ namespace e3 {
         void disconnectSignals() override;
 
         void initVoices() override;
-        void setParameter(int paramId, double value, double modulation=0.f, int16_t voice=-1) override;
-        void onMidiNote( double pitch, double gate, uint16_t voice );
+        void setParameter(int paramId, double value, double modulation=0.f, int voice=-1) override;
+        void onMidiNote( double pitch, double gate, int voice );
         void onMidiPitchbend(int value);
         
         void processControl() throw() override;
@@ -48,7 +48,7 @@ namespace e3 {
 
     protected:
         void createParameters();
-        void calcGlide(double freq, uint16_t voice);
+        void calcGlide(double freq, int voice);
         void setGlideTime(double time);
 
         enum Params { 
@@ -67,9 +67,9 @@ namespace e3 {
         bool glideAuto_      = true;
 
         double bendFactor_   = 1.0;
-        int16_t bendRange_   = 2;
+        int bendRange_       = 2;
 
-        EventOutport pitchOutport_;
+        Outport pitchOutport_;
     };
 
 
@@ -80,12 +80,12 @@ namespace e3 {
 
         void connectSignals() override;
         void disconnectSignals() override;
-        void onMidiNote(double pitch, double gate, uint16_t voice);
+        void onMidiNote(double pitch, double gate, int voice);
 
         std::string debugLabel_ = "MidiInput";
 
     protected:
-        EventOutport gateOutport_;
+        Outport gateOutport_;
     };
 
 }

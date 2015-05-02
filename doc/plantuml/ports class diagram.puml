@@ -11,49 +11,71 @@ endtitle
 
 
 class Port {
-    +Port::Type type_
-    +uint16_t id_
-    #uint16_t numVoices_
+    virtual bool isConnected()
+    virtual bool isAudioConnected()
+    virtual bool isEventConnect()
+
+    Port::Type type_
+    uint16_t id_
+    uint16_t numVoices_
  }
 
 class Outport {
-    virtual void connect(Module*, Link*, VoiceAdapterType) {}
-    virtual void disconnect(Module*, Link*) {}
+    +void connect(Module*, Link*, VoiceAdapterType) {}
+    +void disconnect(Module*, Link*) {}
+    +void putValue(double value, uint16_t voice = 0) throw();
+    +void putEvent(double value, uint16_t voice);
 
-    LinkPointerList targets_;
-    size_t numTargets_ = 0;
-    Buffer< VoiceAdapterType > adapterBuffer_;
-    Buffer< double > modulationBuffer_;
+    #uint16_t addAudioTarget( Link* link, VoiceAdapterType adapter );
+    #uint16_t addEventTarget( Link* link, VoiceAdapterType adapter );
+    #void removeAudioTarget( Link* link );
+    #void removeEventTarget( Link* link );
+
+    #LinkList audioTargets_
+    #Buffer< double* > audioOutBuffer_
+    #Buffer< VoiceAdapterType > audioAdapterBuffer_
+    #Buffer< double > audioModulationBuffer_
+
+    #LinkList eventTargets_
+    #InportList eventInports_
+    #Buffer< VoiceAdapterType > eventAdapterBuffer_
+    #Buffer< double > eventModulationBuffer_
 }
 
 class Inport {
-    virtual void connect()    {}
-    virtual void disconnect() {}
+    double* getAudioBuffer()
+
+    Buffer<double> audioInBuffer_
+
+    Module* eventOwnerModule_
+    int eventParamId_    = -1;
 }
 
+/'
 class AudioOutport {
     void putValue(double value, uint16_t voice = 0) throw();
-
     AudioOutBuffer audioOutBuffer_
 }
-
-
+'/
+/'
 class EventInport {
     Module* module_ = nullptr;
     int paramId_    = -1;
 }
-
-
+'/
+/'
 class EventOutport {
         void putEvent(double value, uint16_t voice);
 
         std::vector< EventInport* > inports_;
 }
-
+'/
+/'
 class AudioInport {
-    #Buffer<double> audioInBuffer_;
-    #int16_t numSources_;
+    Buffer<double> audioInBuffer_;
+    int16_t numSources_;
 }
+'/
 
 /'
 class Module {
@@ -77,10 +99,10 @@ class Module {
 
 Port <|-- Outport
 Port <|-- Inport
-Inport <|-- AudioInport
-Inport <|-- EventInport
-Outport <|-- AudioOutport
-Outport <|-- EventOutport
+'Inport <|-- AudioInport
+'Inport <|-- EventInport
+'Outport <|-- AudioOutport
+'Outport <|-- EventOutport
 
 'AudioOutport o-- Module
 'AudioInport o-- Module

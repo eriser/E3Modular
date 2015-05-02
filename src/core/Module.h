@@ -89,9 +89,9 @@ namespace e3 {
         virtual void resume() {}
 
         virtual void setSampleRate(double sampleRate);
-        virtual void setNumVoices(uint16_t numVoices);
+        virtual void setNumVoices(int numVoices);
 
-        virtual void setParameter(int paramId, double value, double modulation = 0.f, int16_t voice = -1) {}
+        virtual void setParameter(int paramId, double value, double modulation = 0.f, int voice = -1) {}
         const Parameter& getParameter(int parameterId) const;
 
         int getNumParameters() const                 { return parameters_.size(); }
@@ -101,23 +101,17 @@ namespace e3 {
 
         const InportList& getInports() const         { return inports_; }
         const OutportList& getOutports() const       { return outports_; }
-
+        Inport* getInport( int portId ) const;
+        Outport* getOutport( int portId ) const;
         int getNumInports() const                    { return inports_.size(); }
         int getNumOutports() const                   { return outports_.size(); }
-        
-        Inport* getInport(int portId) const;
-        Outport* getOutport(int portId) const;
-        AudioOutport* getAudioOutport(int portId) const;
-        AudioInport* getAudioInport(int portId) const;
-        EventOutport* getEventOutport(int portId) const;
-        EventInport* getEventInport(int portId) const;
 
-        int getId() const                           { return id_; }
-        void setId( int id )                        { id_ = id; }
-        const std::string& getLabel() const         { return label_; }
-        void setLabel( const std::string& label )   { label_ = label; }
-        VoicingType getVoicingType() const          { return voicingType_; }
-        void setVoicingType( VoicingType type )       { voicingType_ = type; }
+        int getId() const                            { return id_; }
+        void setId( int id )                         { id_ = id; }
+        const std::string& getLabel() const          { return label_; }
+        void setLabel( const std::string& label )    { label_ = label; }
+        VoicingType getVoicingType() const           { return voicingType_; }
+        void setVoicingType( VoicingType type )      { voicingType_ = type; }
 
         const ModuleType moduleType_;
         const ProcessingType processingType_;
@@ -160,13 +154,13 @@ namespace e3 {
         virtual void updateParameters();
 
         void addInport(int id, const std::string& label, Inport* port);
-        void addOutport(int id, const std::string& label, Outport* port);
+        void addOutport(int id, const std::string& label, Outport* port, PortType portType );
         void connectPort(Module* target, Link* link);
         VoiceAdapterType selectVoiceAdapter(VoicingType other) const;
 
-        double sampleRate_   = INITIAL_SAMPLERATE;
-        uint16_t numVoices_  = 0;
-        bool mono_           = false;
+        double sampleRate_ = INITIAL_SAMPLERATE;
+        int numVoices_     = 0;
+        bool mono_         = false;
 
         Polyphony* polyphony_ = nullptr;
 

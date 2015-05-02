@@ -7,317 +7,336 @@
 
 namespace e3 {
 
+    //-------------------------------------------------------
+    // class ModulationBuffer
+    //-------------------------------------------------------
+
+    void ModulationBuffer::init( int_fast32_t numVoices, LinkList& targets )
+    {
+        numVoices_ = numVoices;
+
+        set( 0 );
+        resize( numVoices_ * targets.size() );
+
+        for (size_t i = 0; i < targets.size(); i++)
+        {
+            Link* link = &targets[i];
+            setValue( i, link->value_, -1 );
+        }
+    }
+
+
+    void ModulationBuffer::setValue( uint32_t targetIndex, double value, int voice )
+    {
+        if (voice == -1)                // set values for all voices
+        {
+            for (uint_fast32_t i = 0; i < numVoices_; i++) {
+                data_[targetIndex * numVoices_ + i] = value;
+            }
+        }
+        else if (numVoices_ > 0)        // set value for single voice
+        {
+            voice = std::min<int>( (int)(numVoices_ - 1), voice );
+            data_[targetIndex * numVoices_ + voice] = value;
+        }
+
+    }
+
+
+    void ModulationBuffer::onGate( uint32_t targetIndex, Link* link, double gate, int voice )
+    {
+        if (link->veloSens_)
+        {
+            double value = link->valueShaper_.exponential( link->value_ );
+            value       += gate * link->veloSens_;
+
+            setValue( targetIndex, value, voice );
+        }
+    }
+
+
+    void ModulationBuffer::onController( uint32_t targetIndex, Link* link, int16_t controllerId, double value )
+    {
+        UNUSED( targetIndex );
+        UNUSED( link );
+        UNUSED( controllerId );
+        UNUSED( value );
+        //if (link->scaleController(controllerId, value))
+        //{
+        //    link->value_ = value;
+        //    setValue( targetIndex, value, -1 );
+        //}
+    }
+
 
     //-------------------------------------------------------
     // class Port
     //-------------------------------------------------------
 
-    void Port::setNumVoices(uint16_t numVoices)
+    void Port::setNumVoices(int numVoices)
     {
-        numVoices_ = numVoices;
+        numVoices_ = (uint_fast32_t)numVoices;
     }
+
 
 
     //-------------------------------------------------------
     // class Outport
     //-------------------------------------------------------
 
-    void Outport::addTarget(Link* link, VoiceAdapterType adapter)
+    void Outport::connect( Module* target, Link* link, VoiceAdapterType voiceAdapter ) 
     {
-        numTargets_ = targets_.add(link);
+        ASSERT( target ); 
+        ASSERT( link );
+        if (target == nullptr) return;
+        if (link == nullptr) return;
 
-        adapterBuffer_.resize(numTargets_);
-        adapterBuffer_[numTargets_ - 1] = adapter;
-        initModulation();
+        Inport* inport = target->getInport( link->rightPort_ );
+        ASSERT( inport != nullptr );
+        if (inport == nullptr) return;
+
+        if (getType() & PortTypeAudio)
+        {
+            addAudioTarget( link, voiceAdapter );
+            audioOutBuffer_.resize( numAudioTargets_ );
+            audioOutBuffer_[numAudioTargets_ - 1] = inport->connectAudio();
+        }
+        else if (getType() & PortTypeEvent) 
+        {
+            addEventTarget( link, voiceAdapter );
+
+            inport->connectEvent( target, link->rightPort_ );
+            eventInports_.resize( numEventTargets_ );
+            eventInports_.at( numEventTargets_ - 1 ) = inport;
+        }
     }
 
-
-    void Outport::removeTarget(Link* link)
+   
+    void Outport::disconnect( Module* target, Link* link )
     {
-        numTargets_ = targets_.remove(link);
+        ASSERT( target );
+        ASSERT( link );
+        if (target == nullptr) return;
+        if (link == nullptr) return;
 
-        adapterBuffer_.resize(numTargets_);
-        initModulation();
+        int16_t portId = audioLinks_.getIndex( *link );
+        if (portId >= 0)
+        {
+            removeAudioTarget( link );
+        
+            Inport* inport = target->getInport( portId );
+            ASSERT( inport );
+            ASSERT( getType() & PortTypeAudio );
+
+            if (inport != nullptr) {
+                inport->disconnectAudio();
+            }
+            audioOutBuffer_.remove( portId );   
+
+            return;
+        }
+
+        portId = eventLinks_.getIndex( *link );
+        ASSERT( portId >= 0 );
+        if (portId >= 0)
+        {
+            Inport* inport = target->getInport( portId );
+            ASSERT( inport );
+            ASSERT( getType() & PortTypeEvent );
+
+            if (inport != nullptr) {
+                inport->disconnectEvent();
+            }
+            removeEventTarget( link );
+            eventInports_.erase( eventInports_.begin() + portId );   
+        }
     }
-
-
+    
+    
     void Outport::disconnectAll()
     {
-        targets_.clear();
-        numTargets_ = 0;
+        audioLinks_.clear();
+        eventLinks_.clear();
+        audioAdapterBuffer_.clear();
+        eventAdapterBuffer_.clear();
+        audioModulationBuffer_.clear();
+        eventModulationBuffer_.clear();
+        audioOutBuffer_.clear();
+        eventInports_.clear();
 
-        adapterBuffer_.clear();
-        modulationBuffer_.clear();
+        numAudioTargets_ = 0;
+        numEventTargets_ = 0;
     }
 
 
-    bool Outport::isConnected()
+    uint32_t Outport::getNumConnections() const
     {
-        return numTargets_ > 0;
+        return numAudioTargets_ + numEventTargets_;
     }
 
 
-    void Outport::setNumVoices(uint16_t numVoices)
+    void Outport::putEvent( double value, int_fast32_t voice )
     {
-        Port::setNumVoices(numVoices);
-        initModulation();
-    }
-
-
-    void Outport::setModulation(uint16_t target, double value, int16_t voice)
-    {
-        if (voice == -1)    // modulate all voices
+        for (uint_fast32_t target = 0; target < numEventTargets_; target++)
         {
-            for (uint16_t i = 0; i<numVoices_; i++) {
-                modulationBuffer_[target * numVoices_ + i] = value;
-            }
-        }
-        else {              // modulate all voices
-            voice = std::min<uint16_t>(numVoices_ - 1, voice);  // TODO: make sure numVoices_ > 0
-            modulationBuffer_[target * numVoices_ + voice] = value;
-        }
-    }
+            double modulation = eventModulationBuffer_[target * numVoices_ + voice];
 
+            Inport* inport  = eventInports_.at( target );
+            ASSERT( inport );
+            Module* targetModule = inport->eventModule_;
+            ASSERT( targetModule );
 
-    void Outport::setModulation(Link* link)
-    {
-        int16_t idx = targets_.getIndex(link);
-        ASSERT(idx >= 0);
-        if (idx >= 0)
-        {
-            setModulation(idx, link->value_, -1);
-        }
-    }
-
-
-    void Outport::initModulation()
-    {
-        modulationBuffer_.set(0);
-        modulationBuffer_.resize(numTargets_ * numVoices_);
-
-        for (uint16_t i = 0; i < numTargets_; i++)
-        {
-            Link* link = targets_[i];
-            setModulation(i, link->value_);
-        }
-    }
-
-
-    void Outport::onGate(double gate, uint16_t voice)
-    {
-        for (uint16_t i = 0; i<targets_.size(); i++)
-        {
-            Link* link = targets_[i];
-            if (link->veloSens_)
+            VoiceAdapterType adapter = eventAdapterBuffer_[target];
+            __assume(adapter < 3);
+            switch (adapter)
             {
-                double value = link->valueShaper_.exponential(link->value_);
-                gate *= link->veloSens_;
-                value += gate;
-                setModulation(i, value, voice);
+            case AdapterNone:
+                targetModule->setParameter( inport->eventParamId_, value, modulation, voice );
+                break;
+            case AdapterMonoToPoly:
+                for (uint_fast32_t i = 0; i < numVoices_; i++) {
+                    targetModule->setParameter( inport->eventParamId_, value, modulation, i );
+                }
+                break;
+            case AdapterPolyToMono:
+                targetModule->setParameter( inport->eventParamId_, value, modulation, 0 );
+                break;
             }
+        }
+    }
+    
+
+    void Outport::addAudioTarget( Link* link, VoiceAdapterType adapter )
+    {
+        numAudioTargets_ = audioLinks_.add( *link );
+
+        audioAdapterBuffer_.resize( numAudioTargets_ );
+        audioAdapterBuffer_[numAudioTargets_ - 1] = adapter;
+        audioModulationBuffer_.init( numVoices_, audioLinks_ );
+    }
+
+
+    void Outport::addEventTarget( Link* link, VoiceAdapterType adapter )
+    {
+        numEventTargets_ = eventLinks_.add( *link );
+
+        eventAdapterBuffer_.resize( numEventTargets_ );
+        eventAdapterBuffer_[numEventTargets_ - 1] = adapter;
+        eventModulationBuffer_.init( numVoices_, eventLinks_ );
+    }
+
+
+    void Outport::removeAudioTarget( Link* link )
+    {
+        numAudioTargets_ = audioLinks_.remove( *link );
+
+        audioAdapterBuffer_.resize( numAudioTargets_ );
+        audioModulationBuffer_.init( numVoices_, audioLinks_ );
+    }
+
+
+    void Outport::removeEventTarget( Link* link )
+    {
+        numEventTargets_ = eventLinks_.remove( *link );
+
+        eventAdapterBuffer_.resize( numEventTargets_ );
+        eventModulationBuffer_.init( numVoices_, eventLinks_ );
+    }
+
+
+    void Outport::setNumVoices( int numVoices )
+    {
+        Port::setNumVoices( numVoices );
+
+        audioModulationBuffer_.init( numVoices_, audioLinks_ );
+        eventModulationBuffer_.init( numVoices_, eventLinks_ );
+    }
+
+
+    void Outport::onGate(double gate, int voice)
+    {
+        for (uint_fast32_t i = 0; i < numAudioTargets_; i++) {
+            audioModulationBuffer_.onGate( i, &audioLinks_[i], gate, voice );
+        }
+        for (uint_fast32_t i = 0; i < numEventTargets_; i++) {
+            eventModulationBuffer_.onGate( i, &eventLinks_[i], gate, voice );
         }
     }
 
 
     void Outport::onController(int16_t controllerId, double value)
     {
-        value = value;
-        controllerId = controllerId;
-        
-        for (uint16_t i = 0; i < numTargets_; i++)
-        {
-            //Link* link = targets_[i];
-            //if (link->scaleController(controllerId, value))
-            //{
-            //    link->value_ = value;
-            //    setModulation(i, value);
-            //}
+        for (uint_fast32_t i = 0; i < numAudioTargets_; i++) {
+            audioModulationBuffer_.onController( i, &audioLinks_[i], controllerId, value );
+        }
+        for (uint_fast32_t i = 0; i < numEventTargets_; i++) {
+            eventModulationBuffer_.onController( i, &eventLinks_[i], controllerId, value );
         }
     }
 
 
-    //-------------------------------------------------------
-    // class AudioOutport
-    //-------------------------------------------------------
-
-    void AudioOutport::connect(Module* target, Link* link, VoiceAdapterType adapter)
-    {
-        AudioInport* inport = target->getAudioInport(link->rightPort_);
-        ASSERT(inport != nullptr);
-
-        if (inport != nullptr) 
-        {
-            addTarget(link, adapter);
-            audioOutBuffer_.resize(numTargets_);
-            audioOutBuffer_[numTargets_ - 1] = inport->getBuffer();
-        }
-    }
-
-
-    void AudioOutport::disconnect(Module* target, Link* link)
-    {
-        ASSERT(target);
-        ASSERT(link);
-
-        if (link != nullptr && target != nullptr)
-        {
-            int16_t portId = targets_.getIndex( link );
-            ASSERT( portId >= 0 && portId < (int)target->getNumInports() );
-            removeTarget( link );
-
-            if (portId >= 0)
-            {
-                audioOutBuffer_.remove( portId );
-
-                AudioInport* inport = target->getAudioInport( portId );
-                ASSERT( inport );
-                if (inport)
-                    inport->disconnect();
-
-                //target->updatePorts();
-            }
-        }
-    }
-
-
-    void AudioOutport::disconnectAll()
-    {
-        Outport::disconnectAll();
-        audioOutBuffer_.clear();
-    }
-
 
     //-------------------------------------------------------
-    // class EventInport
+    // class Inport
     //-------------------------------------------------------
 
-    void EventInport::disconnectAll()  // TODO: handle multiple connections
+    double* Inport::connectAudio()
     {
-        module_  = nullptr;
-        paramId_ = -1;
-    }
+        ASSERT( audioInBuffer_ && audioInBuffer_.size() == numVoices_ );
 
-
-    bool EventInport::isConnected()
-    {
-        return module_ != nullptr;
-    }
-
-    
-    //-------------------------------------------------------
-    // class EventOutport
-    //-------------------------------------------------------
-
-    void EventOutport::connect(Module* target, Link* link, VoiceAdapterType adapter)
-    {
-        EventInport* inport = target->getEventInport(link->leftPort_);
-        ASSERT(inport);
-        ASSERT(link);
-
-        if (inport != nullptr)
-        {
-            addTarget(link, adapter);
-
-            inport->module_  = target;
-            inport->paramId_ = link->rightPort_;
-
-            inports_.resize(numTargets_);
-            inports_.at(numTargets_ - 1) = inport;
-        }
-    }
-
-
-    void EventOutport::disconnect(Module*, Link* link)
-    {
-        int16_t index = targets_.getIndex(link);
-        ASSERT(index >= 0);
-        removeTarget(link);
-
-        if (index >= 0) {
-            inports_.erase(inports_.begin() + index);
-        }
-    }
-
-
-    void EventOutport::disconnectAll()
-    {
-        Outport::disconnectAll();
-        inports_.clear();
-    }
-
-
-    void EventOutport::putEvent(double value, uint16_t voice)
-    {
-        for (uint16_t targetIndex = 0; targetIndex < numTargets_; targetIndex++)
-        {
-            double modulation    = modulationBuffer_[targetIndex * numVoices_ + voice];
-
-            EventInport* inport  = inports_.at(targetIndex);
-            Module* targetModule = inport->module_;
-            ASSERT(targetModule);
-
-            VoiceAdapterType adapter = adapterBuffer_[targetIndex];
-            __assume(adapter < 3);
-            switch (adapter)
-            {
-            case AdapterNone:
-                targetModule->setParameter(inport->paramId_, value, modulation, voice);
-                break;
-            case AdapterMonoToPoly:
-                for (uint16_t i = 0; i<numVoices_; i++) {
-                    targetModule->setParameter(inport->paramId_, value, modulation, i);
-                }
-                break;
-            case AdapterPolyToMono:
-                targetModule->setParameter(inport->paramId_, value, modulation, 0);
-                break;
-            }
-        }
-    }
-
-
-    //-------------------------------------------------------
-    // class AudioInport
-    //-------------------------------------------------------
-
-    void AudioInport::setNumVoices(uint16_t numVoices)
-    {
-        Port::setNumVoices(numVoices);
-        audioInBuffer_.resize(numVoices_);
-    }
-
-
-    double* AudioInport::getBuffer() const
-    {
+        numAudioSources_++;
         return audioInBuffer_;
     }
 
 
-    void AudioInport::connect()
+    void Inport::connectEvent( Module* eventModule, int eventParamId )
     {
-        numSources_++;
-
-        VERIFY(audioInBuffer_ && audioInBuffer_.size() == numVoices_);
+        numEventSources_++;
+        eventModule_  = eventModule;
+        eventParamId_ = eventParamId;
     }
 
 
-    void AudioInport::disconnect()
+    void Inport::disconnectAudio()
     {
-        VERIFY(numSources_ >= 1);
-        numSources_--;
+        ASSERT( numAudioSources_ >= 1 );
+        if (numAudioSources_ >= 1)
+            numAudioSources_--;
     }
 
 
-    void AudioInport::disconnectAll()
+    void Inport::disconnectEvent()
     {
-        numSources_ = 0;
+        ASSERT( numAudioSources_ >= 1 );
+        if (numAudioSources_ >= 1)
+            numAudioSources_--;
+
+        eventModule_  = nullptr;
+        eventParamId_ = -1;
     }
 
 
-    bool AudioInport::isConnected()
+    void Inport::disconnectAll()  // TODO: handle multiple connections
     {
-        VERIFY(numSources_ >= 0);
-        return numSources_ > 0;
+        numAudioSources_ = 0;
+        numEventSources_ = 0;
+
+        eventModule_     = nullptr;
+        eventParamId_    = -1;
     }
+
+
+    uint32_t Inport::getNumConnections() const
+    {
+        return numAudioSources_ + numEventSources_;
+    }
+
+
+    void Inport::setNumVoices( int numVoices )
+    {
+        Port::setNumVoices( numVoices );
+        audioInBuffer_.resize( numVoices_ );
+    }
+
 
 }  // namespace e3

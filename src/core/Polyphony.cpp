@@ -65,9 +65,9 @@ namespace e3 {
             allNotesOff(false);
         }
 
-        for (uint16_t i = 0; i < numUnison_; i++)   // trigger unison voices
+        for (int i = 0; i < numUnison_; i++)   // trigger unison voices
         {
-            uint16_t voice = getUnusedVoice();
+            int voice = getUnusedVoice();
             if (voice >= 0)
             {
                 double unisonPitch    = basePitch + i * unisonSpread_;
@@ -76,7 +76,7 @@ namespace e3 {
                 current->pitch_       = unisonPitch;
 
                 if (i == 0) {  // put the played note on the stack
-                    stack_.push_back(Voice(voice, Voice::kNoteOn, unisonPitch, gate, tags_, unisonGroup));
+                    stack_.push_back(Voice(voice, Voice::NoteOn, unisonPitch, gate, tags_, unisonGroup));
                 }
                 startVoice(voice, unisonPitch, gate);
             }
@@ -116,13 +116,13 @@ namespace e3 {
             }
         }
 
-        for (uint16_t i = 0; i<numVoices_; i++)                       // set state to NoteOff for the voice and all assigned unisonVoices
+        for (int i = 0; i < numVoices_; i++)                       // set state to NoteOff for the voice and all assigned unisonVoices
         {
             Voice* next = &voices_[i];
-            if (next->unisonGroup_ == offVoice->unisonGroup_ && next->state_ > Voice::kSilent)
+            if (next->unisonGroup_ == offVoice->unisonGroup_ && next->state_ > Voice::Silent)
             {
-                next->state_ &= ~Voice::kNoteOn;
-                next->state_ |= Voice::kNoteOff;
+                next->state_ &= ~Voice::NoteOn;
+                next->state_ |= Voice::NoteOff;
                 numActive_--;
                 ASSERT(numActive_ >= 0);
 
@@ -136,9 +136,9 @@ namespace e3 {
     }
 
     
-    void Polyphony::startVoice(uint16_t voice, double pitch, double gate)
+    void Polyphony::startVoice(int voice, double pitch, double gate)
     {
-        uint16_t state = Voice::kNoteOn | (hold_ ? Voice::kNoteHold : 0);
+        int state = Voice::NoteOn | (hold_ ? Voice::NoteHold : 0);
         voices_[voice].init(voice, state, pitch, gate, tags_);
 
         midiPitchSignal(pitch, voice);
@@ -154,7 +154,7 @@ namespace e3 {
     }
 
 
-    void Polyphony::endVoice(uint16_t voice)
+    void Polyphony::endVoice(int voice)
     {
         Voice& v = voices_[voice];
         if (v.state_)
@@ -173,15 +173,15 @@ namespace e3 {
     
     void Polyphony::allNotesOff(bool reset)
     {
-        for (size_t i = 0; i<voices_.size(); i++)
+        for (size_t i = 0; i < voices_.size(); i++)
         {
             Voice* next = &voices_[i];
             if (reset) {
                 next->reset();
             }
-            else if (next->state_ > Voice::kSilent)
+            else if (next->state_ > Voice::Silent)
             {
-                next->state_ = Voice::kNoteOff;
+                next->state_ = Voice::NoteOff;
                 midiGateSignal(0, next->id_);
                 midiNoteSignal(next->pitch_, 0, next->id_);
             }
@@ -196,7 +196,7 @@ namespace e3 {
     }
 
 
-    void Polyphony::setNumVoices(uint16_t numVoices)
+    void Polyphony::setNumVoices(int numVoices)
     {
         stack_.clear();
         voices_.clear();
@@ -220,11 +220,11 @@ namespace e3 {
             for (size_t i = 0; i<stack_.size(); i++)                 // iterate over all played voices
             {
                 Voice* first = &stack_[i];
-                uint16_t counter = 0;
-                for (uint16_t j = 0; j<numVoices_ && counter < numUnison_; j++)    // iterate over unison voices
+                int counter = 0;
+                for (int j = 0; j < numVoices_ && counter < numUnison_; j++)    // iterate over unison voices
                 {
                     Voice* next = &voices_[j];
-                    if (next->unisonGroup_ == first->unisonGroup_ && next->state_ > Voice::kSilent)
+                    if (next->unisonGroup_ == first->unisonGroup_ && next->state_ > Voice::Silent)
                     {
                         double pitch = basePitch + counter * unisonSpread_;
 
@@ -243,9 +243,9 @@ namespace e3 {
     
     void Polyphony::updateSoundingVoices()
     {
-        uint16_t counter = 0;
+        int counter = 0;
 
-        for (uint16_t i = 0; i < numVoices_; i++)
+        for (int i = 0; i < numVoices_; i++)
         {
             if (voices_[i].state_) {
                 soundingVoices_[counter++] = i;
@@ -254,18 +254,18 @@ namespace e3 {
     }
 
 
-    int16_t Polyphony::getUnusedVoice()
+    int Polyphony::getUnusedVoice()
     {
-        int16_t idxKill = -1;
+        int idxKill = -1;
 
-        for (uint16_t i = 0; i < numVoices_; i++)
+        for (int i = 0; i < numVoices_; i++)
         {
-            if (voices_[i].state_ == Voice::kSilent) {         // voices available?
+            if (voices_[i].state_ == Voice::Silent) {         // voices available?
                 return i;
             }
         }
 
-        for (uint16_t i = 0; i < numVoices_; i++)		       // all voices sounding, so interrupt oldest.
+        for (int i = 0; i < numVoices_; i++)		       // all voices sounding, so interrupt oldest.
         {
             if (idxKill == -1) {
                 idxKill = i;

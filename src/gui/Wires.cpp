@@ -347,7 +347,7 @@ namespace e3 {
             }
             
             PortType portType = port->getPortType();
-            if (portType != expectedType) {
+            if ((portType & expectedType) == 0) {
                 return link.isSamePort() ? WireErrorSamePort : WireErrorSameType;
             }          
             else {     

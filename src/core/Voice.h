@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <cstdint>
 #include <vector>
 
 
@@ -12,23 +11,23 @@ namespace e3 {
     public:
         enum State
         {
-            kSilent = 0,
-            kNoteOff = 1,
-            kNoteOn = 2,
-            kNoteHold = 4,
+            Silent = 0,
+            NoteOff = 1,
+            NoteOn = 2,
+            NoteHold = 4,
         };
 
         Voice() = default;
-        Voice(int16_t id, uint16_t state, double pitch, double gate, int32_t tag, int32_t unisonGroup);
+        Voice(int id, int state, double pitch, double gate, int tag, int unisonGroup);
         void reset();
-        void init(int16_t id, uint16_t state, double pitch, double gate, int32_t tag);
+        void init(int id, int state, double pitch, double gate, int tag);
 
-        int16_t id_          = -1;
-        uint16_t state_      = kSilent;
-        double pitch_        = -1;
-        double gate_         = -1;
-        int32_t tag_         = -1;
-        int32_t unisonGroup_ = -1;
+        int id_           = -1;
+        int state_        = Silent;
+        double pitch_     = -1;
+        double gate_      = -1;
+        int tag_          = -1;
+        int unisonGroup_  = -1;
     };
     typedef std::vector< Voice > VoiceList;
 

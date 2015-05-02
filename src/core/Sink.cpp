@@ -67,7 +67,7 @@ namespace e3 {
         }
 
         reverse(begin(), end());
-        audioOutPointer_ = &audioOut->value_;
+        audioOutPointer_ = &(audioOut->value_);
     }
 
 

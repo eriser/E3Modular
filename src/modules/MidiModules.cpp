@@ -16,28 +16,28 @@ namespace e3 {
         ModuleTypeMidiGate,
         "Midi Gate",
         Polyphonic,
-        ProcessEvent)
+        ProcessEvent )
     {
-        addOutport(0, "Gate", &gateOutport_);
+        addOutport( 0, "Gate", &gateOutport_, PortTypeEvent );
     }
 
 
     void MidiGate::connectSignals()
     {
-        polyphony_->midiGateSignal.Connect(this, &MidiGate::onMidiGate);
+        polyphony_->midiGateSignal.Connect( this, &MidiGate::onMidiGate );
     }
 
 
     void MidiGate::disconnectSignals()
     {
-        polyphony_->midiGateSignal.Disconnect(this, &MidiGate::onMidiGate);
+        polyphony_->midiGateSignal.Disconnect( this, &MidiGate::onMidiGate );
     }
 
 
-    void MidiGate::onMidiGate(double gate, uint16_t voice)
+    void MidiGate::onMidiGate( double gate, int voice )
     {
         if (gate > -1) {
-            gateOutport_.putEvent(gate, voice);
+            gateOutport_.putEvent( gate, voice );
         }
     }
 
@@ -50,20 +50,20 @@ namespace e3 {
         ModuleTypeMidiPitch,
         "Midi Pitch",
         Polyphonic,
-        (ProcessingType)(ProcessEvent | ProcessControl))
+        (ProcessingType)(ProcessEvent | ProcessControl) )
     {
-        addOutport(0, "Pitch", &pitchOutport_);
+        addOutport( 0, "Pitch", &pitchOutport_, PortTypeEvent );
         createParameters();
     }
 
 
     MidiPitch::MidiPitch(
-        ModuleType moduleType, 
+        ModuleType moduleType,
         const std::string& label,
         VoicingType voicingType,
-        ProcessingType processingType)
+        ProcessingType processingType )
         :
-        Module(moduleType, label, voicingType, processingType)
+        Module( moduleType, label, voicingType, processingType )
     {
         createParameters();
     }
@@ -71,33 +71,33 @@ namespace e3 {
 
     void MidiPitch::createParameters()
     {
-        Parameter paramBend(ParamBendRange, "BendRange", ControlBiSlider, 2);
-        paramBend.valueShaper_ = { -48, 48, 96 };
-        parameters_.add(paramBend);
+        Parameter paramBend( ParamBendRange, "BendRange", ControlBiSlider, 2 );
+        paramBend.valueShaper_ ={ -48, 48, 96 };
+        parameters_.add( paramBend );
 
-        Parameter paramTime(ParamGlideTime, "Portamento Time", ControlSlider, 0);
-        paramTime.valueShaper_ = { 0, 2000 };
+        Parameter paramTime( ParamGlideTime, "Portamento Time", ControlSlider, 0 );
+        paramTime.valueShaper_ ={ 0, 2000 };
         paramTime.unit_ = "msec";
         paramTime.numberFormat_ = NumberFloat;
-        parameters_.add(paramTime);
+        parameters_.add( paramTime );
 
-        Parameter paramAuto(ParamGlideAuto, "Portamento Auto", ControlCheckbox, 0);
-        paramBend.valueShaper_ = { 0, 1 };
-        parameters_.add(paramAuto);
+        Parameter paramAuto( ParamGlideAuto, "Portamento Auto", ControlCheckbox, 0 );
+        paramBend.valueShaper_ ={ 0, 1 };
+        parameters_.add( paramAuto );
     }
 
 
     void MidiPitch::connectSignals()
     {
-        polyphony_->midiNoteSignal.Connect(this, &MidiPitch::onMidiNote);
-        polyphony_->midiPitchbendSignal.Connect(this, &MidiPitch::onMidiPitchbend);
+        polyphony_->midiNoteSignal.Connect( this, &MidiPitch::onMidiNote );
+        polyphony_->midiPitchbendSignal.Connect( this, &MidiPitch::onMidiPitchbend );
     }
 
 
     void MidiPitch::disconnectSignals()
     {
-        polyphony_->midiNoteSignal.Disconnect(this, &MidiPitch::onMidiNote);
-        polyphony_->midiPitchbendSignal.Disconnect(this, &MidiPitch::onMidiPitchbend);
+        polyphony_->midiNoteSignal.Disconnect( this, &MidiPitch::onMidiNote );
+        polyphony_->midiPitchbendSignal.Disconnect( this, &MidiPitch::onMidiPitchbend );
     }
 
 
@@ -109,23 +109,23 @@ namespace e3 {
     }
 
 
-    void MidiPitch::setParameter(int paramId, double value, double, int16_t) 
+    void MidiPitch::setParameter( int paramId, double value, double, int )
     {
-        switch( paramId ) 
+        switch (paramId)
         {
-        case ParamBendRange: bendRange_ = (int16_t)value;       break;
+        case ParamBendRange: bendRange_ = (int)value;           break;
         case ParamGlideTime: setGlideTime( value );             break;
         case ParamGlideAuto: glideAuto_ = value ? true : false; break;
         }
     }
 
 
-    void MidiPitch::onMidiNote( double pitch, double gate, uint16_t voice )
+    void MidiPitch::onMidiNote( double pitch, double gate, int voice )
     {
         double freq  = PitchToFreq( pitch );
         freq_[voice] = freq;
 
-        if( gate != 0 )
+        if (gate != 0)
         {
             calcGlide( freq, voice );
             pitchOutport_.putEvent( freq_[voice] * bendFactor_, voice );
@@ -133,15 +133,15 @@ namespace e3 {
     }
 
 
-    void MidiPitch::onMidiPitchbend(int value)
+    void MidiPitch::onMidiPitchbend( int value )
     {
         double cents = ((value - 0x2000) / (double)0x2000) * bendRange_ * 100;
         bendFactor_  = pow( 2.f, cents / 1200.f );
 
-        uint16_t maxVoices = std::min<uint16_t>( numVoices_, polyphony_->numSounding_ );
-        for( uint16_t i=0; i<maxVoices; i++ )
+        int maxVoices = std::min<int>( numVoices_, polyphony_->numSounding_ );
+        for (int i = 0; i < maxVoices; i++)
         {
-            uint16_t v = polyphony_->soundingVoices_[i];
+            int v = polyphony_->soundingVoices_[i];
             pitchOutport_.putEvent( freq_[v] * bendFactor_, v );
         }
     }
@@ -149,17 +149,17 @@ namespace e3 {
 
     void MidiPitch::processControl() throw()
     {
-        if( glideFrames_ == 0 )
+        if (glideFrames_ == 0)
             return;
 
-        uint16_t maxVoices = std::min<uint16_t>( numVoices_, polyphony_->numSounding_ );
-        for( uint16_t i=0; i<maxVoices; i++ )
+        int maxVoices = std::min<int>( numVoices_, polyphony_->numSounding_ );
+        for (int i = 0; i < maxVoices; i++)
         {
-            uint16_t v = mono_ ? 0 : polyphony_->soundingVoices_[i];
+            int v = mono_ ? 0 : polyphony_->soundingVoices_[i];
 
-            if( glideDelta_[v] > 0 && freq_[v] >= glideTarget_[v] || glideDelta_[v] < 0 && freq_[v] <= glideTarget_[v] ) {
+            if (glideDelta_[v] > 0 && freq_[v] >= glideTarget_[v] || glideDelta_[v] < 0 && freq_[v] <= glideTarget_[v]) {
                 glideDelta_[v] = 0.0f;
-            } 
+            }
             else {
                 freq_[v] += glideDelta_[v];
                 pitchOutport_.putEvent( freq_[v] * bendFactor_, v );
@@ -168,16 +168,16 @@ namespace e3 {
     }
 
 
-    void MidiPitch::calcGlide( double freq, uint16_t voice )
+    void MidiPitch::calcGlide( double freq, int voice )
     {
-        if( glideFrames_ > 0) 
+        if (glideFrames_ > 0)
         {
             glideTarget_[voice] = freq;
             //double prevPitch    = polyphony_->getPreviousPitch( voice );
             double prevPitch = 0;
-            ASSERT(prevPitch == 1);
+            ASSERT( prevPitch == 1 );
 
-            if( prevPitch == -1 || glideAuto_ && polyphony_->numActive_ <= polyphony_->numUnison_ ) {
+            if (prevPitch == -1 || glideAuto_ && polyphony_->numActive_ <= polyphony_->numUnison_) {
                 glideDeltaBuffer_.set( 0 );
             }
             else {
@@ -192,7 +192,7 @@ namespace e3 {
 
     void MidiPitch::setGlideTime( double time )
     {
-        double msPerFrame = ( 1 / (double)INITIAL_CONTROLRATE ) * 1000;
+        double msPerFrame = (1 / (double)INITIAL_CONTROLRATE) * 1000;
         glideFrames_     = time / msPerFrame;
     }
 
@@ -205,32 +205,32 @@ namespace e3 {
         ModuleTypeMidiInput,
         "Midi Input",
         Polyphonic,
-        (ProcessingType)(ProcessEvent | ProcessControl))
+        (ProcessingType)(ProcessEvent | ProcessControl) )
     {
-        addOutport(0, "Pitch", &pitchOutport_);
-        addOutport(1, "Gate", &gateOutport_);
+        addOutport( 0, "Pitch", &pitchOutport_, PortTypeEvent );
+        addOutport( 1, "Gate", &gateOutport_, PortTypeEvent );
     }
 
 
     void MidiInput::connectSignals()
     {
-        polyphony_->midiNoteSignal.Connect(this, &MidiInput::onMidiNote);
-        polyphony_->midiPitchbendSignal.Connect(this, &MidiPitch::onMidiPitchbend);
+        polyphony_->midiNoteSignal.Connect( this, &MidiInput::onMidiNote );
+        polyphony_->midiPitchbendSignal.Connect( this, &MidiPitch::onMidiPitchbend );
     }
 
 
     void MidiInput::disconnectSignals()
     {
-        polyphony_->midiNoteSignal.Disconnect(this, &MidiInput::onMidiNote);
-        polyphony_->midiPitchbendSignal.Disconnect(this, &MidiPitch::onMidiPitchbend);
+        polyphony_->midiNoteSignal.Disconnect( this, &MidiInput::onMidiNote );
+        polyphony_->midiPitchbendSignal.Disconnect( this, &MidiPitch::onMidiPitchbend );
     }
 
 
-    void MidiInput::onMidiNote( double pitch, double gate, uint16_t voice )
+    void MidiInput::onMidiNote( double pitch, double gate, int voice )
     {
         MidiPitch::onMidiNote( pitch, gate, voice );
 
-        if( gate > -1 ) {
+        if (gate > -1) {
             gateOutport_.putEvent( gate, voice );
         }
     }

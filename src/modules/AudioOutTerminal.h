@@ -15,7 +15,7 @@ namespace e3 {
         ~AudioOutTerminal() override {}
 
         void updateInports() override;
-        void setParameter(int paramId, double value, double modulation = 0, int16_t voice = -1) override;
+        void setParameter(int paramId, double value, double modulation = 0, int voice = -1) override;
 
         void processAudio() throw();
 
@@ -27,8 +27,8 @@ namespace e3 {
         double value_ = 0;
 
     protected:
-        AudioInport audioInport_;
-        AudioOutport audioOutport_;
+        Inport audioInport_;
+        //Outport audioOutport_;
 
         double volume_ = 0.1;
         double* audioInportPointer_ = nullptr;

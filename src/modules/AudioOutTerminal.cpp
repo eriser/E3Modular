@@ -25,11 +25,11 @@ namespace e3 {
     {
         ASSERT(numVoices_ == 1);
         audioInport_.setNumVoices(numVoices_);
-        audioInportPointer_ = audioInport_.getBuffer();
+        audioInportPointer_ = audioInport_.getAudioBuffer();
     }
 
 
-    void AudioOutTerminal::setParameter(int paramId, double value, double, int16_t)
+    void AudioOutTerminal::setParameter(int paramId, double value, double, int)
     {
         switch (paramId) {
         case ParamVolume: volume_ = value; break;

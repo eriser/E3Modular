@@ -101,10 +101,13 @@ namespace e3 {
         {
             if (isDockingPosition(e.getMouseDownPosition())) 
             {
-                switch (port_->getType()) {
-                case PortTypeInport:  owner_->portAction(this, PortActionUndocking, getDockingPosition()); break;
-                case PortTypeOutport: owner_->portAction(this, PortActionDocking, getDockingPosition()); break;
-                }
+                PortAction action = (getPortType() & PortTypeInport) ? PortActionUndocking : PortActionDocking;
+                owner_->portAction( this, action, getDockingPosition() );
+
+                //switch (port_->getType()) {
+                //case PortTypeInport:  owner_->portAction(this, PortActionUndocking, getDockingPosition()); break;
+                //case PortTypeOutport: owner_->portAction(this, PortActionDocking, getDockingPosition()); break;
+                //}
             }
         }
 

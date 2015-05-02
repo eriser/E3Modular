@@ -17,7 +17,7 @@ namespace e3 {
         
         void processAudio() throw();
         void resume() override;
-        void setParameter(int paramId, double value, double modulation=0.f, int16_t voice=-1) override;
+        void setParameter(int paramId, double value, double modulation=0.f, int voice=-1) override;
         void setSampleRate(double sampleRate) override;
 
         enum ParamId {
@@ -42,8 +42,8 @@ namespace e3 {
         Buffer< double > delayBuffer_;
         double* delayBufferPointer_ = nullptr;
 
-        AudioInport audioInport_; 
-        AudioOutport audioOutport_;
+        Inport audioInport_; 
+        Outport audioOutport_;
         double* audioInportPointer_;
     };
 }

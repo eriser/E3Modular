@@ -9,7 +9,6 @@
 #include "core/Link.h"
 
 
-
 namespace e3 {
 
     class Module;
@@ -23,9 +22,15 @@ namespace e3 {
     //------------------------------------------
 
     enum PortType {
-        PortTypeUndefined = 0,
-        PortTypeInport    = 1,
-        PortTypeOutport   = 2
+        PortTypeUndefined    = 0,
+        PortTypeInport       = 1,
+        PortTypeOutport      = 2,
+        PortTypeAudio        = 4,
+        PortTypeEvent        = 8,
+        PortTypeAudioInport  = PortTypeInport  | PortTypeAudio,   // 5
+        PortTypeAudioOutport = PortTypeOutport | PortTypeAudio,   // 6
+        PortTypeEventInport  = PortTypeInport  | PortTypeEvent,   // 9
+        PortTypeEventOutport = PortTypeOutport | PortTypeEvent    // 10
     };
 
 
@@ -62,14 +67,32 @@ namespace e3 {
 
     };
 
+    //------------------------------------------
+    // class ModulationBuffer
+    //------------------------------------------
+
+    class ModulationBuffer : public Buffer < double >
+    {
+    public:
+        void init( int_fast32_t numVoices, LinkList& targets );
+        void setValue( uint32_t targetIndex, double value, int voice );
+
+        void onGate( uint32_t targetIndex, Link* link, double gate, int voice );
+        void onController( uint32_t targetIndex, Link* link, int16_t controllerId, double value );
+
+    protected:
+        uint_fast32_t numVoices_;
+    };
+
+
     typedef PortList<Inport*> InportList;
     typedef PortList<Outport*> OutportList;
 
 
-    //------------------------------------------
+    //---------------------------------------------------------
     // class Port
-    // Base class for all Ports
-    //------------------------------------------
+    // Abstract base class for all Inports and Outports
+    //---------------------------------------------------------
 
     class Port
     {
@@ -78,187 +101,129 @@ namespace e3 {
         virtual ~Port() {}
 
         virtual void disconnectAll() = 0;
-        virtual bool isConnected() { return false;  }
+        virtual uint32_t getNumConnections() const { return 0;  }
 
-        virtual void setNumVoices(uint16_t numVoices);
+        virtual void setNumVoices(int numVoices);
 
         void setId(int id)                      { id_ = id; }
-        int getId()                             { return id_;  }
+        int getId() const                       { return id_;  }
 
-        PortType getType()                      { return type_; }
+        PortType getType() const                { return type_; }
+        void setProcessType(PortType type)      { type_ = (PortType)(type_ | type); }
+
         const std::string& getLabel()           { return label_; }
         void setLabel(const std::string& label) { label_ = label; }
 
     protected:
         int id_                  = -1;
-        uint16_t numVoices_      = 0;
+        uint_fast32_t numVoices_ = 0;
         PortType type_           = PortTypeUndefined;
         ControlType controlType_ = ControlHidden;
         std::string label_;
     };
 
 
-    //-----------------------------------------------------------------------
+    //------------------------------------------
     // class Outport
-    // Base class for module out ports
-    //-----------------------------------------------------------------------
-    
+    //------------------------------------------
+
     class Outport : public Port
     {
     public:
-        Outport() : Port(PortTypeOutport) {}
+        Outport() : Port( PortTypeOutport ) {}
 
-        virtual void connect(Module*, Link*, VoiceAdapterType) {}
-        virtual void disconnect(Module*, Link*) {}
+        void connect( Module* target, Link* link, VoiceAdapterType voiceAdapter );
+        void disconnect( Module* target, Link* link );
 
         void disconnectAll() override;
-        bool isConnected() override;
+        uint32_t getNumConnections() const override;
+        
+        void setNumVoices( int numVoices ) override;
 
-        void setModulation(Link* link);
-        void setNumVoices(uint16_t numVoices) override;
+        void __stdcall putAudio( double value, int_fast32_t voice = 0 ) throw();
+        void putEvent( double value, int_fast32_t voice );
 
-        void onGate(double gate, uint16_t voice);
-        void onController(int16_t controllerId, double value);
+        void onGate( double gate, int voice );
+        void onController( int16_t controllerId, double value );
 
-        const LinkPointerList& getTargets() const  { return targets_; }
 
     protected:
-        void addTarget(Link* link, VoiceAdapterType adapter);
-        void removeTarget(Link* link);
+        void addAudioTarget( Link* link, VoiceAdapterType adapter );
+        void addEventTarget( Link* link, VoiceAdapterType adapter );
+        void removeAudioTarget( Link* link );
+        void removeEventTarget( Link* link );
 
-        void setModulation(uint16_t targetId, double value, int16_t voice = -1);
-        void initModulation();
+    protected:
+        LinkList audioLinks_;
+        Buffer< double* > audioOutBuffer_;
+        Buffer< VoiceAdapterType > audioAdapterBuffer_;
+        ModulationBuffer audioModulationBuffer_;
+        uint_fast32_t numAudioTargets_ = 0;
 
-        LinkPointerList targets_;
-        size_t numTargets_ = 0;
-
-        Buffer< VoiceAdapterType > adapterBuffer_;
-        Buffer< double > modulationBuffer_;
+        LinkList eventLinks_;
+        InportList eventInports_;
+        Buffer< VoiceAdapterType > eventAdapterBuffer_;
+        ModulationBuffer eventModulationBuffer_;
+        uint_fast32_t numEventTargets_ = 0;
     };
 
-
-    //------------------------------------------------------------------------
-    // class Inport
-    // Base class for Inports
-    //------------------------------------------------------------------------
 
     class Inport : public Port
     {
-    public: 
-        Inport() : Port(PortTypeInport)  {}
+        friend class Outport;
 
-        virtual void connect()    {}
-        virtual void disconnect() {}
-    };
-
-
-
-    //------------------------------------------------------------------------
-    // class AudioOutport
-    // Stores pointers to the input buffers of all connected AudioInports.
-    //------------------------------------------------------------------------
-
-    class AudioOutport : public Outport
-    {
     public:
-        void connect(Module* target, Link* link, VoiceAdapterType adapter) override;
-        void disconnect(Module* target, Link* link) override;
-        void disconnectAll() override;
+        Inport() : Port( PortTypeInport ) {}
 
-        void __stdcall putValue(double value, uint16_t voice = 0) throw();
+        double* connectAudio();
+        void connectEvent( Module* eventModule, int eventParamId );
+        void disconnectAudio();
+        void disconnectEvent();
+        void disconnectAll() override;
+        uint32_t getNumConnections() const override;
+
+        void setNumVoices( int numVoices ) override;
+        double* getAudioBuffer() const  { return audioInBuffer_; }
 
     protected:
-        Buffer<double*> audioOutBuffer_;
+        Buffer<double> audioInBuffer_;
+        int numAudioSources_ = 0;
+
+        Module* eventModule_;
+        int eventParamId_    = -1;
+        int numEventSources_ = 0;
     };
 
 
-    __forceinline void __stdcall AudioOutport::putValue(double value, uint16_t voice) throw()
+    __forceinline void __stdcall Outport::putAudio( double value, int_fast32_t voice ) throw()
     {
-        uint16_t modulationIndex = voice;
+        int modulationIndex = voice;
 
-        for (uint16_t target = 0; target < numTargets_; target++)
+        for (uint_fast32_t target = 0; target < numAudioTargets_; target++)
         {
-            double  val = value * modulationBuffer_[modulationIndex];     // apply modulation
+            double  val = value * audioModulationBuffer_[modulationIndex];  // apply modulation
             modulationIndex += numVoices_;
 
-            double* ptr = audioOutBuffer_[target];	                      // get pointer to target
-
-            VoiceAdapterType adapter = adapterBuffer_[target];
-            __assume(adapter < 3);
-            switch (adapter)
-            {
-            case AdapterNone:
-                *(ptr + voice) += val; 	                     // add value to existing value, per voice
-                break;
-            case AdapterMonoToPoly:
-                for (uint16_t i = 0; i < numVoices_; i++) {  // add value to all voices of target
-                    *(ptr + i) += val;
+            double* inportPointer = audioOutBuffer_[target];	            // get pointer to target
+                                                                            
+            VoiceAdapterType adapter = audioAdapterBuffer_[target];         
+            __assume(adapter < 3);                                          
+            switch (adapter)                                                
+            {                                                               
+            case AdapterNone:                                               
+                *(inportPointer + voice) += val; 	                         // add value to existing value, per voice
+                break;                                                      
+            case AdapterMonoToPoly:                                         
+                for (uint32_t i = 0; i < numVoices_; i++) {                  // add value to all voices of target
+                    *(inportPointer + i) += val;
                 }
                 break;
             case AdapterPolyToMono:
-                *ptr += val; 	                              // add value only to voice 0
+                *inportPointer += val; 	                              // add value only to voice 0
                 break;
             }
         }
     }
 
 
-    //--------------------------------------------------------------------------------------------
-    // class EventInport
-    // Has a pointer to a target module. EventOutport use this pointer to access the parameters
-    // of the target module.
-    //--------------------------------------------------------------------------------------------
-
-    class EventInport : public Inport
-    {
-    public:
-        Module* module_ = nullptr;
-        int paramId_    = -1;
-
-        void disconnectAll() override;
-        bool isConnected() override;
-    };
-
-
-    
-    //----------------------------------------
-    // class EventOutport
-    //----------------------------------------
-
-    class EventOutport : public Outport
-    {
-    public:
-        void connect(Module* module, Link* link, VoiceAdapterType adapter) override;
-        void disconnect(Module* target, Link* link) override;
-        void disconnectAll() override;
-
-        void putEvent(double value, uint16_t voice);
-
-    protected:
-        std::vector< EventInport* > inports_;
-    };
-
-
-    //--------------------------------------------------------------------------------------------
-    // class AudioInport
-    // AudioInport has a buffer, where each element represents the value for a single voice.
-    //--------------------------------------------------------------------------------------------
-
-    class AudioInport : public Inport
-    {
-    public:
-        void setNumVoices(uint16_t numVoices) override;
-
-        void connect() override;
-        void disconnect() override;
-        void disconnectAll() override;
-        bool isConnected() override;
-
-        double* getBuffer() const;
-
-    protected:
-        Buffer< double > audioInBuffer_;
-        int16_t numSources_ = 0;
-    };
-    
 }  // namespace e3

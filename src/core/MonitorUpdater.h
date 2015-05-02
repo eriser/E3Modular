@@ -8,17 +8,17 @@
 namespace e3 {
 
     enum MonitorEventType {
-        kMonitorNote,
-        kMonitorController,
-        kMonitorPitchbend,
-        kMonitorVoices,
-        kMonitorCpuMeter,
+        MonitorNote,
+        MonitorController,
+        MonitorPitchbend,
+        MonitorVoices,
+        MonitorCpuMeter,
     };
 
 
     struct MonitorEvent 
     {
-        MonitorEvent(MonitorEventType type, double value1=-1, double value2=-1, int16_t numVoices=-1) :
+        MonitorEvent(MonitorEventType type, double value1=-1, double value2=-1, int numVoices=-1) :
             type(type),
             numVoices(numVoices),
             value1(value1),
@@ -26,7 +26,7 @@ namespace e3 {
         {}
 
         MonitorEventType type;
-        int16_t numVoices;
+        int numVoices;
         double value1;
         double value2;
     };
@@ -36,7 +36,7 @@ namespace e3 {
     public:
         Gallant::Signal1<MonitorEvent> monitorUpdateSignal;
 
-        void monitorVoiceEvent(int16_t numSounding);
+        void monitorVoiceEvent(int numSounding);
         void monitorCpuMeterEvent(double value);
 
         void monitorNoteEvent(double pitch, double gate);

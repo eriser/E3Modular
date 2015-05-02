@@ -27,20 +27,20 @@ namespace e3 {
         void processAudio() throw();
         void processControl() throw() override;
 
-        void setParameter(int paramId, double value, double modulation=0.f, int16_t voice=-1) override;
+        void setParameter(int paramId, double value, double modulation=0.f, int voice=-1) override;
         void setSentinel(bool sentinel) { sentinel_ = sentinel; }
 
     protected:  
-        void keyOn(double amplitude, uint16_t voice);
-        void keyOff(uint16_t voice);
+        void keyOn(double amplitude,int voice);
+        void keyOff(int voice);
 
         void setSampleRate(double sampleRate);
 
         // ranges for all times: 0-1, 1=10sec
-        void setAttackRate( double time, int16_t voice=-1 );
-        void setDecayRate( double time, int16_t voice=-1 );
-        void setSustainLevel( double level, int16_t voice=-1 );
-        void setReleaseRate( double time, int16_t voice=-1 );
+        void setAttackRate( double time, int voice=-1 );
+        void setDecayRate( double time, int voice=-1 );
+        void setSustainLevel( double level, int voice=-1 );
+        void setReleaseRate( double time, int voice=-1 );
         
         double calcRate( double time );
 
@@ -60,9 +60,9 @@ namespace e3 {
 
         bool sentinel_ = false;
 
-        AudioInport audioInport_;
-        AudioOutport audioOutport_;
-        EventInport gateInport_;
+        Inport audioInport_;
+        Outport audioOutport_;
+        Inport gateInport_;
         double* audioInportPointer_ = nullptr;
 
         enum State {

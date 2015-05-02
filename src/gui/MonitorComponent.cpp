@@ -48,19 +48,19 @@ namespace e3 {
 
         switch (e.type)
         {
-        case kMonitorVoices:
+        case MonitorVoices:
         {
             stream << e.numVoices;
             labels_[kVoices]->setText(stream.str(), dontSendNotification);
             break;
         }
-        case kMonitorCpuMeter:
+        case MonitorCpuMeter:
         {
             stream << std::setprecision(2) << std::fixed << e.value1 << "%";
             labels_[kCpuMeter]->setText(stream.str(), dontSendNotification);
             break;
         }
-        case kMonitorNote:
+        case MonitorNote:
         {
             labels_[kType]->setText("Note", dontSendNotification);
 
@@ -77,7 +77,7 @@ namespace e3 {
             labels_[kValue2]->setText(stream.str(), dontSendNotification);
             break;
         }
-        case kMonitorController:
+        case MonitorController:
         {
             labels_[kType]->setText("CC", dontSendNotification);
 
@@ -89,7 +89,7 @@ namespace e3 {
             labels_[kValue2]->setText(stream.str(), dontSendNotification);
             break;
         }
-        case kMonitorPitchbend:
+        case MonitorPitchbend:
         {
             labels_[kType]->setText("PB", dontSendNotification);
 

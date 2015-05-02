@@ -4,7 +4,7 @@
 
 namespace e3 {
 
-    Voice::Voice(int16_t id, uint16_t state, double pitch, double gate, int32_t tag, int32_t unisonGroup)
+    Voice::Voice(int id, int state, double pitch, double gate, int tag, int unisonGroup)
     {
         init(id, state, pitch, gate, tag);
         unisonGroup_ = unisonGroup;
@@ -14,7 +14,7 @@ namespace e3 {
     void Voice::reset()
     {
         id_          = -1;
-        state_       = kSilent;
+        state_       = Silent;
         pitch_       = -1;
         gate_        = -1;
         tag_         = -1;
@@ -22,7 +22,7 @@ namespace e3 {
     }
 
 
-    void Voice::init(int16_t id, uint16_t state, double pitch, double gate, int32_t tag)
+    void Voice::init(int id, int state, double pitch, double gate, int tag)
     {
         id_    = id;
         state_ = state;

@@ -8,39 +8,39 @@ namespace e3 {
         ModuleTypeDelay,
         "Delay",
         Polyphonic,
-        ProcessAudio)
+        ProcessAudio )
     {
-        addInport(0, "In", &audioInport_);
-        addOutport(0, "Out", &audioOutport_);
+        addInport( 0, "In", &audioInport_ );
+        addOutport( 0, "Out", &audioOutport_, PortTypeAudio );
 
-        processFunction_ = static_cast< ProcessFunctionPointer >(&Delay::processAudio);
+        processFunction_ = static_cast<ProcessFunctionPointer>( &Delay::processAudio );
 
-        Parameter paramTime(ParamDelaytime, "Time", ControlSlider, 0.5);
+        Parameter paramTime( ParamDelaytime, "Time", ControlSlider, 0.5 );
         paramTime.unit_ = "sec";
         paramTime.numberFormat_ = NumberFloat;
-        parameters_.add(paramTime);
+        parameters_.add( paramTime );
 
-        Parameter paramRepeats(ParamFeedback, "Repeats", ControlSlider, 0.5);
+        Parameter paramRepeats( ParamFeedback, "Repeats", ControlSlider, 0.5 );
         paramRepeats.unit_ = "sec";
         paramRepeats.numberFormat_ = NumberFloat;
-        parameters_.add(paramRepeats);
+        parameters_.add( paramRepeats );
 
-        Parameter paramGain(ParamGain, "Gain", ControlSlider, 0.5);
+        Parameter paramGain( ParamGain, "Gain", ControlSlider, 0.5 );
         paramGain.unit_ = "db";
         paramGain.numberFormat_ = NumberDecibel;
-        parameters_.add(paramGain);
+        parameters_.add( paramGain );
     }
 
-    
+
     void Delay::initVoices()
     {
         updateBuffer();
     }
 
 
-    void Delay::setSampleRate(double sampleRate)
+    void Delay::setSampleRate( double sampleRate )
     {
-        Module::setSampleRate(sampleRate);
+        Module::setSampleRate( sampleRate );
         updateBuffer();
     }
 
@@ -48,16 +48,16 @@ namespace e3 {
     void Delay::updateInports()
     {
         audioInport_.setNumVoices( numVoices_ );
-        audioInportPointer_ = audioInport_.getBuffer();
+        audioInportPointer_ = audioInport_.getAudioBuffer();
     }
 
 
-    void Delay::setParameter(int paramId, double value, double, int16_t) 
+    void Delay::setParameter( int paramId, double value, double, int )
     {
-        switch( paramId ) {
-        case ParamDelaytime: delayTime_ = (uint32_t)( value * (double)(bufferSize_ - 1)); break;
+        switch (paramId) {
+        case ParamDelaytime: delayTime_ = (uint32_t)(value * (double)(bufferSize_ - 1)); break;
         case ParamFeedback:  feedback_  = value; break;
-        case ParamGain:	  gain_      = value; break;
+        case ParamGain:	     gain_      = value; break;
         }
     }
 
@@ -65,8 +65,8 @@ namespace e3 {
     void Delay::updateBuffer()
     {
         bufferSize_          = (uint32_t)sampleRate_;
-        delayBufferPointer_  = delayBuffer_.resize(numVoices_ * bufferSize_);  
-        cursorBufferPointer_ = cursorBuffer_.resize(numVoices_);
+        delayBufferPointer_  = delayBuffer_.resize( numVoices_ * bufferSize_ );
+        cursorBufferPointer_ = cursorBuffer_.resize( numVoices_ );
     }
 
 
@@ -81,8 +81,8 @@ namespace e3 {
         double output, input;
         uint32_t index;
         uint16_t v;
-        
-        for( v = 0; v < numVoices_; v++ )
+
+        for (v = 0; v < numVoices_; v++)
         {
             input = audioInportPointer_[v];
             audioInportPointer_[v] = 0.f;
@@ -92,10 +92,10 @@ namespace e3 {
 
             delayBufferPointer_[index] = input + output * feedback_;
 
-            if( ++cursorBufferPointer_[v] >= delayTime_ ) {
+            if (++cursorBufferPointer_[v] >= delayTime_) {
                 cursorBufferPointer_[v] = 0;
             }
-            audioOutport_.putValue( input + output * gain_, v );
+            audioOutport_.putAudio( input + output * gain_, v );
         }
     }
 } // namespace e3

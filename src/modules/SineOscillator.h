@@ -16,7 +16,9 @@ namespace e3 {
         void initVoices() override;
         void updatePorts() override;
         void updateInports() override;
-        void setParameter(int paramId, double value, double modulation=0.f, int16_t voice=-1) override;
+        void updateOutports() override;
+
+        void setParameter(int paramId, double value, double modulation=0.f, int voice=-1) override;
 
         void processAudio() throw();
         void processAudioFm();
@@ -36,7 +38,7 @@ namespace e3 {
         void setSampleRate(double sampleRate) override;
         void setTuning( double paramValue );
         void setFineTuning( double paramValue );
-        void setIncrement( uint16_t voice );
+        void setIncrement( int_fast32_t voice );
 
         void makeWaveTable();
 
@@ -46,20 +48,20 @@ namespace e3 {
         double tuning_ = 1;
         double fineTuning_ = 1;
 
-        EventInport  pitchInport_;
-        AudioInport  fmInport_;
-        AudioInport  amInport_;
-        AudioOutport audioOutport_;
+        Inport  pitchInport_;
+        Inport  fmInport_;
+        Inport  amInport_;
+        Outport audioOutport_;
         double* fmInportPointer_ = nullptr;
         double* amInportPointer_ = nullptr;
         
         static Buffer<double> tableBuffer_;
         static double* table_;
-        static uint16_t tableSize_; // = 2048;
+        static uint_fast32_t tableSize_; // = 2048;
     };
 
 
-    inline void SineOscillator::setIncrement(uint16_t voice)
+    inline void SineOscillator::setIncrement(int_fast32_t voice)
     {
         increment_[voice] = (tableSize_ * freq_[voice] * tuning_ * fineTuning_) / sampleRate_;
     }

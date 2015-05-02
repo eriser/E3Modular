@@ -136,19 +136,19 @@ namespace e3 {
     }
 
 
+    void Processor::resetAndInitInstrument()
+    {
+        instrument_->resetModules();
+        initInstrument();
+    }
+
+
     void Processor::initInstrument()
     {
         instrument_->initModules( polyphony_, getSampleRate() );
         instrument_->connectModules();
 
         sink_->compile( instrument_ );
-    }
-
-
-    void Processor::resetAndInitInstrument()
-    {
-        instrument_->resetModules();
-        initInstrument();
     }
 
 

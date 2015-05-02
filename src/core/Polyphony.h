@@ -24,12 +24,12 @@ namespace e3 {
 
         void handleMidiMessage(const MidiMessage& m);
 
-        void startVoice(uint16_t voice, double pitch, double gate);
-        void endVoice(uint16_t voice);
+        void startVoice(int voice, double pitch, double gate);
+        void endVoice(int voice);
 
-        void setNumVoices(uint16_t numVoices);
-        uint16_t getNumVoices()                     { return numVoices_; }
-        bool isVoiceActive(uint16_t voice) const	{ return voices_[voice].state_ != Voice::kSilent; }
+        void setNumVoices(int numVoices);
+        int getNumVoices() const                    { return numVoices_; }
+        bool isVoiceActive(int voice) const	        { return voices_[voice].state_ != Voice::Silent; }
         
         //void setNumUnison(uint16_t numUnison);
         //void setUnisonSpread(uint16_t cent);
@@ -40,19 +40,19 @@ namespace e3 {
         //double getPreviousPitch(uint16_t voice);
 
         VoiceList voices_;
-        Buffer< uint16_t > soundingVoices_;
+        Buffer< int > soundingVoices_;
 
-        int16_t numSounding_ = 0;
-        int16_t numActive_   = 0;
-        int16_t numUnison_   = 1;
+        int numSounding_     = 0;
+        int numActive_       = 0;
+        int numUnison_       = 1;
         double unisonSpread_ = 5;
 
-        Gallant::Signal2<double, uint16_t>          midiPitchSignal;          // double pitch, uint16_t voice
-        Gallant::Signal2<double, uint16_t>          midiGateSignal;           // double gate, uint16_t voice
-        Gallant::Signal3<double, double, uint16_t>  midiNoteSignal;           // double pitch, double gate, uint16_t voice
-        Gallant::Signal1<int>                       midiPitchbendSignal;      // int value
-        Gallant::Signal2<double, int>               midiAftertouchSignal;     // double pitch, int value
-        Gallant::Signal2<int, int>                  midiControllerSignal;     // uint16_t controllerNum, double value
+        Gallant::Signal2<double, int>          midiPitchSignal;          // double pitch, uint16_t voice
+        Gallant::Signal2<double, int>          midiGateSignal;           // double gate, uint16_t voice
+        Gallant::Signal3<double, double, int>  midiNoteSignal;           // double pitch, double gate, uint16_t voice
+        Gallant::Signal1<int>                  midiPitchbendSignal;      // int value
+        Gallant::Signal2<double, int>          midiAftertouchSignal;     // double pitch, int value
+        Gallant::Signal2<int, int>             midiControllerSignal;     // uint16_t controllerNum, double value
 
     protected:
 
@@ -60,20 +60,20 @@ namespace e3 {
         void noteOff(double pitch);
         void allNotesOff(bool reset);
 
-        int16_t getUnusedVoice();
+        int getUnusedVoice();
         void combineVoices(double basePitch, double gate);
         void updateSoundingVoices();
 
         //void dumpStack(const string& msg);
 
-        uint32_t tags_      = 0;
-        bool hold_          = false;
-        bool sustain_       = false;
-        bool retrigger_     = false;
-        bool legato_        = false;
-        double lastPitch_   = -1;
-        uint16_t numVoices_ = 0;
-        double tuning_      = 0;
+        uint32_t tags_    = 0;
+        bool hold_        = false;
+        bool sustain_     = false;
+        bool retrigger_   = false;
+        bool legato_      = false;
+        double lastPitch_ = -1;
+        int numVoices_    = 0;
+        double tuning_    = 0;
 
         std::vector< Voice > stack_;
 

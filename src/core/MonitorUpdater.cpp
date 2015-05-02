@@ -3,37 +3,37 @@
 
 namespace e3 {
 
-    void MonitorUpdater::monitorVoiceEvent(int16_t numSounding)
+    void MonitorUpdater::monitorVoiceEvent(int numSounding)
     {
-        pendingEvents_.push_back(MonitorEvent(kMonitorVoices, -1, -1, numSounding));
+        pendingEvents_.push_back(MonitorEvent(MonitorVoices, -1, -1, numSounding));
         triggerAsyncUpdate();
     }
 
 
     void MonitorUpdater::monitorCpuMeterEvent(double value)
     {
-        pendingEvents_.push_back(MonitorEvent(kMonitorCpuMeter, value));
+        pendingEvents_.push_back(MonitorEvent(MonitorCpuMeter, value));
         triggerAsyncUpdate();
     }
 
 
     void MonitorUpdater::monitorNoteEvent(double pitch, double gate)
     {
-        pendingEvents_.push_back(MonitorEvent(kMonitorNote, pitch, gate));
+        pendingEvents_.push_back(MonitorEvent(MonitorNote, pitch, gate));
         triggerAsyncUpdate();
     }
 
 
     void MonitorUpdater::monitorControllerEvent(int controllerId, int value)
     {
-        pendingEvents_.push_back(MonitorEvent(kMonitorController, controllerId, value));
+        pendingEvents_.push_back(MonitorEvent(MonitorController, controllerId, value));
         triggerAsyncUpdate();
     }
 
 
     void MonitorUpdater::monitorPitchbendEvent(int value)
     {
-        pendingEvents_.push_back(MonitorEvent(kMonitorPitchbend, value));
+        pendingEvents_.push_back(MonitorEvent(MonitorPitchbend, value));
         triggerAsyncUpdate();
     }
 
