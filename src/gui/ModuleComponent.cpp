@@ -14,11 +14,13 @@
 
 namespace e3 {
 
-    ModuleComponent::ModuleComponent(ModulePanel* owner, Module* module) :
-        panel_(owner),
-        module_(module)
+    ModuleComponent::ModuleComponent( ModulePanel* owner, Module* module ) :
+        panel_( owner ),
+        module_( module )
     {
-        setInterceptsMouseClicks(false, true);  // owner handles selection, focus and dragging
+        setInterceptsMouseClicks( false, true );  // owner handles selection, focus and dragging
+        setWantsKeyboardFocus( true );
+
         createPorts();
         calculateSize();
     }
@@ -28,25 +30,25 @@ namespace e3 {
     {
         for (int i = 0; i < module_->getNumInports(); i++)
         {
-            Port* port = module_->getInport(i);
-            PortComponent* component = new PortComponent(port, this);
-            inports_.add(component);
-            addAndMakeVisible(component);
+            Port* port = module_->getInport( i );
+            PortComponent* component = new PortComponent( port, this );
+            inports_.add( component );
+            addAndMakeVisible( component );
         }
 
         for (int i = 0; i < module_->getNumOutports(); i++)
         {
-            Port* port = module_->getOutport(i);
-            PortComponent* component = new PortComponent(port, this);
-            outports_.add(component);
-            addAndMakeVisible(component);
+            Port* port = module_->getOutport( i );
+            PortComponent* component = new PortComponent( port, this );
+            outports_.add( component );
+            addAndMakeVisible( component );
         }
     }
 
 
     void ModuleComponent::resized()
     {
-        dragConstrainer_.setMinimumOnscreenAmounts(getHeight(), getWidth(), 0, 0);
+        dragConstrainer_.setMinimumOnscreenAmounts( getHeight(), getWidth(), 0, 0 );
     }
 
 
@@ -54,12 +56,12 @@ namespace e3 {
     {
         Rectangle<int> content = getLocalBounds();
 
-        int numPorts = jmax(inports_.size(), outports_.size());
+        int numPorts = jmax( inports_.size(), outports_.size() );
         int height = portHeight_ + numPorts * portHeight_;
-        content.setHeight(height);
+        content.setHeight( height );
 
         int width = 100;
-        content.setWidth(width);
+        content.setWidth( width );
 
         int portWidth = width / 2;
         int top = portHeight_ / 2;
@@ -67,68 +69,70 @@ namespace e3 {
 
         for (int i = 0; i < inports_.size(); i++)
         {
-            inports_[i]->setBounds(Rectangle<int>(0, offset, portWidth, portHeight_));
+            inports_[i]->setBounds( Rectangle<int>( 0, offset, portWidth, portHeight_ ) );
             offset += portHeight_;
         }
 
         offset = top;
         for (int i = 0; i < outports_.size(); i++)
         {
-            outports_[i]->setBounds(Rectangle<int>(width - portWidth, offset, portWidth, portHeight_));
+            outports_[i]->setBounds( Rectangle<int>( width - portWidth, offset, portWidth, portHeight_ ) );
             offset += portHeight_;
         }
-        setBounds(content);
+        setBounds( content );
     }
 
 
-    void ModuleComponent::paint(Graphics& g)
+    void ModuleComponent::paint( Graphics& g )
     {
         Rectangle<int> r = getLocalBounds();
 
-        Colour bkgndCol = findColour(Style::kModuleColourId);
-        g.setColour(bkgndCol);
-        g.fillRect(r);
+        Colour bkgndCol = findColour( Style::kModuleColourId );
+        g.setColour( bkgndCol );
+        g.fillRect( r );
 
         int id = Style::kModuleBorderNormalColourId;
         if (isSelected()) id = Style::kModuleBorderSelectedColourId;
-        if (hasKeyboardFocus(true)) id = Style::kModuleBorderFocusedColourId;
+        if (hasKeyboardFocus( true )) id = Style::kModuleBorderFocusedColourId;
 
-        g.setColour(findColour(id));
-        g.drawRect(r);
+        g.setColour( findColour( id ) );
+        g.drawRect( r );
 
-        g.setColour(findColour(Style::kModuleText1ColourId));
-        g.drawText(module_->getLabel(), 0, 0, getWidth(), getHeight(), Justification::centred, true);
+        g.setColour( findColour( Style::kModuleText1ColourId ) );
+        g.drawText( module_->getLabel(), 0, 0, getWidth(), getHeight(), Justification::centred, true );
     }
 
 
-    void ModuleComponent::beginDrag(const MouseEvent& e)
+    void ModuleComponent::beginDrag( const MouseEvent& e )
     {
-        MouseEvent e1 = e.getEventRelativeTo(this);
-        
+        MouseEvent e1 = e.getEventRelativeTo( this );
+
         positionBeforeDragging_ = getPosition();
-        dragger_.startDraggingComponent(this, e);
+        dragger_.startDraggingComponent( this, e );
     }
 
 
-    void ModuleComponent::continueDrag(const MouseEvent& e) 
+    void ModuleComponent::continueDrag( const MouseEvent& e )
     {
-        dragger_.dragComponent(this, e, &dragConstrainer_);
+        dragger_.dragComponent( this, e, &dragConstrainer_ );
         panel_->checkViewport();
-        panel_->selectWiresForModule(this, isSelected());
+        panel_->selectWires( this, isSelected() );
     }
 
 
-    void ModuleComponent::endDrag(const MouseEvent&)
+    void ModuleComponent::endDrag( const MouseEvent& )
     {
         Point<int> pos = getPosition();
         if (positionBeforeDragging_ != pos) {
-            panel_->storeModulePosition(module_->getId(), pos);
+            panel_->storeModulePosition( module_->getId(), pos );
         }
     }
 
 
-    void ModuleComponent::mouseDoubleClick(const MouseEvent&)
+    void ModuleComponent::focusGained( FocusChangeType )
     {
+        TRACE( "ModuleComponent::focusGained, id=%d\n", getModuleId() );
+        panel_->showModuleSignal( getModule() );
     }
 
 
@@ -136,7 +140,7 @@ namespace e3 {
     int ModuleComponent::getModuleId() const     { return module_->getId(); }
 
 
-    PortComponent* ModuleComponent::getPort(int portId, PortType portType)
+    PortComponent* ModuleComponent::getPort( int portId, PortType portType )
     {
         PortList& list = (portType == PortTypeInport) ? inports_ : outports_;
 
@@ -152,39 +156,39 @@ namespace e3 {
     }
 
 
-    PortComponent* ModuleComponent::getPort(const Link& link, PortType portType)
+    PortComponent* ModuleComponent::getPort( const Link& link, PortType portType )
     {
-        return panel_->getPort(link, portType);
+        return panel_->getPort( link, portType );
     }
 
 
-    void ModuleComponent::getPortPosition(int portId, PortType portType, Point<int>& pos)
+    void ModuleComponent::getPortPosition( int portId, PortType portType, Point<int>& pos )
     {
-        PortComponent* port = getPort(portId, portType);
-        ASSERT(port);
+        PortComponent* port = getPort( portId, portType );
+        ASSERT( port );
         if (port != nullptr) {
             pos = port->getDockingPosition();
         }
     }
 
 
-    PortComponent* ModuleComponent::getPortAtPosition(const Point<int>& pos) const
+    PortComponent* ModuleComponent::getPortAtPosition( const Point<int>& pos ) const
     {
-        PortComponent* port = getPortAtPosition(pos, inports_);
+        PortComponent* port = getPortAtPosition( pos, inports_ );
         if (port == nullptr) {
-            port = getPortAtPosition(pos, outports_);
+            port = getPortAtPosition( pos, outports_ );
         }
         return port;
     }
 
 
-    PortComponent* ModuleComponent::getPortAtPosition(const Point<int>& pos, const OwnedArray<PortComponent>& list) const
+    PortComponent* ModuleComponent::getPortAtPosition( const Point<int>& pos, const OwnedArray<PortComponent>& list ) const
     {
         for (int i = 0; i < list.size(); ++i)
         {
-            PortComponent* port = list.getUnchecked(i);
-            Point<int> p = port->getLocalPoint(this, pos);
-            if (port->isDockingPosition(p)) {
+            PortComponent* port = list.getUnchecked( i );
+            Point<int> p = port->getLocalPoint( this, pos );
+            if (port->isDockingPosition( p )) {
                 return port;
             }
         }
@@ -192,17 +196,16 @@ namespace e3 {
     }
 
 
-    void ModuleComponent::portAction(PortComponent* port, PortAction action, const Point<int>& pos)   
-    { 
-        panel_->portAction(port, action, pos); 
+    void ModuleComponent::portAction( PortComponent* port, PortAction action, const Point<int>& pos )
+    {
+        panel_->portAction( port, action, pos );
     }
 
 
-    void ModuleComponent::select(bool doSelect)
+    void ModuleComponent::select( bool doSelect )
     {
-        TRACE("ModuleComponent::select doSelect=%d\n", doSelect);
         if (doSelect != isSelected()) {
-            panel_->selectWiresForModule(this, doSelect);
+            panel_->selectWires( this, doSelect );
         }
         selected_ = doSelect;
     }
@@ -211,119 +214,119 @@ namespace e3 {
     /*
     void ModuleComponent::focusAndSelect(bool focus, bool select)
     {
-        bool mustInvalid = selected_ != select || focused_ != focus;
+    bool mustInvalid = selected_ != select || focused_ != focus;
 
-        if (selected_ != select) {
-            selected_ = select;
-        }
-        if (focused_ != focus) {
-            focused_ = focus;
-        }
-        if (mustInvalid) setColors();
+    if (selected_ != select) {
+    selected_ = select;
+    }
+    if (focused_ != focus) {
+    focused_ = focus;
+    }
+    if (mustInvalid) setColors();
     }
 
 
     void ModuleComponent::setColors()
     {
-        if (data_->catalog_ != MASTER)
-        {
-            colBkgnd_ = data_->polyphony_ == MONOPHONIC ? colors.moduleMono : colors.module;
-            colFrame_ = selected_ ? colors.moduleFrame2 : colors.moduleFrame1;
-            colFrame_ = focused_ ? colors.moduleFrame3 : colFrame_;
-            colText_ = focused_ ? colors.moduleText2 : colors.moduleText1;
-            colPort_ = colors.moduleFrame1;
-        }
-        else
-        {
-            colBkgnd_ = colors.master;
-            colFrame_ = selected_ ? colors.masterFrame2 : colors.masterFrame1;
-            colFrame_ = focused_ ? colors.masterFrame3 : colFrame_;
-            colText_ = focused_ ? colors.masterText2 : colors.masterText1;
-            colPort_ = colors.masterFrame1;
-        }
-        setBackgroundColor(colBkgnd_);
+    if (data_->catalog_ != MASTER)
+    {
+    colBkgnd_ = data_->polyphony_ == MONOPHONIC ? colors.moduleMono : colors.module;
+    colFrame_ = selected_ ? colors.moduleFrame2 : colors.moduleFrame1;
+    colFrame_ = focused_ ? colors.moduleFrame3 : colFrame_;
+    colText_ = focused_ ? colors.moduleText2 : colors.moduleText1;
+    colPort_ = colors.moduleFrame1;
+    }
+    else
+    {
+    colBkgnd_ = colors.master;
+    colFrame_ = selected_ ? colors.masterFrame2 : colors.masterFrame1;
+    colFrame_ = focused_ ? colors.masterFrame3 : colFrame_;
+    colText_ = focused_ ? colors.masterText2 : colors.masterText1;
+    colPort_ = colors.masterFrame1;
+    }
+    setBackgroundColor(colBkgnd_);
     }
 
 
     void ModuleComponent::setPortVisibility()
     {
-        for (CCView* pSv = pFirstView; pSv; pSv = pSv->pNext)
-        {
-            if (pSv->pView->isTypeOf("ModulePort")) {
-                ModulePort* port = dynamic_cast<ModulePort*>(pSv->pView);
-                if (port) {
-                    port->setVisible(data_->collapsed_ == false);
-                }
-            }
-        }
+    for (CCView* pSv = pFirstView; pSv; pSv = pSv->pNext)
+    {
+    if (pSv->pView->isTypeOf("ModulePort")) {
+    ModulePort* port = dynamic_cast<ModulePort*>(pSv->pView);
+    if (port) {
+    port->setVisible(data_->collapsed_ == false);
+    }
+    }
+    }
     }
 
 
     ModulePort* ModuleComponent::getPort(uint16_t portId, PortAlignment portAlign)
     {
-        for (CCView* pSv = pFirstView; pSv; pSv = pSv->pNext)
-        {
-            if (pSv->pView->isTypeOf("ModulePort")) {
-                ModulePort* port = dynamic_cast<ModulePort*>(pSv->pView);
-                if (port && port->info_->id_ == portId && port->align_ == portAlign)
-                {
-                    return port;
-                }
-            }
-        }
-        VERIFY(false);
-        return NULL;
+    for (CCView* pSv = pFirstView; pSv; pSv = pSv->pNext)
+    {
+    if (pSv->pView->isTypeOf("ModulePort")) {
+    ModulePort* port = dynamic_cast<ModulePort*>(pSv->pView);
+    if (port && port->info_->id_ == portId && port->align_ == portAlign)
+    {
+    return port;
+    }
+    }
+    }
+    VERIFY(false);
+    return NULL;
     }
 
 
     void ModuleComponent::getPortPosition(uint16_t portId, PortType portType, Point<int>& pos)
     {
-        if (module_->collapsed_ == false)
-        {
-            PortComponent* port = getPort(portId, portType);
-            port->getDockPosition(pos);
-        }
-        else
-        {
-            Rectangle<int> bounds = getLocalBounds();
-            pos.y = bounds.getY() + bounds.getHeight() / 2;
-            pos.x = (portType == PortTypeInport) ? bounds.getX() + 1 : bounds.getRight() - 1;
+    if (module_->collapsed_ == false)
+    {
+    PortComponent* port = getPort(portId, portType);
+    port->getDockPosition(pos);
+    }
+    else
+    {
+    Rectangle<int> bounds = getLocalBounds();
+    pos.y = bounds.getY() + bounds.getHeight() / 2;
+    pos.x = (portType == PortTypeInport) ? bounds.getX() + 1 : bounds.getRight() - 1;
 
-            Rectangle<int> rcParent = panel_->getLocalBounds();
-            pos.offset(-rcParent.getX(), -rcParent.getY());
-        }
+    Rectangle<int> rcParent = panel_->getLocalBounds();
+    pos.offset(-rcParent.getX(), -rcParent.getY());
+    }
     }
 
 
     void ModuleComponent::drawBackgroundRect(CDrawContext *pContext, CRect& updateRect)
     {
-        CViewContainer::drawBackgroundRect(pContext, updateRect);
+    CViewContainer::drawBackgroundRect(pContext, updateRect);
 
-        CRect rc(size);
-        rc.offset(-rc.left, -rc.top);
+    CRect rc(size);
+    rc.offset(-rc.left, -rc.top);
 
-        pContext->setLineWidth(1);
-        pContext->setFillColor(colBkgnd_);
-        pContext->setFrameColor(colFrame_);
-        pContext->drawRect(rc, kDrawFilledAndStroked);
+    pContext->setLineWidth(1);
+    pContext->setFillColor(colBkgnd_);
+    pContext->setFrameColor(colFrame_);
+    pContext->drawRect(rc, kDrawFilledAndStroked);
 
-        if (data_ && data_->collapsed_)    // draw port dummies in collapsed state
-        {
-            ModuleInfo* info = ModuleInfo::getInfo(data_->catalog_);
+    if (data_ && data_->collapsed_)    // draw port dummies in collapsed state
+    {
+    ModuleInfo* info = ModuleInfo::getInfo(data_->catalog_);
 
-            pContext->setFillColor(colPort_);
-            if (info && info->inports_.empty() == false)
-            {
-                CRect rcSquare = CRect(rc.left + 4, rc.top + 9, rc.left + 10, rc.top + 15);
-                pContext->drawRect(rcSquare, kDrawFilled);
-            }
-            if (info && info->outPorts_.empty() == false)
-            {
-                CRect rcSquare = CRect(rc.right - 10, rc.top + 9, rc.right - 4, rc.top + 15);
-                pContext->drawRect(rcSquare, kDrawFilled);
-            }
-        }
-        setDirty(false);
+    pContext->setFillColor(colPort_);
+    if (info && info->inports_.empty() == false)
+    {
+    CRect rcSquare = CRect(rc.left + 4, rc.top + 9, rc.left + 10, rc.top + 15);
+    pContext->drawRect(rcSquare, kDrawFilled);
+    }
+    if (info && info->outPorts_.empty() == false)
+    {
+    CRect rcSquare = CRect(rc.right - 10, rc.top + 9, rc.right - 4, rc.top + 15);
+    pContext->drawRect(rcSquare, kDrawFilled);
+    }
+    }
+    setDirty(false);
     }
     */
 

@@ -27,7 +27,7 @@ namespace e3 {
         void continueDrag(const MouseEvent& e);
         void endDrag(const MouseEvent& e);
 
-        void mouseDoubleClick(const MouseEvent& e) override;
+        void focusGained( FocusChangeType ) override;
 
         //void focusAndSelect(bool focus, bool select);
         //void moveTo(Rectangle<int>& r);

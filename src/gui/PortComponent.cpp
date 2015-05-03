@@ -17,6 +17,7 @@ namespace e3 {
         state_(Idle)
         {
             ASSERT(port_ != nullptr);
+            setWantsKeyboardFocus( false );
         }
 
 

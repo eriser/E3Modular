@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include "JuceHeader.h"
+#include "core/GlobalHeader.h"
 #include "core/Port.h"
 #include "gui/ModuleSelection.h"
 
@@ -42,9 +43,10 @@ namespace e3 {
 
         void selectAll();
         void deselectAll();
+        void focusGained( FocusChangeType ) override;
 
         void checkViewport();
-        void selectWiresForModule(ModuleComponent* module, bool select);
+        void selectWires(ModuleComponent* module, bool select);
         Rectangle<int> getUsedArea() const;
 
         ModuleComponent* getModule(int id);
@@ -57,6 +59,9 @@ namespace e3 {
 
         Processor* getProcessor() const;
 
+        Gallant::Signal1<Instrument*> showInstrumentSignal;
+        Gallant::Signal1<Module*> showModuleSignal;
+
     protected: 
         ModuleComponent* createModuleComponent( Module* module, int x, int y );
         void createWires(LinkList& links);
@@ -65,6 +70,7 @@ namespace e3 {
         PopupMenu createPopupMenu();
         static void popupMenuCallback( int, ModulePanel* );
 
+        void focusModule( ModuleComponent* module );
 
         OwnedArray<ModuleComponent> modules_;
         ScopedPointer<WireManager> wires_;

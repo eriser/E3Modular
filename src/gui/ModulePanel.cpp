@@ -17,6 +17,9 @@ namespace e3 {
         selection_( new ModuleSelection() ),
         wires_( new WireManager( this ) )
     {
+        setWantsKeyboardFocus( true );
+        setMouseClickGrabsKeyboardFocus( true );
+
         selection_->addChangeListener( this );
     }
 
@@ -50,6 +53,7 @@ namespace e3 {
                     }
                 }
                 createWires( instrument->getLinks() );
+                showInstrumentSignal( instrument );   // update parameterPanel
             }
         }
     }
@@ -88,7 +92,7 @@ namespace e3 {
             storeModulePosition( moduleId, pos );
 
             selection_->selectOnly( comp );
-            //focusBox( box, true );
+            focusModule( comp );
         }
     }
 
@@ -152,6 +156,7 @@ namespace e3 {
 
             selectedModule_        = getModuleAtPosition( pos );
             mouseDownSelectStatus_ = selection_->addToSelectionOnMouseDown( selectedModule_, e.mods );
+            focusModule( selectedModule_ );
 
             if (selection_->getNumSelected() == 0)
             {
@@ -240,10 +245,23 @@ namespace e3 {
         selection_->deselectAll();
     }
 
-
+    
     void ModulePanel::changeListenerCallback( ChangeBroadcaster* )
     {
         repaint();
+    }
+
+
+    void ModulePanel::focusModule( ModuleComponent* module )
+    {
+        module == nullptr ? grabKeyboardFocus() : module->grabKeyboardFocus();
+    }
+
+
+    void ModulePanel::focusGained( FocusChangeType )
+    {
+        TRACE( "ModulePanel::focusGained\n" );
+        showInstrumentSignal( processor_->getInstrument() );
     }
 
 
@@ -280,7 +298,7 @@ namespace e3 {
     }
 
 
-    void ModulePanel::selectWiresForModule( ModuleComponent* module, bool select )
+    void ModulePanel::selectWires( ModuleComponent* module, bool select )
     {
         wires_->selectWiresForModule( module, select );
     }

@@ -6,10 +6,21 @@
 
 namespace e3
 {
-    class ParameterPanel : public Component
+    class ParameterPanel : public Component, public Label::Listener
     {
     public:
         ParameterPanel();
+
+        void resized() override;
+        void paint( Graphics& g );
+
+        void showInstrument( Instrument* instrument );
+        void showModule( Module* module );
+
+        void labelTextChanged( Label *labelThatHasChanged ) override;
+
+    protected:
+        ScopedPointer<Label> headerLabel_;
     };
 
 
