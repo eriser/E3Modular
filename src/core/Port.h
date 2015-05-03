@@ -27,9 +27,9 @@ namespace e3 {
         PortTypeOutport      = 2,
         PortTypeAudio        = 4,
         PortTypeEvent        = 8,
-        PortTypeAudioInport  = PortTypeInport  | PortTypeAudio,   // 5
+        PortTypeAudioInport  = PortTypeInport | PortTypeAudio,   // 5
         PortTypeAudioOutport = PortTypeOutport | PortTypeAudio,   // 6
-        PortTypeEventInport  = PortTypeInport  | PortTypeEvent,   // 9
+        PortTypeEventInport  = PortTypeInport | PortTypeEvent,   // 9
         PortTypeEventOutport = PortTypeOutport | PortTypeEvent    // 10
     };
 
@@ -49,23 +49,6 @@ namespace e3 {
         AdapterPolyToMono = 2
     };
 
-    
-    template <typename T>
-    class PortList : public std::vector < T >
-    {
-    public: 
-        void disconnect()
-        {
-            for (iterator it = begin(); it != end(); ++it)
-            {
-                T port = (*it);
-                if (port != nullptr) {
-                    port->disconnectAll();
-                }
-            }
-        }
-
-    };
 
     //------------------------------------------
     // class ModulationBuffer
@@ -77,13 +60,34 @@ namespace e3 {
         void init( int_fast32_t numVoices, LinkList& targets );
         void setValue( uint32_t targetIndex, double value, int voice );
 
-        void onGate( uint32_t targetIndex, Link* link, double gate, int voice );
-        void onController( uint32_t targetIndex, Link* link, int16_t controllerId, double value );
+        void onGate( uint32_t targetIndex, Link& link, double gate, int voice );
+        void onController( uint32_t targetIndex, Link& link, int16_t controllerId, double value );
 
     protected:
         uint_fast32_t numVoices_;
     };
 
+
+    //---------------------------------------------------------
+    // class PortList
+    // A container for ports based on std::vector
+    //---------------------------------------------------------
+
+    template <typename T>
+    class PortList : public std::vector < T >
+    {
+    public:
+        void disconnect()
+        {
+            for (iterator it = begin(); it != end(); ++it)
+            {
+                T port = (*it);
+                if (port != nullptr) {
+                    port->disconnectAll();
+                }
+            }
+        }
+    };
 
     typedef PortList<Inport*> InportList;
     typedef PortList<Outport*> OutportList;
@@ -97,28 +101,34 @@ namespace e3 {
     class Port
     {
     public:
-        Port(PortType type) : type_(type)  {}
+        Port( PortType type ) : type_( type )  {}
         virtual ~Port() {}
 
-        virtual void disconnectAll() = 0;
-        virtual uint32_t getNumConnections() const { return 0;  }
+        virtual void disconnectAll();
 
-        virtual void setNumVoices(int numVoices);
+        virtual int getNumConnections() const      { return getNumAudioConnections() + getNumEventConnections(); }
+        virtual int getNumAudioConnections() const { return numAudioConnections_; }
+        virtual int getNumEventConnections() const { return numEventConnections_; }
 
-        void setId(int id)                      { id_ = id; }
-        int getId() const                       { return id_;  }
+        virtual void setNumVoices( int numVoices ) { numVoices_ = (uint_fast32_t)numVoices; }
+        virtual int getNumVoices() const           { return (int)numVoices_; }
 
-        PortType getType() const                { return type_; }
-        void setProcessType(PortType type)      { type_ = (PortType)(type_ | type); }
+        void setId( int id )                       { id_ = id; }
+        int getId() const                          { return id_; }
 
-        const std::string& getLabel()           { return label_; }
-        void setLabel(const std::string& label) { label_ = label; }
+        PortType getType() const                   { return type_; }
+        void setProcessType( PortType type )       { type_ = (PortType)(type_ | type); }
+
+        const std::string& getLabel()              { return label_; }
+        void setLabel( const std::string& label )  { label_ = label; }
 
     protected:
-        int id_                  = -1;
-        uint_fast32_t numVoices_ = 0;
-        PortType type_           = PortTypeUndefined;
-        ControlType controlType_ = ControlHidden;
+        int id_                           = -1;
+        int_fast32_t numVoices_           = 0;
+        int_fast32_t numAudioConnections_ = 0;
+        int_fast32_t numEventConnections_ = 0;
+        PortType type_                    = PortTypeUndefined;
+        ControlType controlType_          = ControlHidden;
         std::string label_;
     };
 
@@ -132,12 +142,10 @@ namespace e3 {
     public:
         Outport() : Port( PortTypeOutport ) {}
 
-        void connect( Module* target, Link* link, VoiceAdapterType voiceAdapter );
-        void disconnect( Module* target, Link* link );
-
+        void connect( Module* target, const Link& link, VoiceAdapterType voiceAdapter );
+        void disconnect( Module* target, const Link& link );
         void disconnectAll() override;
-        uint32_t getNumConnections() const override;
-        
+
         void setNumVoices( int numVoices ) override;
 
         void __stdcall putAudio( double value, int_fast32_t voice = 0 ) throw();
@@ -146,25 +154,22 @@ namespace e3 {
         void onGate( double gate, int voice );
         void onController( int16_t controllerId, double value );
 
-
     protected:
-        void addAudioTarget( Link* link, VoiceAdapterType adapter );
-        void addEventTarget( Link* link, VoiceAdapterType adapter );
-        void removeAudioTarget( Link* link );
-        void removeEventTarget( Link* link );
+        void addAudioTarget( const Link& link, VoiceAdapterType adapter );
+        void addEventTarget( const Link& link, VoiceAdapterType adapter );
+        void removeAudioTarget( const Link& link );
+        void removeEventTarget( const Link& link );
 
     protected:
         LinkList audioLinks_;
         Buffer< double* > audioOutBuffer_;
         Buffer< VoiceAdapterType > audioAdapterBuffer_;
         ModulationBuffer audioModulationBuffer_;
-        uint_fast32_t numAudioTargets_ = 0;
 
         LinkList eventLinks_;
         InportList eventInports_;
         Buffer< VoiceAdapterType > eventAdapterBuffer_;
         ModulationBuffer eventModulationBuffer_;
-        uint_fast32_t numEventTargets_ = 0;
     };
 
 
@@ -176,22 +181,21 @@ namespace e3 {
         Inport() : Port( PortTypeInport ) {}
 
         double* connectAudio();
-        void connectEvent( Module* eventModule, int eventParamId );
+        void connectEvent( int eventParamId );
         void disconnectAudio();
         void disconnectEvent();
         void disconnectAll() override;
-        uint32_t getNumConnections() const override;
 
         void setNumVoices( int numVoices ) override;
+        void setOwner( Module* module );
+        Module* getOwner() const;
         double* getAudioBuffer() const  { return audioInBuffer_; }
 
     protected:
         Buffer<double> audioInBuffer_;
-        int numAudioSources_ = 0;
 
-        Module* eventModule_;
+        Module* owner_ = nullptr;
         int eventParamId_    = -1;
-        int numEventSources_ = 0;
     };
 
 
@@ -199,22 +203,22 @@ namespace e3 {
     {
         int modulationIndex = voice;
 
-        for (uint_fast32_t target = 0; target < numAudioTargets_; target++)
+        for (int_fast32_t target = 0; target < numAudioConnections_; target++)
         {
             double  val = value * audioModulationBuffer_[modulationIndex];  // apply modulation
             modulationIndex += numVoices_;
 
             double* inportPointer = audioOutBuffer_[target];	            // get pointer to target
-                                                                            
-            VoiceAdapterType adapter = audioAdapterBuffer_[target];         
-            __assume(adapter < 3);                                          
-            switch (adapter)                                                
-            {                                                               
-            case AdapterNone:                                               
+
+            VoiceAdapterType adapter = audioAdapterBuffer_[target];
+            __assume(adapter < 3);
+            switch (adapter)
+            {
+            case AdapterNone:
                 *(inportPointer + voice) += val; 	                         // add value to existing value, per voice
-                break;                                                      
-            case AdapterMonoToPoly:                                         
-                for (uint32_t i = 0; i < numVoices_; i++) {                  // add value to all voices of target
+                break;
+            case AdapterMonoToPoly:
+                for (int32_t i = 0; i < numVoices_; i++) {                  // add value to all voices of target
                     *(inportPointer + i) += val;
                 }
                 break;

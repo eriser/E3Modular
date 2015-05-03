@@ -20,9 +20,10 @@ namespace e3 {
         makeWaveTable();
 
         addOutport( 0, "Out", &audioOutport_, PortTypeAudio );
-        addInport( 0, "Pitch", &pitchInport_ );
-        addInport( 1, "FM", &fmInport_ );
-        addInport( 2, "AM", &amInport_ );
+        addInport( 0, "Freq", &freqInport_ );
+        addInport( 1, "Amp",  &ampInport_ );
+        //addInport( 1, "FM", &fmInport_ );
+        //addInport( 2, "AM", &amInport_ );
 
         Parameter paramFreq( ParamFrequency, "Frequency", ControlHidden );
         parameters_.add( paramFreq );
@@ -40,19 +41,24 @@ namespace e3 {
     }
 
 
-    void SineOscillator::initVoices()
+    void SineOscillator::initData()
     {
+        Module::initData();
+
         phaseIndex_ = phaseIndexBuffer_.resize( numVoices_, 0. );
         amplitude_  = amplitudeBuffer_.resize( numVoices_, 1 );
         increment_  = incrementBuffer_.resize( numVoices_, 20.43356 );	// 440 Hz
         freq_       = frequencyBuffer_.resize( numVoices_, 440 );
+
+        freqInportPointer_ = freqInport_.getAudioBuffer();
+        ampInportPointer_  = ampInport_.getAudioBuffer();
     }
 
 
     void SineOscillator::updatePorts()
     {
-        bool fm = fmInport_.getNumConnections() > 0;
-        bool am = amInport_.getNumConnections() > 0;
+        bool fm = freqInport_.getNumAudioConnections() > 0;
+        bool am = ampInport_.getNumAudioConnections() > 0;
 
         if (fm == false && am == false) {
             processFunction_ = static_cast<ProcessFunctionPointer>(&SineOscillator::processAudio);
@@ -66,24 +72,6 @@ namespace e3 {
         else if (fm == true && am == true) {
             processFunction_ = static_cast<ProcessFunctionPointer>(&SineOscillator::processAudioFmAm);
         }
-
-        Module::updatePorts();
-    }
-
-
-    void SineOscillator::updateInports()
-    {
-        pitchInport_.setNumVoices( numVoices_ );
-        fmInport_.setNumVoices( numVoices_ );
-        amInport_.setNumVoices( numVoices_ );
-        fmInportPointer_ = fmInport_.getAudioBuffer();
-        amInportPointer_ = amInport_.getAudioBuffer();
-    }
-
-
-    void SineOscillator::updateOutports()
-    {
-        audioOutport_.setNumVoices( numVoices_ );
     }
 
 
@@ -208,8 +196,8 @@ namespace e3 {
             v   = mono_ ? 0 : polyphony_->soundingVoices_[i];
             pos = phaseIndex_[v];
 
-            pos += fmInportPointer_[v];							// FM
-            fmInportPointer_[v] = 0.f;
+            pos += freqInportPointer_[v];							// FM
+            freqInportPointer_[v] = 0.f;
 
             while (pos < 0.0) pos += tableSize_;         // Check limits of table address
             while (pos >= tableSize_) pos -= tableSize_;
@@ -244,8 +232,8 @@ namespace e3 {
             frac  = pos - index;
             tick  = table_[index];
             tick += frac * (table_[index + 1] - tick);
-            tick *= amplitude_[v] + amInportPointer_[v];
-            amInportPointer_[v] = 0;
+            tick *= amplitude_[v] + ampInportPointer_[v];
+            ampInportPointer_[v] = 0;
 
             phaseIndex_[v] = pos + increment_[v];                     // table position, which can be negative.
             audioOutport_.putAudio( tick, v );
@@ -265,8 +253,8 @@ namespace e3 {
             v = mono_ ? 0 : polyphony_->soundingVoices_[i];
             pos = phaseIndex_[v];
 
-            pos += fmInportPointer_[v];                         // FM
-            fmInportPointer_[v] = 0.f;
+            pos += freqInportPointer_[v];                         // FM
+            freqInportPointer_[v] = 0.f;
 
             while (pos < 0.0) pos += tableSize_;         // Check limits of table address
             while (pos >= tableSize_) pos -= tableSize_;
@@ -275,8 +263,8 @@ namespace e3 {
             frac = pos - index;
             tick = table_[index];
             tick += frac * (table_[index + 1] - tick);
-            tick *= amplitude_[v] + amInportPointer_[v];
-            amInportPointer_[v] = 0.f;
+            tick *= amplitude_[v] + ampInportPointer_[v];
+            ampInportPointer_[v] = 0.f;
 
             phaseIndex_[v] = pos + increment_[v];
             audioOutport_.putAudio( tick, v );

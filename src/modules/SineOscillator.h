@@ -13,10 +13,8 @@ namespace e3 {
     public:
         SineOscillator();
 
-        void initVoices() override;
+        void initData() override;
         void updatePorts() override;
-        void updateInports() override;
-        void updateOutports() override;
 
         void setParameter(int paramId, double value, double modulation=0.f, int voice=-1) override;
 
@@ -48,12 +46,15 @@ namespace e3 {
         double tuning_ = 1;
         double fineTuning_ = 1;
 
-        Inport  pitchInport_;
-        Inport  fmInport_;
-        Inport  amInport_;
+        Inport  freqInport_;
+        Inport  ampInport_;
+        //Inport  fmInport_;
+        //Inport  amInport_;
         Outport audioOutport_;
-        double* fmInportPointer_ = nullptr;
-        double* amInportPointer_ = nullptr;
+        double* freqInportPointer_ = nullptr;
+        double* ampInportPointer_  = nullptr;
+        //double* fmInportPointer_ = nullptr;
+        //double* amInportPointer_ = nullptr;
         
         static Buffer<double> tableBuffer_;
         static double* table_;

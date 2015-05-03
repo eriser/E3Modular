@@ -13,20 +13,33 @@
 namespace e3 {
 
 
-    Module* ModuleFactory::create(ModuleType type)
+    Module* ModuleFactory::create( ModuleType type )
     {
         switch (type)
         {
         case ModuleTypeAudioOutTerminal: return new AudioOutTerminal();
         case ModuleTypeMidiGate:         return new MidiGate();
-        case ModuleTypeMidiPitch:        return new MidiPitch();
+        case ModuleTypeMidiFrequency:    return new MidiFrequency();
         case ModuleTypeMidiInput:        return new MidiInput();
-        case ModuleTypeSineOscillator:        return new SineOscillator();
+        case ModuleTypeSineOscillator:   return new SineOscillator();
         case ModuleTypeAdsrEnvelope:     return new ADSREnvelope();
         case ModuleTypeDelay:	         return new Delay();
 
-        default: THROW(std::domain_error, "module type %d does not exist", type);
+        default: THROW( std::domain_error, "module type %d does not exist", type );
         }
     }
+
+
+    ModuleCatalog ModuleFactory::catalog_ 
+    {
+        { ModuleTypeAudioOutTerminal, "Audio Out" },
+        { ModuleTypeMidiGate,         "Midi Gate" },
+        { ModuleTypeMidiFrequency,    "Midi Frequency" },
+        { ModuleTypeMidiInput,        "Midi Input" },
+        { ModuleTypeSineOscillator,   "Sine" },
+        { ModuleTypeAdsrEnvelope,     "ADSR" },
+        { ModuleTypeDelay,            "Delay" }
+    };
+
 
 } // namespace e3

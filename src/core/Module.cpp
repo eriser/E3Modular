@@ -43,12 +43,10 @@ namespace e3 {
         ASSERT( sampleRate_ > 0 );
         ASSERT( numVoices_ > 0 );
 
-        initVoices();
-        initParameters();
         connectSignals();
 
-        updateParameters();
-        updatePorts();
+        initData();
+        initParameters();
     }
 
 
@@ -56,19 +54,10 @@ namespace e3 {
     {
         disconnectSignals();
         disconnectPorts();
-        resetData();
-        resetParameters();
 
         sampleRate_ = 0;
         numVoices_  = 0;
         polyphony_  = nullptr;
-    }
-
-
-    void Module::disconnectPorts()
-    {
-        outports_.disconnect();
-        inports_.disconnect();
     }
 
 
@@ -77,32 +66,26 @@ namespace e3 {
         ASSERT( sampleRate_ > 0 );
         ASSERT( numVoices_ > 0 );
 
-        initVoices();
         updateParameters();
         updatePorts();
     }
 
 
-    void Module::updatePorts()
-    {
-        updateInports();
-        updateOutports();
-    }
-
-
-    void Module::updateInports()
+    void Module::initData()
     {
         for (size_t i = 0; i < inports_.size(); i++) {
             inports_[i]->setNumVoices( numVoices_ );
         }
-    }
-
-
-    void Module::updateOutports()
-    {
         for (size_t i = 0; i < outports_.size(); i++) {
             outports_[i]->setNumVoices( numVoices_ );
         }
+    }
+    
+    
+    void Module::disconnectPorts()
+    {
+        outports_.disconnect();
+        inports_.disconnect();
     }
 
 
@@ -150,14 +133,15 @@ namespace e3 {
     }
 
 
-    void Module::addInport( int id, const std::string& label, Inport* port )
+    void Module::addInport( int portId, const std::string& label, Inport* port )
     {
         ASSERT( port );
         ASSERT( port->getType() & PortTypeInport );
 
-        port->setId( id );
+        port->setId( portId );
         port->setLabel( label );
-        inports_.insert( inports_.begin() + id, port );
+        port->setOwner( this );
+        inports_.insert( inports_.begin() + portId, port );
     }
 
 
@@ -186,13 +170,13 @@ namespace e3 {
     }
 
 
-    void Module::connectPort( Module* target, Link* link )
+    void Module::connectPort( Module* target, const Link& link )
     {
         ASSERT( target );
 
         if (target)
         {
-            Outport* outport = getOutport( link->leftPort_ );
+            Outport* outport = getOutport( link.leftPort_ );
             ASSERT( outport );
 
             if (outport)

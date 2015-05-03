@@ -21,10 +21,12 @@ namespace e3 {
     }
 
     
-    void AudioOutTerminal::updateInports()
+    void AudioOutTerminal::initData()
     {
+        Module::initData();
+
         ASSERT(numVoices_ == 1);
-        audioInport_.setNumVoices(numVoices_);
+        ASSERT( audioInport_.getNumVoices() == 1 );
         audioInportPointer_ = audioInport_.getAudioBuffer();
     }
 

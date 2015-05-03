@@ -12,8 +12,7 @@ namespace e3 {
     public:
         Delay();
 
-        void initVoices() override;
-        void updateInports() override;
+        void initData() override;
         
         void processAudio() throw();
         void resume() override;

@@ -50,8 +50,10 @@ namespace e3 {
     }
 
 
-    void ADSREnvelope::initVoices()
+    void ADSREnvelope::initData()
     {
+        Module::initData();
+
         value_        = valueBuffer_.resize( numVoices_, 0 );
         target_       = targetBuffer_.resize( numVoices_, 0 );
         delta_        = deltaBuffer_.resize( numVoices_, 0 );
@@ -62,12 +64,7 @@ namespace e3 {
         decayRate_    = decayRateBuffer_.resize( numVoices_, 0 );
         sustainLevel_ = sustainLevelBuffer_.resize( numVoices_, 0 );
         releaseRate_  = releaseRateBuffer_.resize( numVoices_, 0 );
-    }
 
-
-    void ADSREnvelope::updateInports()
-    {
-        audioInport_.setNumVoices( numVoices_ );
         audioInportPointer_ = audioInport_.getAudioBuffer();
     }
 

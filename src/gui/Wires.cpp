@@ -21,10 +21,10 @@ namespace e3 {
     Wire::Wire() {}
 
     
-    Wire::Wire( const Point<int>& first, const Point<int>& last, Link* link ) :
+    Wire::Wire( const Point<int>& first, const Point<int>& last, const Link& link ) :
         first_( first ),
         last_( last ),
-        link_( link == nullptr ? Link() : *link )
+        link_( link )
     {}
 
 
@@ -99,7 +99,7 @@ namespace e3 {
     {}
 
 
-    void WireManager::addWire( Point<int> first, Point<int> last, Link* link )
+    void WireManager::addWire( Point<int> first, Point<int> last, const Link& link )
     {
         Wire* wire = new Wire( first, last, link );
         
@@ -125,7 +125,12 @@ namespace e3 {
             }
         }
         ASSERT( false );
-        //wires_.removeObject( wire, true );
+    }
+
+
+    void WireManager::deleteAll()
+    {
+        wires_.clear( true );
     }
 
 
@@ -185,27 +190,44 @@ namespace e3 {
         }
     }
 
+    void WireManager::deleteWiresForModule( ModuleComponent* module )
+    {
+        updateWiresForModule( module, false, true );
+    }
 
-    void WireManager::updateWiresForModule( ModuleComponent* module, bool selectWire )
+
+    void WireManager::selectWiresForModule( ModuleComponent* module, bool select)
+    {
+        updateWiresForModule( module, select, false );
+    }
+
+
+    void WireManager::updateWiresForModule( ModuleComponent* module, bool selectWires, bool deleteWires )
     {
         for (int i = 0; i < wires_.size(); ++i)
         {
-            Wire* wire  = wires_.getUnchecked( i );
-            Link* link  = &wire->link_;
-            int id      = module->getModuleId();
+            Wire* wire        = wires_.getUnchecked( i );
+            const Link& link  = wire->link_;
+            int id            = module->getModuleId();
 
-            if (link && link->leftModule_ == id || link->rightModule_ == id)
+            if (link.leftModule_ == id || link.rightModule_ == id)
             {
-                PortComponent* leftPort  = module->getPort( link, PortTypeOutport );
-                PortComponent* rightPort = module->getPort( link, PortTypeInport );
-
-                if (leftPort && rightPort)
+                if (deleteWires == false)
                 {
-                    Point<int> first, last;
-                    wire->first_ = leftPort->getDockingPosition();
-                    wire->last_  = rightPort->getDockingPosition();
+                    PortComponent* leftPort  = module->getPort( link, PortTypeOutport );
+                    PortComponent* rightPort = module->getPort( link, PortTypeInport );
 
-                    wire->select( selectWire );
+                    if (leftPort && rightPort)
+                    {
+                        Point<int> first, last;
+                        wire->first_ = leftPort->getDockingPosition();
+                        wire->last_  = rightPort->getDockingPosition();
+
+                        wire->select( selectWires );
+                    }
+                }
+                else {
+                    wires_.remove( i--, true );
                 }
             }
         }
@@ -240,12 +262,12 @@ namespace e3 {
                 dockingLink_ = wire->link_;
                 deleteWire( wire );
 
-                panel_->getProcessor()->removeLink( &dockingLink_ );
+                panel_->getProcessor()->removeLink( dockingLink_ );
                 rightPort->setDisconnectedState();
                 dockingLink_.resetRight();
                 panel_->repaint();
 
-                PortComponent* leftPort  = panel_->getPort( &dockingLink_, PortTypeOutport );
+                PortComponent* leftPort  = panel_->getPort( dockingLink_, PortTypeOutport );
                 ASSERT( leftPort );
                 if (leftPort != nullptr) 
                 {
@@ -309,16 +331,16 @@ namespace e3 {
             Link* link = nullptr;
             if (dockingLink_.isValid())
             {
-                link = panel_->getProcessor()->addLink( &dockingLink_ );
+                link = panel_->getProcessor()->addLink( dockingLink_ );
                 ASSERT( link && *link == dockingLink_ );
             }
 
-            PortComponent* leftPort  = panel_->getPort( &dockingLink_, PortTypeOutport );
-            PortComponent* rightPort = panel_->getPort( &dockingLink_, PortTypeInport );
+            PortComponent* leftPort  = panel_->getPort( dockingLink_, PortTypeOutport );
+            PortComponent* rightPort = panel_->getPort( dockingLink_, PortTypeInport );
 
             if (link && leftPort && rightPort)
             {
-                addWire( dockingWire_.first_, rightPort->getDockingPosition(), link );
+                addWire( dockingWire_.first_, rightPort->getDockingPosition(), *link );
 
                 leftPort->setConnectedState(); 
                 rightPort->setConnectedState();

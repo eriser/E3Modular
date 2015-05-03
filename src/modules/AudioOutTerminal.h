@@ -14,7 +14,7 @@ namespace e3 {
         AudioOutTerminal();
         ~AudioOutTerminal() override {}
 
-        void updateInports() override;
+        void initData() override;
         void setParameter(int paramId, double value, double modulation = 0, int voice = -1) override;
 
         void processAudio() throw();

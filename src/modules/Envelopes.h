@@ -21,8 +21,7 @@ namespace e3 {
 
         ADSREnvelope();
 
-        void initVoices() override;
-        void updateInports() override;
+        void initData() override;
 
         void processAudio() throw();
         void processControl() throw() override;

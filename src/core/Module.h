@@ -27,7 +27,7 @@ namespace e3 {
         // system modules
         ModuleTypeAudioOutTerminal = 0,
         ModuleTypeMidiGate         = 1,
-        ModuleTypeMidiPitch        = 2,
+        ModuleTypeMidiFrequency    = 2,
         ModuleTypeMidiInput        = 3,
         
         // audio
@@ -129,33 +129,29 @@ namespace e3 {
         ProcessFunctionPointer processFunction_ = nullptr;
 
         // Constructs all member and initializes them with the current sample rate and number of voices.
-        // No links are created.
         virtual void init(Polyphony* polyphony, double sampleRate);
 
-        // Updates all members with the current sample rate and number of voices.
-        // Links remain valid.
+        // Update after all modules are connected. Links remain valid.
         virtual void update();
 
         // Deletes all members and links. After reset the module is in the same state as before init().
         virtual void reset();
 
         virtual void connectSignals() {}
-        virtual void initVoices() {}
+        virtual void disconnectSignals() {}
+
+        virtual void initData();
         virtual void initParameters();
 
-        virtual void disconnectSignals() {}
-        virtual void disconnectPorts();
-        virtual void resetData()  {}
-        virtual void resetParameters()  {}
-
-        virtual void updatePorts();
-        virtual void updateInports();
-        virtual void updateOutports();
+        virtual void updatePorts() {}
         virtual void updateParameters();
 
-        void addInport(int id, const std::string& label, Inport* port);
-        void addOutport(int id, const std::string& label, Outport* port, PortType portType );
-        void connectPort(Module* target, Link* link);
+        virtual void disconnectPorts();
+        void connectPort(Module* target, const Link& link);
+
+        void addInport( int portId, const std::string& label, Inport* port );
+        void addOutport( int portId, const std::string& label, Outport* port, PortType portType );
+
         VoiceAdapterType selectVoiceAdapter(VoicingType other) const;
 
         double sampleRate_ = INITIAL_SAMPLERATE;

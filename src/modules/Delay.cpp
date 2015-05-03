@@ -32,8 +32,14 @@ namespace e3 {
     }
 
 
-    void Delay::initVoices()
+    void Delay::initData()
     {
+        Module::initData();
+        ASSERT( audioInport_.getNumVoices() > 0 );
+        ASSERT( audioOutport_.getNumVoices() > 0 );
+
+        audioInportPointer_ = audioInport_.getAudioBuffer();
+
         updateBuffer();
     }
 
@@ -42,13 +48,6 @@ namespace e3 {
     {
         Module::setSampleRate( sampleRate );
         updateBuffer();
-    }
-
-
-    void Delay::updateInports()
-    {
-        audioInport_.setNumVoices( numVoices_ );
-        audioInportPointer_ = audioInport_.getAudioBuffer();
     }
 
 

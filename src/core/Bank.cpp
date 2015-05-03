@@ -10,73 +10,73 @@
 
 namespace e3 {
 
-    void Bank::open(const std::string& path)
+    void Bank::open( const std::string& path )
     {
         if (path.empty()) {
             createNewBank();
         }
         else {
-            XmlElement* root = BankSerializer::readBank(path);
+            XmlElement* root = BankSerializer::readBank( path );
             if (root != nullptr) {
-                setXml(root);
-                setPath(path);
+                setXml( root );
+                setPath( path );
             }
         }
     }
 
 
-    void Bank::save(const std::string& path, bool saveCurrent, bool makeBackup)
+    void Bank::save( const std::string& path, bool saveCurrent, bool makeBackup )
     {
         std::string p = path.empty() ? getPath() : path;
-        if (hasLoaded() == false || path.empty()) {
+        if (hasLoaded() == false || p.empty()) {
             return;
         }
 
-        UNUSED(saveCurrent);
-        UNUSED(makeBackup);
+        UNUSED( saveCurrent );
+        UNUSED( makeBackup );
         //if (saveCurrent)
-            //saveCurrentInstrument();
+        //saveCurrentInstrument();
 
         //if (makeBackup)
-            //makeBackup();
+        //makeBackup();
 
-        BankSerializer::saveBank(p, getXml());
-        setPath(p);
+        BankSerializer::saveBank( p, getXml() );
+        setPath( p );
     }
 
 
     void Bank::createNewBank()
     {
         XmlElement* root = BankSerializer::createNewBank();
-        setXml(root);
-        setPath("");
+        setXml( root );
+        setPath( "" );
     }
 
 
-    void Bank::append(Instrument* instrument)      
-    { 
+    void Bank::append( Instrument* instrument )
+    {
         bool isNull = (nullptr == instrument);
-        ASSERT(!isNull);
+        ASSERT( !isNull );
 
         //if (!isNull) instrumentList_.push_back(instrument);
     }
-    
 
-    Instrument* Bank::loadInstrument(int hash)
-    { 
+
+    Instrument* Bank::loadInstrument( int hash )
+    {
         hash = (hash == 0) ? getInstrumentHash() : hash;
 
-        Instrument* instrument = BankSerializer::loadInstrument(getXml(), hash);
+        Instrument* instrument = BankSerializer::loadInstrument( getXml(), hash );
         if (instrument != nullptr) {
-            setInstrumentHash(instrument->hash_);
+            setInstrumentHash( instrument->hash_ );
         }
         return instrument;
     }
 
 
-    void Bank::saveInstrument(Instrument* instrument)
+    void Bank::saveInstrument( Instrument* instrument )
     {
-        BankSerializer::saveInstrument(getXml(), instrument);
+        BankSerializer::saveInstrument( getXml(), instrument );
     }
 
 
@@ -86,50 +86,50 @@ namespace e3 {
     }
 
 
-    void Bank::setXml(XmlElement* e)
+    void Bank::setXml( XmlElement* e )
     {
-        xml_.reset(e);
+        xml_.reset( e );
     }
 
 
-    void Bank::setInstrumentHash(int hash)             
-    { 
+    void Bank::setInstrumentHash( int hash )
+    {
         if (xml_ != nullptr) {
-            xml_->setAttribute("instrument", hash);
+            xml_->setAttribute( "instrument", hash );
         }
     }
 
 
     int Bank::getInstrumentHash() const
     {
-        return (xml_ != nullptr) ? xml_->getIntAttribute("instrument") : 0;
+        return (xml_ != nullptr) ? xml_->getIntAttribute( "instrument" ) : 0;
     }
 
 
-    void Bank::setPath(const std::string& path)
+    void Bank::setPath( const std::string& path )
     {
-        XmlElement* e = Settings::getInstance().getElement("Application");
-        e->setAttribute("RecentBank", path);
+        XmlElement* e = Settings::getInstance().getElement( "Application" );
+        e->setAttribute( "RecentBank", path );
     }
 
 
     std::string Bank::getPath()
     {
-        XmlElement* e = Settings::getInstance().getElement("Application");
-        return e->getStringAttribute("RecentBank").toStdString();
+        XmlElement* e = Settings::getInstance().getElement( "Application" );
+        return e->getStringAttribute( "RecentBank" ).toStdString();
     }
 
 
-    const std::string Bank::getName() const           
+    const std::string Bank::getName() const
     {
-        return (xml_ != nullptr) ? xml_->getStringAttribute("name").toStdString() : "";
+        return (xml_ != nullptr) ? xml_->getStringAttribute( "name" ).toStdString() : "";
     }
 
 
-    void Bank::setName(const std::string& name)        
-    { 
+    void Bank::setName( const std::string& name )
+    {
         if (xml_ != nullptr) {
-            xml_->setAttribute("name", name);
+            xml_->setAttribute( "name", name );
         }
     }
 

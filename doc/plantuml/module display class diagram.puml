@@ -12,21 +12,22 @@ hide empty members
 
 class Module
 class Port
-class WirePanel
+class ModulePanel
 class ViewPort
 class ParameterPanel
 class ModuleComponent
 class PortComponent
+class WireManager
 class Wire
 class EditorPanel
 
 EditorPanel --o "1" ViewPort
-ViewPort --o "1" WirePanel
+ViewPort --o "1" ModulePanel
 EditorPanel --o "1" ParameterPanel
-WirePanel --o "*" ModuleComponent
-WirePanel --o "*" Wire
+ModulePanel --o "*" ModuleComponent
+ModulePanel --o "*" WireManager
+WireManager --o "*" Wire
 ModuleComponent --o "1" Module
-ModuleComponent --o "*" Wire
 ModuleComponent --o "*" PortComponent
 PortComponent --o "1" Port
 Module --o "*" Port

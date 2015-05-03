@@ -447,7 +447,7 @@ namespace e3 {
         static ModuleType testModuleTypes[] ={
             ModuleTypeAudioOutTerminal,
             ModuleTypeMidiGate,
-            ModuleTypeMidiPitch,
+            ModuleTypeMidiFrequency,
             ModuleTypeMidiInput,
             ModuleTypeSineOscillator,
             ModuleTypeAdsrEnvelope,
@@ -461,7 +461,7 @@ namespace e3 {
             { testModuleTypes[1], { ProcessEvent, Polyphonic, 0, 1, 0 } },
             { testModuleTypes[2], { ProcessEvent | ProcessControl, Polyphonic, 0, 1, 3 } },
             { testModuleTypes[3], { ProcessEvent | ProcessControl, Polyphonic, 0, 2, 3 } },
-            { testModuleTypes[4], { ProcessAudio, Polyphonic, 3, 1, 4 } },
+            { testModuleTypes[4], { ProcessAudio, Polyphonic, 2, 1, 4 } },
             { testModuleTypes[5], { ProcessAudio | ProcessControl, Polyphonic, 2, 1, 6 } },
             { testModuleTypes[6], { ProcessAudio, Polyphonic, 1, 1, 3 } },
         };
@@ -482,6 +482,7 @@ namespace e3 {
         class TestableSineOscil : public SineOscillator
         {
         public:
+            using Module::init;
             using Module::connectPort;
             using Module::update;
             using Module::disconnectPorts;
@@ -490,6 +491,7 @@ namespace e3 {
         class TestableAudioOutTerminal : public AudioOutTerminal
         {
         public:
+            using Module::init;
             using Module::connectPort;
             using Module::update;
             using Module::disconnectPorts;
@@ -498,7 +500,12 @@ namespace e3 {
         class ModuleTest : public ::testing::Test
         {
         public:
-            ModuleTest() {}
+            ModuleTest() 
+            {
+                polyphony_.setNumVoices( 1 );
+            }
+
+            Polyphony polyphony_;
 
             void testInitialization( ModuleType moduleType )
             {
@@ -524,10 +531,8 @@ namespace e3 {
 
                 sine_->setId( 1 );
                 audioOutTerminal_->setId( 0 );
-                sine_->setNumVoices( 1 );
-                audioOutTerminal_->setNumVoices( 1 );
-                sine_->update();
-                audioOutTerminal_->update();
+                sine_->init( &polyphony_, 44100 );
+                audioOutTerminal_->init( &polyphony_, 44100 );
 
                 Link link;
                 link.value_ = 1;    // modulation value
@@ -535,7 +540,10 @@ namespace e3 {
                 link.rightModule_ = 0;
                 link.leftPort_ = 0;
                 link.rightPort_ = 0;
-                sine_->connectPort( audioOutTerminal_, &link );
+                sine_->connectPort( audioOutTerminal_, link );
+
+                sine_->update();
+                audioOutTerminal_->update();
             }
         };
 
@@ -816,7 +824,7 @@ namespace e3 {
 
                 EXPECT_EQ( 1, audioOut->getNumInports() );
                 EXPECT_EQ( 2, input->getNumOutports() );
-                EXPECT_EQ( 3, sine->getNumInports() );
+                EXPECT_EQ( 2, sine->getNumInports() );
                 EXPECT_EQ( 1, sine->getNumOutports() );
                 EXPECT_EQ( 2, adsr->getNumInports() );
                 EXPECT_EQ( 1, adsr->getNumOutports() );
@@ -857,7 +865,7 @@ namespace e3 {
                 checkMidiParameters( instrument->getLinks()[2] );
                 checkMidiParameters( instrument->getLinks()[3] );
 
-                LinkPointerList linksForAdsr;
+                LinkList linksForAdsr;
                 instrument->getLinksForModule( adsr->getId(), PortTypeUndefined, linksForAdsr );
                 EXPECT_EQ( 3, linksForAdsr.size() );
 

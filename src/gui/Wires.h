@@ -24,7 +24,7 @@ namespace e3 {
 
     public:
         Wire();
-        Wire( const Point<int>& first, const Point<int>& last, Link* link=nullptr );
+        Wire( const Point<int>& first, const Point<int>& last, const Link& link=Link() );
 
         bool hitTest( const Rectangle<int>& area );
         Rectangle<int> getBoundingRect();
@@ -52,8 +52,9 @@ namespace e3 {
     public:
         WireManager( ModulePanel* panel );
 
-        void addWire( Point<int> first, Point<int> last, Link* link );
+        void addWire( Point<int> first, Point<int> last, const Link& link );
         void deleteWire( Wire* wire );
+        void deleteAll();
         Wire* getWire( int index ) const;
         bool containsWire( Wire* wire ) const;
         int getNumWires() const;
@@ -61,7 +62,8 @@ namespace e3 {
         void paint( Graphics& g );
 
         void selectWiresInArea( const Rectangle<int>& area );
-        void updateWiresForModule( ModuleComponent* module, bool selectWire );
+        void selectWiresForModule( ModuleComponent* module, bool select );
+        void deleteWiresForModule( ModuleComponent* module );
 
         void startDocking( PortComponent* port, const Point<int>& pos );
         void startUndocking( PortComponent* port );
@@ -77,7 +79,7 @@ namespace e3 {
             WireErrorSamePort     = 4
         };
 
-
+        void updateWiresForModule( ModuleComponent* module, bool selectWires, bool deleteWires );
         Wire* getWire( Link* link, PortType portType=PortTypeUndefined, bool onlySelected=false ) const;
         WireError checkPort( Link& link, PortComponent* port, PortType expectedType );
         void resetDocking();

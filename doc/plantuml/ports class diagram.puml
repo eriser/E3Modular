@@ -11,13 +11,19 @@ endtitle
 
 
 class Port {
-    virtual bool isConnected()
-    virtual bool isAudioConnected()
-    virtual bool isEventConnect()
+    +virtual int getNumConnections()
+    +virtual int getNumAudioConnections()
+    +virtual int getNumEventConnections()
+    +virtual void disconnectAll()
+    +virtual void setNumVoices(int numVoices)
 
-    Port::Type type_
-    uint16_t id_
-    uint16_t numVoices_
+    #int id_
+    #ControlType controlType_
+    #int_fast32_t numVoices_
+    #int_fast32_t numAudioConnections_
+    #int_fast32_t numEventConnections_
+    #PortType type_
+    #std::string label_;
  }
 
 class Outport {
@@ -31,82 +37,27 @@ class Outport {
     #void removeAudioTarget( Link* link );
     #void removeEventTarget( Link* link );
 
-    #LinkList audioTargets_
+    #LinkList audioLinks_
     #Buffer< double* > audioOutBuffer_
     #Buffer< VoiceAdapterType > audioAdapterBuffer_
     #Buffer< double > audioModulationBuffer_
 
-    #LinkList eventTargets_
+    #LinkList eventLinks_
     #InportList eventInports_
     #Buffer< VoiceAdapterType > eventAdapterBuffer_
     #Buffer< double > eventModulationBuffer_
 }
 
 class Inport {
-    double* getAudioBuffer()
+    +double* getAudioBuffer()
 
-    Buffer<double> audioInBuffer_
+    #Buffer<double> audioInBuffer_
 
-    Module* eventOwnerModule_
-    int eventParamId_    = -1;
+    #Module* eventOwnerModule_
+    #int eventParamId_    = -1;
 }
-
-/'
-class AudioOutport {
-    void putValue(double value, uint16_t voice = 0) throw();
-    AudioOutBuffer audioOutBuffer_
-}
-'/
-/'
-class EventInport {
-    Module* module_ = nullptr;
-    int paramId_    = -1;
-}
-'/
-/'
-class EventOutport {
-        void putEvent(double value, uint16_t voice);
-
-        std::vector< EventInport* > inports_;
-}
-'/
-/'
-class AudioInport {
-    Buffer<double> audioInBuffer_;
-    int16_t numSources_;
-}
-'/
-
-/'
-class Module {
-    ProcessFunctionPointer processFunction_
-
-    int16_t id_
-    ModuleType moduleType_
-    ProcessingType processingType_
-    VoicingType voicingType_
-    PortModelList inPortModels_
-    PortModelList outPortModels_
-    ParameterMap parameters_
-    double sampleRate_
-    uint16_t numVoices_
-    bool mono_
-    InPortList inPorts_;
-    OutPortList outPorts_;
-    Polyphony* polyphony_;
-}
-'/
 
 Port <|-- Outport
 Port <|-- Inport
-'Inport <|-- AudioInport
-'Inport <|-- EventInport
-'Outport <|-- AudioOutport
-'Outport <|-- EventOutport
-
-'AudioOutport o-- Module
-'AudioInport o-- Module
-'EventOutport o-- Module
-
 
 @enduml

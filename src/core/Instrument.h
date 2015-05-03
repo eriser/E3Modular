@@ -21,6 +21,7 @@ namespace e3 {
         void initModules( Polyphony* polyphony, double sampleRate );
         void resetModules();
         void connectModules();
+        void updateModules();
         void resumeModules();
         void suspendModules();
 
@@ -34,10 +35,10 @@ namespace e3 {
         Module* createAndAddModule( ModuleType type );
         void deleteModule( Module* module );
 
-        Link* addLink( Link* link );
-        void removeLink( Link* link );
-        LinkList& getLinks()                          { return links_; }
-        void getLinksForModule( int moduleId, PortType portType, LinkPointerList& list );
+        Link* addLink( const Link& link );
+        void removeLink( const Link& link );
+        LinkList& getLinks()                            { return links_; }
+        void getLinksForModule( int moduleId, PortType portType, LinkList& list );
 
 
         void setNumUnison( uint16_t numUnison )         { numUnison_    = numUnison; }

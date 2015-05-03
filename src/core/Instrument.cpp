@@ -21,8 +21,11 @@ namespace e3 {
 
     void Instrument::deleteModules()
     {
-        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)	{
-            delete *it;
+        resetModules();
+
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++) {
+            Module* m = *it;
+            delete m;
         }
         modules_.clear();
         links_.clear();
@@ -41,60 +44,37 @@ namespace e3 {
 
     void Instrument::deleteModule( Module* module )       // TODO: remove all links to and from this module
     {
-        //ModuleList targets;
-        //getTargetModules(module, &targets);
-
-        // remove the links at the targets
-        //for (int16_t i = 0; i < (int16_t)targets.size(); i++)        
-        //{
-        //    Module* next = targets.at(i);
-        //    for (uint16_t j = 0; j < next->links_.size();)
-        //    {
-        //        Link& link = next->getLink(j);
-        //        if (link.leftModule_ == module->id_) {
-        //            next->links_.remove(link);
-        //        }
-        //        else j++;
-        //    }
-        //}
-
-        //// disconnect ports of own links
-        //for (int16_t i = 0; i < (int16_t)module->links_.size();)     
-        //{
-        //    Link& link = module->getLink(i);
-        //    if (link.leftModule_ == module->id_)
-        //    {
-        //        module->links_.remove(link);
-        //    }
-        //    else i++;
-        //}
-
-        // remove and delete module
-        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
+        ASSERT( module );
+        if (module)
         {
-            if ((*it)->id_ == module->id_) {
-                delete *it;
-                modules_.erase( it );
-                break;
+            LinkList list;
+            getLinksForModule( module->getId(), PortTypeUndefined, list );
+            module->reset();
+            for (LinkList::const_iterator it = list.begin(); it != list.end(); ++it) {
+                removeLink( *it );
             }
+
+            modules_.erase( std::remove( modules_.begin(), modules_.end(), module ), modules_.end() );
+            ASSERT( std::find( modules_.begin(), modules_.end(), module ) == modules_.end() );
+            delete module;
         }
     }
 
 
-    Link* Instrument::addLink( Link* link )
+    Link* Instrument::addLink( const Link& link )
     {
-        links_.add( *link );
+        links_.add( link );
         return &links_.back();
     }
 
 
-    void Instrument::removeLink( Link* link )
+    void Instrument::removeLink( const Link& link )
     {
-        links_.remove( *link );
+        links_.remove( link );
     }
 
 
-    void Instrument::getLinksForModule( int moduleId, PortType portType, LinkPointerList& list)
+    void Instrument::getLinksForModule( int moduleId, PortType portType, LinkList& list)
     {
         list.clear();
 
@@ -102,10 +82,10 @@ namespace e3 {
         {
             Link& link = *it;
             if ((portType == PortTypeInport || portType == PortTypeUndefined) && link.rightModule_ == moduleId) {
-                list.add( &link );
+                list.add( link );
             }
             else if ((portType == PortTypeOutport || portType == PortTypeUndefined) && link.leftModule_ == moduleId) {
-                list.add( &link );
+                list.add( link );
             }
         }
     }
@@ -125,7 +105,8 @@ namespace e3 {
     {
         for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
-            (*it)->reset();
+            Module* m = *it;
+            m->reset();
         }
     }
 
@@ -135,21 +116,47 @@ namespace e3 {
         for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             Module* target = (*it);
-            for (LinkList::iterator it = links_.begin(); it != links_.end(); ++it)
+            LinkList list;
+            getLinksForModule(target->getId(), PortTypeInport, list);
+
+            for (LinkList::iterator it = list.begin(); it != list.end(); ++it)
             {
-                Link* link = &(*it);
-                if (link->rightModule_ == target->id_)
-                {
-                    Module* source = getModule( link->leftModule_ );
-                    ASSERT( source );
-                    if (source) {
-                        source->connectPort( target, link );
-                    }
+                const Link& link = *it;
+                Module* source = getModule( link.leftModule_ );
+                ASSERT( source );
+                if (source) {
+                    source->connectPort( target, link );
                 }
             }
         }
+        //for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
+        //{
+        //    Module* target = (*it);
+
+        //    for (LinkList::iterator it = links_.begin(); it != links_.end(); ++it)
+        //    {
+        //        Link* link = &(*it);
+        //        if (link->rightModule_ == target->id_)
+        //        {
+        //            Module* source = getModule( link->leftModule_ );
+        //            ASSERT( source );
+        //            if (source) {
+        //                source->connectPort( target, link );
+        //            }
+        //        }
+        //    }
+        //}
     }
 
+
+    void Instrument::updateModules()
+    {
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
+        {
+            Module* m = (*it);
+            m->update();
+        }
+    }
 
 
     Module* Instrument::getModule( int moduleId ) const

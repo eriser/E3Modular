@@ -20,8 +20,8 @@ namespace e3 {
 
         for (size_t i = 0; i < targets.size(); i++)
         {
-            Link* link = &targets[i];
-            setValue( i, link->value_, -1 );
+            Link& link = targets[i];
+            setValue( i, link.value_, -1 );
         }
     }
 
@@ -43,19 +43,19 @@ namespace e3 {
     }
 
 
-    void ModulationBuffer::onGate( uint32_t targetIndex, Link* link, double gate, int voice )
+    void ModulationBuffer::onGate( uint32_t targetIndex, Link& link, double gate, int voice )
     {
-        if (link->veloSens_)
+        if (link.veloSens_)
         {
-            double value = link->valueShaper_.exponential( link->value_ );
-            value       += gate * link->veloSens_;
+            double value = link.valueShaper_.exponential( link.value_ );
+            value       += gate * link.veloSens_;
 
             setValue( targetIndex, value, voice );
         }
     }
 
 
-    void ModulationBuffer::onController( uint32_t targetIndex, Link* link, int16_t controllerId, double value )
+    void ModulationBuffer::onController( uint32_t targetIndex, Link& link, int16_t controllerId, double value )
     {
         UNUSED( targetIndex );
         UNUSED( link );
@@ -73,9 +73,10 @@ namespace e3 {
     // class Port
     //-------------------------------------------------------
 
-    void Port::setNumVoices(int numVoices)
+    void Port::disconnectAll()
     {
-        numVoices_ = (uint_fast32_t)numVoices;
+        numAudioConnections_ = 0;
+        numEventConnections_ = 0;
     }
 
 
@@ -84,42 +85,38 @@ namespace e3 {
     // class Outport
     //-------------------------------------------------------
 
-    void Outport::connect( Module* target, Link* link, VoiceAdapterType voiceAdapter ) 
+    void Outport::connect( Module* target, const Link& link, VoiceAdapterType voiceAdapter ) 
     {
         ASSERT( target ); 
-        ASSERT( link );
         if (target == nullptr) return;
-        if (link == nullptr) return;
 
-        Inport* inport = target->getInport( link->rightPort_ );
+        Inport* inport = target->getInport( link.rightPort_ );
         ASSERT( inport != nullptr );
         if (inport == nullptr) return;
 
         if (getType() & PortTypeAudio)
         {
             addAudioTarget( link, voiceAdapter );
-            audioOutBuffer_.resize( numAudioTargets_ );
-            audioOutBuffer_[numAudioTargets_ - 1] = inport->connectAudio();
+            audioOutBuffer_.resize( numAudioConnections_ );
+            audioOutBuffer_[numAudioConnections_ - 1] = inport->connectAudio();
         }
         else if (getType() & PortTypeEvent) 
         {
             addEventTarget( link, voiceAdapter );
 
-            inport->connectEvent( target, link->rightPort_ );
-            eventInports_.resize( numEventTargets_ );
-            eventInports_.at( numEventTargets_ - 1 ) = inport;
+            inport->connectEvent( link.rightPort_ );
+            eventInports_.resize( numEventConnections_ );
+            eventInports_.at( numEventConnections_ - 1 ) = inport;
         }
     }
 
    
-    void Outport::disconnect( Module* target, Link* link )
+    void Outport::disconnect( Module* target, const Link& link )
     {
         ASSERT( target );
-        ASSERT( link );
         if (target == nullptr) return;
-        if (link == nullptr) return;
 
-        int16_t portId = audioLinks_.getIndex( *link );
+        int16_t portId = audioLinks_.getIndex( link );
         if (portId >= 0)
         {
             removeAudioTarget( link );
@@ -136,7 +133,7 @@ namespace e3 {
             return;
         }
 
-        portId = eventLinks_.getIndex( *link );
+        portId = eventLinks_.getIndex( link );
         ASSERT( portId >= 0 );
         if (portId >= 0)
         {
@@ -164,26 +161,19 @@ namespace e3 {
         audioOutBuffer_.clear();
         eventInports_.clear();
 
-        numAudioTargets_ = 0;
-        numEventTargets_ = 0;
-    }
-
-
-    uint32_t Outport::getNumConnections() const
-    {
-        return numAudioTargets_ + numEventTargets_;
+        Port::disconnectAll();
     }
 
 
     void Outport::putEvent( double value, int_fast32_t voice )
     {
-        for (uint_fast32_t target = 0; target < numEventTargets_; target++)
+        for (int_fast32_t target = 0; target < numEventConnections_; target++)
         {
             double modulation = eventModulationBuffer_[target * numVoices_ + voice];
 
             Inport* inport  = eventInports_.at( target );
             ASSERT( inport );
-            Module* targetModule = inport->eventModule_;
+            Module* targetModule = inport->getOwner();
             ASSERT( targetModule );
 
             VoiceAdapterType adapter = eventAdapterBuffer_[target];
@@ -194,7 +184,7 @@ namespace e3 {
                 targetModule->setParameter( inport->eventParamId_, value, modulation, voice );
                 break;
             case AdapterMonoToPoly:
-                for (uint_fast32_t i = 0; i < numVoices_; i++) {
+                for (int_fast32_t i = 0; i < numVoices_; i++) {
                     targetModule->setParameter( inport->eventParamId_, value, modulation, i );
                 }
                 break;
@@ -206,40 +196,40 @@ namespace e3 {
     }
     
 
-    void Outport::addAudioTarget( Link* link, VoiceAdapterType adapter )
+    void Outport::addAudioTarget( const Link& link, VoiceAdapterType adapter )
     {
-        numAudioTargets_ = audioLinks_.add( *link );
+        numAudioConnections_ = audioLinks_.add( link );
 
-        audioAdapterBuffer_.resize( numAudioTargets_ );
-        audioAdapterBuffer_[numAudioTargets_ - 1] = adapter;
+        audioAdapterBuffer_.resize( numAudioConnections_ );
+        audioAdapterBuffer_[numAudioConnections_ - 1] = adapter;
         audioModulationBuffer_.init( numVoices_, audioLinks_ );
     }
 
 
-    void Outport::addEventTarget( Link* link, VoiceAdapterType adapter )
+    void Outport::addEventTarget( const Link& link, VoiceAdapterType adapter )
     {
-        numEventTargets_ = eventLinks_.add( *link );
+        numEventConnections_ = eventLinks_.add( link );
 
-        eventAdapterBuffer_.resize( numEventTargets_ );
-        eventAdapterBuffer_[numEventTargets_ - 1] = adapter;
+        eventAdapterBuffer_.resize( numEventConnections_ );
+        eventAdapterBuffer_[numEventConnections_ - 1] = adapter;
         eventModulationBuffer_.init( numVoices_, eventLinks_ );
     }
 
 
-    void Outport::removeAudioTarget( Link* link )
+    void Outport::removeAudioTarget( const Link& link )
     {
-        numAudioTargets_ = audioLinks_.remove( *link );
+        numAudioConnections_ = audioLinks_.remove( link );
 
-        audioAdapterBuffer_.resize( numAudioTargets_ );
+        audioAdapterBuffer_.resize( numAudioConnections_ );
         audioModulationBuffer_.init( numVoices_, audioLinks_ );
     }
 
 
-    void Outport::removeEventTarget( Link* link )
+    void Outport::removeEventTarget( const Link& link )
     {
-        numEventTargets_ = eventLinks_.remove( *link );
+        numEventConnections_ = eventLinks_.remove( link );
 
-        eventAdapterBuffer_.resize( numEventTargets_ );
+        eventAdapterBuffer_.resize( numEventConnections_ );
         eventModulationBuffer_.init( numVoices_, eventLinks_ );
     }
 
@@ -255,22 +245,22 @@ namespace e3 {
 
     void Outport::onGate(double gate, int voice)
     {
-        for (uint_fast32_t i = 0; i < numAudioTargets_; i++) {
-            audioModulationBuffer_.onGate( i, &audioLinks_[i], gate, voice );
+        for (int_fast32_t i = 0; i < numAudioConnections_; i++) {
+            audioModulationBuffer_.onGate( i, audioLinks_[i], gate, voice );
         }
-        for (uint_fast32_t i = 0; i < numEventTargets_; i++) {
-            eventModulationBuffer_.onGate( i, &eventLinks_[i], gate, voice );
+        for (int_fast32_t i = 0; i < numEventConnections_; i++) {
+            eventModulationBuffer_.onGate( i, eventLinks_[i], gate, voice );
         }
     }
 
 
     void Outport::onController(int16_t controllerId, double value)
     {
-        for (uint_fast32_t i = 0; i < numAudioTargets_; i++) {
-            audioModulationBuffer_.onController( i, &audioLinks_[i], controllerId, value );
+        for (int_fast32_t i = 0; i < numAudioConnections_; i++) {
+            audioModulationBuffer_.onController( i, audioLinks_[i], controllerId, value );
         }
-        for (uint_fast32_t i = 0; i < numEventTargets_; i++) {
-            eventModulationBuffer_.onController( i, &eventLinks_[i], controllerId, value );
+        for (int_fast32_t i = 0; i < numEventConnections_; i++) {
+            eventModulationBuffer_.onController( i, eventLinks_[i], controllerId, value );
         }
     }
 
@@ -282,53 +272,44 @@ namespace e3 {
 
     double* Inport::connectAudio()
     {
-        ASSERT( audioInBuffer_ && audioInBuffer_.size() == numVoices_ );
+        ASSERT( audioInBuffer_ && audioInBuffer_.size() == (size_t)numVoices_ );
 
-        numAudioSources_++;
+        numAudioConnections_++;
         return audioInBuffer_;
     }
 
 
-    void Inport::connectEvent( Module* eventModule, int eventParamId )
+    void Inport::connectEvent( int eventParamId )
     {
-        numEventSources_++;
-        eventModule_  = eventModule;
+        numEventConnections_++;
         eventParamId_ = eventParamId;
     }
 
 
     void Inport::disconnectAudio()
     {
-        ASSERT( numAudioSources_ >= 1 );
-        if (numAudioSources_ >= 1)
-            numAudioSources_--;
+        ASSERT( numAudioConnections_ >= 1 );
+        if (numAudioConnections_ >= 1)
+            numAudioConnections_--;
     }
 
 
     void Inport::disconnectEvent()
     {
-        ASSERT( numAudioSources_ >= 1 );
-        if (numAudioSources_ >= 1)
-            numAudioSources_--;
+        ASSERT( numAudioConnections_ >= 1 );
+        if (numAudioConnections_ >= 1)
+            numAudioConnections_--;
 
-        eventModule_  = nullptr;
         eventParamId_ = -1;
     }
 
 
     void Inport::disconnectAll()  // TODO: handle multiple connections
     {
-        numAudioSources_ = 0;
-        numEventSources_ = 0;
+        numAudioConnections_ = 0;
+        numEventConnections_ = 0;
 
-        eventModule_     = nullptr;
-        eventParamId_    = -1;
-    }
-
-
-    uint32_t Inport::getNumConnections() const
-    {
-        return numAudioSources_ + numEventSources_;
+        eventParamId_        = -1;
     }
 
 
@@ -338,5 +319,8 @@ namespace e3 {
         audioInBuffer_.resize( numVoices_ );
     }
 
+
+    void Inport::setOwner( Module* module )  { owner_ = module; }
+    Module* Inport::getOwner() const { return owner_; }
 
 }  // namespace e3

@@ -82,8 +82,11 @@ namespace e3 {
         void saveBank( const std::string& path = "" );
         void loadInstrument( int hash = 0, bool saveCurrent = true );
 
-        Link* addLink( Link* link );
-        void removeLink( Link* link );
+        Link* addLink( const Link& link );
+        void removeLink( const Link& link );
+
+        Module* addModule( int moduleType );
+        void deleteModule( Module* module );
 
         Instrument* getInstrument() const   { return instrument_; }
         XmlElement* getBankXml() const;

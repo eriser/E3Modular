@@ -71,7 +71,9 @@ namespace e3 {
             int hash = e->getIntAttribute( "hash" );
             if (hash == instrument->hash_) {
                 try {
-                    e->deleteAllChildElements();
+                    //e->deleteAllChildElements();
+                    e->deleteAllChildElementsWithTagName( "modules" );
+                    e->deleteAllChildElementsWithTagName( "links" );
                     writeInstrument( e, instrument );
                     return;
                 }
@@ -140,7 +142,7 @@ namespace e3 {
             link.rightPort_   = (uint16_t)e->getIntAttribute( "right_port" );
 
             readParameter( e, link );
-            instrument->addLink( &link );
+            instrument->addLink( link );
         }
     }
 
@@ -211,7 +213,7 @@ namespace e3 {
         if (instrument->legato_)
             e->setAttribute( "legato", instrument->legato_ );
 
-        XmlElement* const modules = e->createNewChildElement( "modules" );
+        XmlElement* modules = e->createNewChildElement( "modules" );
         const ModuleList& moduleList = instrument->getModules();
         for (ModuleList::const_iterator it = moduleList.begin(); it != moduleList.end(); it++)
         {
@@ -219,7 +221,7 @@ namespace e3 {
             writeModule( em, *it );
         }
 
-        XmlElement* const links = e->createNewChildElement( "links" );
+        XmlElement* links = e->createNewChildElement( "links" );
         const LinkList& linkList = instrument->getLinks();
         for (LinkList::const_iterator it = linkList.begin(); it != linkList.end(); it++)
         {

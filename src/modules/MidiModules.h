@@ -24,11 +24,11 @@ namespace e3 {
     };
 
 
-    class MidiPitch : public Module 
+    class MidiFrequency : public Module 
     {
     public:
-        MidiPitch();
-        MidiPitch(
+        MidiFrequency();
+        MidiFrequency(
             ModuleType moduleType,
             const std::string& label,
             VoicingType voicingType,
@@ -37,14 +37,14 @@ namespace e3 {
         void connectSignals() override;
         void disconnectSignals() override;
 
-        void initVoices() override;
+        void initData() override;
         void setParameter(int paramId, double value, double modulation=0.f, int voice=-1) override;
         void onMidiNote( double pitch, double gate, int voice );
         void onMidiPitchbend(int value);
         
         void processControl() throw() override;
 
-        std::string debugLabel_ = "MidiPitch";
+        std::string debugLabel_ = "MidiFrequency";
 
     protected:
         void createParameters();
@@ -69,11 +69,11 @@ namespace e3 {
         double bendFactor_   = 1.0;
         int bendRange_       = 2;
 
-        Outport pitchOutport_;
+        Outport freqOutport_;
     };
 
 
-    class MidiInput : public MidiPitch
+    class MidiInput : public MidiFrequency
     {
     public:
         MidiInput();

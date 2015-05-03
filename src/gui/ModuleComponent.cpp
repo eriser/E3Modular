@@ -14,16 +14,13 @@
 
 namespace e3 {
 
-    ModuleComponent::ModuleComponent(ModulePanel* owner, Module* module, bool collapsed) :
+    ModuleComponent::ModuleComponent(ModulePanel* owner, Module* module) :
         panel_(owner),
-        module_(module),
-        collapsed_(collapsed)
+        module_(module)
     {
         setInterceptsMouseClicks(false, true);  // owner handles selection, focus and dragging
         createPorts();
         calculateSize();
-        //setVisible((module != nullptr) && (module->style_ & ModuleStyleVisible));
-        //setColors();
     }
 
 
@@ -57,15 +54,10 @@ namespace e3 {
     {
         Rectangle<int> content = getLocalBounds();
 
-        if (collapsed_ == false)
-        {
-            int numPorts = jmax(inports_.size(), outports_.size());
-            int height = portHeight_ + numPorts * portHeight_;
-            content.setHeight(height);
-        }
-        else {
-            content.setHeight(portHeight_ * 2);
-        }
+        int numPorts = jmax(inports_.size(), outports_.size());
+        int height = portHeight_ + numPorts * portHeight_;
+        content.setHeight(height);
+
         int width = 100;
         content.setWidth(width);
 
@@ -122,7 +114,7 @@ namespace e3 {
     {
         dragger_.dragComponent(this, e, &dragConstrainer_);
         panel_->checkViewport();
-        panel_->updateWiresForModule(this, isSelected());
+        panel_->selectWiresForModule(this, isSelected());
     }
 
 
@@ -137,11 +129,6 @@ namespace e3 {
 
     void ModuleComponent::mouseDoubleClick(const MouseEvent&)
     {
-        if (module_)
-        {
-            collapsed_ = !collapsed_;
-            //collapseOrExpand(collapsed);
-        }
     }
 
 
@@ -165,7 +152,7 @@ namespace e3 {
     }
 
 
-    PortComponent* ModuleComponent::getPort(Link* link, PortType portType)
+    PortComponent* ModuleComponent::getPort(const Link& link, PortType portType)
     {
         return panel_->getPort(link, portType);
     }
@@ -173,22 +160,10 @@ namespace e3 {
 
     void ModuleComponent::getPortPosition(int portId, PortType portType, Point<int>& pos)
     {
-        if (collapsed_ == false)
-        {
-            PortComponent* port = getPort(portId, portType);
-            ASSERT(port);
-            if (port != nullptr) {
-                pos = port->getDockingPosition();
-            }
-        }
-        else
-        {
-            Rectangle<int> bounds = getLocalBounds();
-            pos.y = bounds.getY() + bounds.getHeight() / 2;
-            pos.x = (portType == PortTypeInport) ? bounds.getX() + 1 : bounds.getRight() - 1;
-
-            Rectangle<int> rcParent = panel_->getLocalBounds();
-            pos.addXY(-rcParent.getX(), -rcParent.getY());
+        PortComponent* port = getPort(portId, portType);
+        ASSERT(port);
+        if (port != nullptr) {
+            pos = port->getDockingPosition();
         }
     }
 
@@ -227,32 +202,13 @@ namespace e3 {
     {
         TRACE("ModuleComponent::select doSelect=%d\n", doSelect);
         if (doSelect != isSelected()) {
-            panel_->updateWiresForModule(this, doSelect);
+            panel_->selectWiresForModule(this, doSelect);
         }
         selected_ = doSelect;
     }
 
 
     /*
-    void ModuleComponent::collapseOrExpand(bool collapse)
-    {
-        if (collapse != data_->collapsed_)
-        {
-            data_->collapsed_ = collapse;
-            setPortVisibility();
-            calculateSize();
-
-            panel_->onBoxResized(this);
-        }
-    }
-
-
-    bool ModuleComponent::isCollapsed()
-    {
-        return data_->collapsed_;
-    }
-
-
     void ModuleComponent::focusAndSelect(bool focus, bool select)
     {
         bool mustInvalid = selected_ != select || focused_ != focus;

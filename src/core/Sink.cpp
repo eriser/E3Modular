@@ -50,13 +50,13 @@ namespace e3 {
                 {
                     push_back(module);
 
-                    LinkPointerList links;
+                    LinkList links;
                     instrument->getLinksForModule( module->id_, PortTypeInport, links );
 
-                    for (LinkPointerList::const_iterator it = links.begin(); it != links.end(); ++it)
+                    for (LinkList::const_iterator it = links.begin(); it != links.end(); ++it)
                     {
-                        Link* link = *it;
-                        Module* next = instrument->getModule( link->leftModule_ );
+                        const Link& link = *it;
+                        Module* next = instrument->getModule( link.leftModule_ );
                         if (next && next != module) {
                             queue.push( next );                 // enqueue sources of current module
                         }

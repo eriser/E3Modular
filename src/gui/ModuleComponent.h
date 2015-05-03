@@ -16,7 +16,7 @@ namespace e3 {
     class ModuleComponent : public Component
     {
     public:
-        ModuleComponent(ModulePanel* owner, Module* module, bool collapsed);
+        ModuleComponent(ModulePanel* owner, Module* module);
 
         void paint(Graphics& g) override;
         void resized() override;
@@ -33,7 +33,7 @@ namespace e3 {
         //void moveTo(Rectangle<int>& r);
         void createPorts();
         PortComponent* getPort(int portId, PortType portType);
-        PortComponent* getPort(Link* link, PortType portType);
+        PortComponent* getPort(const Link& link, PortType portType);
         void getPortPosition(int portId, PortType portType, Point<int>& pos);
         PortComponent* getPortAtPosition(const Point<int>& pos) const;
 
@@ -63,7 +63,6 @@ namespace e3 {
         const int portHeight_ = 12;
         bool selected_        = false;
         bool focused_         = false;
-        bool collapsed_       = false;
 
         Colour colBkgnd_, colFrame_, colPort_, colText_;
 

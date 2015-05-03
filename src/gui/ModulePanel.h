@@ -25,9 +25,11 @@ namespace e3 {
         ModulePanel();
 
         void paint(Graphics& g) override;
-        void ModulePanel::paintOverChildren(Graphics& g) override;
+        void paintOverChildren(Graphics& g) override;
 
         void createModules(Processor* processor, XmlElement* instrumentXml);
+        void createModule( int moduleId, Point<int> pos );
+        void deleteSelectedModules();
         void storeModulePosition(int moduleId, Point<int> pos);
 
         void mouseDown(const MouseEvent& e) override;
@@ -38,23 +40,31 @@ namespace e3 {
         void findLassoItemsInArea(Array<ModuleComponent*>& results, const Rectangle<int>& area) override;
         void changeListenerCallback(ChangeBroadcaster* broadcaster) override;
 
+        void selectAll();
+        void deselectAll();
+
         void checkViewport();
-        void updateWiresForModule(ModuleComponent* module, bool select);
+        void selectWiresForModule(ModuleComponent* module, bool select);
         Rectangle<int> getUsedArea() const;
 
         ModuleComponent* getModule(int id);
-        PortComponent* getPort(Link* link, PortType portType);
+        PortComponent* getPort(const Link& link, PortType portType);
 
         ModuleComponent* getModuleAtPosition(const Point<int>& pos) const;
         PortComponent* getPortAtPosition(const Point<int>& pos) const;
 
         void portAction(PortComponent* port, PortAction action, const Point<int>& pos);
 
-        Processor* getProcessor()
-            const;
+        Processor* getProcessor() const;
 
     protected: 
+        ModuleComponent* createModuleComponent( Module* module, int x, int y );
         void createWires(LinkList& links);
+
+        void showPopupMenu( Point<int> pos );
+        PopupMenu createPopupMenu();
+        static void popupMenuCallback( int, ModulePanel* );
+
 
         OwnedArray<ModuleComponent> modules_;
         ScopedPointer<WireManager> wires_;
@@ -64,9 +74,21 @@ namespace e3 {
         ModuleComponent* selectedModule_ = nullptr;
         bool mouseDownSelectStatus_ = false;
         bool dragging_ = false;
+        Point<int> popupMenuPosition_;
 
         XmlElement* panelXml_;
         Processor* processor_;
+
+        enum MenuTags {
+            MenuModuleNew      = 1,
+            MenuModuleDelete   = 2,
+            MenuCopy           = 3,
+            MenuCut            = 4, 
+            MenuPaste          = 5,
+            MenuSelectAll      = 6, 
+            MenuUnselectAll    = 7,
+            MenuSubModuleFirst = 10,
+        };
     };
 
 

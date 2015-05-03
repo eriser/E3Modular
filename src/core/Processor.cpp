@@ -124,7 +124,7 @@ namespace e3 {
             bank_->saveInstrument( instrument_ );
         }
 
-        instrument_ = bank_->loadInstrument( hash );
+        instrument_ = bank_->loadInstrument( hash );        // this calls instrument::ctor first!
         if (instrument_ != nullptr)
         {
             uint16_t numVoices = instrument_->numVoices_;
@@ -147,12 +147,13 @@ namespace e3 {
     {
         instrument_->initModules( polyphony_, getSampleRate() );
         instrument_->connectModules();
+        instrument_->updateModules();
 
         sink_->compile( instrument_ );
     }
 
 
-    Link* Processor::addLink( Link* link )
+    Link* Processor::addLink( const Link& link )
     {
         Link* result = nullptr;
         suspend();
@@ -169,20 +170,57 @@ namespace e3 {
     }
 
 
-    void Processor::removeLink( Link* link )
+    void Processor::removeLink( const Link& link )
     {
         suspend();
         try {
             instrument_->removeLink( link );
             resetAndInitInstrument();
         }
-        catch (const std::exception& e) {
+        catch (const std::exception& e) 
+        {
             TRACE( e.what() );
             //checkAppState();
             return;
         }
         resume();
     }
+
+
+    Module* Processor::addModule( int moduleType )
+    {
+        Module* module = nullptr;
+        try {
+            module = instrument_->createAndAddModule( (ModuleType)moduleType );
+        }
+        catch (const std::exception& e) 
+        {
+            TRACE( e.what() );
+            suspend();
+        }
+        return module;
+    }
+
+
+    void Processor::deleteModule( Module* module )
+    {
+        ASSERT( module );
+        if (module == nullptr) return;
+
+        suspend();
+        try {
+            instrument_->deleteModule( module );
+            resetAndInitInstrument();
+        }
+        catch (const std::exception& e) 
+        {
+            TRACE( e.what() );
+            //checkAppState();
+            return;
+        }
+        resume();
+    }
+
 
 
     void Processor::processBlock( AudioSampleBuffer& audioBuffer, MidiBuffer& midiBuffer )
