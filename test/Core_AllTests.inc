@@ -30,7 +30,6 @@ namespace e3 {
         {
         public:
             using Settings::file_;
-            using Settings::getStyleXml;
 
             bool testValid()
             {
@@ -123,15 +122,6 @@ namespace e3 {
 
         TEST_F( SettingsTest, hasStyle )
         {
-            settings_.load();
-            XmlElement* e = settings_.getStyleXml();
-            ASSERT_NE( nullptr, e );
-            EXPECT_TRUE( e->getStringAttribute( "name" ) == "Default" );
-        }
-
-        TEST_F( SettingsTest, useDefaultStyle )
-        {
-            settings_.setPath( "e3m_no_style.settings" );
             settings_.load();
             XmlElement* e = settings_.getStyleXml();
             ASSERT_NE( nullptr, e );
@@ -887,62 +877,62 @@ namespace e3 {
 
         TEST_F( BankTest, load_nofile )
         {
-            EXPECT_THROW( bank_.open( "BankTest_load_error" ), std::invalid_argument );
+            EXPECT_THROW( bank_.load( "BankTest_load_error" ), std::invalid_argument );
         }
 
         TEST_F( BankTest, load_invalid_xml )
         {
-            EXPECT_THROW( bank_.open( testBank_invalid_xml_filename ), std::runtime_error );
+            EXPECT_THROW( bank_.load( testBank_invalid_xml_filename ), std::runtime_error );
         }
 
         TEST_F( BankTest, load_incompatible_xml )
         {
-            EXPECT_THROW( bank_.open( testBank_incompatible_xml_filename ), std::runtime_error );
+            EXPECT_THROW( bank_.load( testBank_incompatible_xml_filename ), std::runtime_error );
         }
 
         TEST_F( BankTest, load_ok )
         {
-            bank_.open( testBank_valid_filename );
+            bank_.load( testBank_valid_filename );
             checkBank( bank_ );
         }
 
         TEST_F( BankTest, load_multiple )
         {
             for (int i = 0; i < 10; i++) {
-                bank_.open( testBank_valid_filename );
+                bank_.load( testBank_valid_filename );
                 checkBank( bank_ );
             }
         }
 
         TEST_F( BankTest, load_instrument )
         {
-            bank_.open( testBank_valid_filename );
-            int hash = bank_.getInstrumentHash();
-            ScopedPointer<Instrument> instrument = bank_.loadInstrument( hash );
+            bank_.load( testBank_valid_filename );
+            int id = bank_.getCurrentInstrumentId();
+            ScopedPointer<Instrument> instrument = bank_.loadInstrument( id );
             ASSERT_NE( nullptr, instrument );
             checkInstrument( instrument );
         }
 
         TEST_F( BankTest, store )
         {
-            bank_.open( testBank_valid_filename );
+            bank_.load( testBank_valid_filename );
             bank_.save( makeAbsolutePath("TestBank_storeTest.e3mb"), false, false );
-            bank_.open( makeAbsolutePath( "TestBank_storeTest.e3mb") );
+            bank_.load( makeAbsolutePath( "TestBank_storeTest.e3mb") );
             checkBank( bank_ );
 
             ScopedPointer<Instrument> instrument = bank_.loadInstrument();
             ASSERT_NE( nullptr, instrument );
             instrument->deleteModules();
             bank_.saveInstrument( instrument );
-            int hash = instrument->hash_;
-            bank_.setInstrumentHash( hash );
+            int id = instrument->id_;
+            bank_.setCurrentInstrumentId( id );
             bank_.save( makeAbsolutePath("TestBank_storeTest.e3mb"), false, false );
-            bank_.open( makeAbsolutePath( "TestBank_storeTest.e3mb"));
-            EXPECT_EQ( hash, bank_.getInstrumentHash() );
+            bank_.load( makeAbsolutePath( "TestBank_storeTest.e3mb"));
+            EXPECT_EQ( id, bank_.getCurrentInstrumentId() );
 
             instrument = bank_.loadInstrument();
             ASSERT_NE( nullptr, instrument );
-            EXPECT_EQ( hash, instrument->hash_ );
+            EXPECT_EQ( id, instrument->id_ );
             EXPECT_EQ( 0, instrument->getModules().size() );
             EXPECT_EQ( 0, instrument->getLinks().size() );
         }
@@ -951,7 +941,7 @@ namespace e3 {
 
         TEST_F( BankTest, compile )
         {
-            bank_.open( testBank_valid_filename );
+            bank_.load( testBank_valid_filename );
             ScopedPointer<Instrument> instrument = bank_.loadInstrument();
             ASSERT_NE( nullptr, instrument );
 

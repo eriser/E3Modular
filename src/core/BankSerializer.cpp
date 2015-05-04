@@ -11,7 +11,7 @@ namespace e3 {
 
     std::string BankSerializer::defaultBankXml =
         "<bank name='New Bank' instrument='1'>"
-        "<instrument name='Default Instrument' hash='1' category='' comment='' voices='32'>"
+        "<instrument name='Empty Instrument' id='0' category='' comment='' voices='32'>"
         "</instrument>"
         "</bank>";
 
@@ -43,24 +43,38 @@ namespace e3 {
     }
 
 
-    Instrument* BankSerializer::loadInstrument( XmlElement* root, int hash )
+    Instrument* BankSerializer::loadInstrument( XmlElement* root, int id )
     {
-        forEachXmlChildElementWithTagName( *root, e, "instrument" )
+        XmlElement* e = root->getChildByAttribute( "id", String( id ) );
+        if (e != nullptr)
         {
-            int h = e->getIntAttribute( "hash" );
-            if (h == hash) {
-                try {
-                    Instrument* instrument = new Instrument();  // processor will be owner of the instrument
-                    readInstrument( e, instrument );
-                    return instrument;
-                }
-                catch (const std::exception& e) {               // parse error, skip instrument
-                    TRACE( e.what() );
-                    return nullptr;
-                }
+            try {
+                Instrument* instrument = new Instrument();  // processor will be owner of the instrument
+                readInstrument( e, instrument );
+                return instrument;
+            }
+            catch (const std::exception& e) {               // parse error, skip instrument
+                TRACE( e.what() );
             }
         }
         return nullptr;
+
+        //forEachXmlChildElementWithTagName( *root, e, "instrument" )
+        //{
+        //    int i = e->getIntAttribute( "id" );
+        //    if (i == id) {
+        //        try {
+        //            Instrument* instrument = new Instrument();  // processor will be owner of the instrument
+        //            readInstrument( e, instrument );
+        //            return instrument;
+        //        }
+        //        catch (const std::exception& e) {               // parse error, skip instrument
+        //            TRACE( e.what() );
+        //            return nullptr;
+        //        }
+        //    }
+        //}
+        //return nullptr;
     }
 
 
@@ -68,10 +82,9 @@ namespace e3 {
     {
         forEachXmlChildElementWithTagName( *root, e, "instrument" )
         {
-            int hash = e->getIntAttribute( "hash" );
-            if (hash == instrument->hash_) {
+            int id = e->getIntAttribute( "id" );
+            if (id == instrument->id_) {
                 try {
-                    //e->deleteAllChildElements();
                     e->deleteAllChildElementsWithTagName( "modules" );
                     e->deleteAllChildElementsWithTagName( "links" );
                     writeInstrument( e, instrument );
@@ -87,7 +100,7 @@ namespace e3 {
 
     void BankSerializer::readInstrument( XmlElement* e, Instrument* instrument )
     {
-        instrument->hash_         = e->getIntAttribute( "hash" );
+        instrument->id_           = e->getIntAttribute( "id" );
         instrument->name_         = e->getStringAttribute( "name", "Unnamed Instrument" ).toStdString();
         instrument->category_     = e->getStringAttribute( "category" ).toStdString();
         instrument->comment_      = e->getStringAttribute( "comment" ).toStdString();
@@ -228,11 +241,6 @@ namespace e3 {
             XmlElement* const el = links->createNewChildElement( "link" );
             writeLink( el, *it );
         }
-
-        e->setAttribute( "hash", 0 );
-        int hash = createHash( e );
-        e->setAttribute( "hash", hash );
-        instrument->hash_ = hash;
     }
 
 
@@ -342,11 +350,5 @@ namespace e3 {
         }
     }
 
-
-    int BankSerializer::createHash( XmlElement* e )
-    {
-        String xml = e->createDocument( "", false, true, "UTF-8", 1000 );
-        return xml.hashCode();
-    }
 
 } // namespace e3

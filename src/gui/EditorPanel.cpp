@@ -28,8 +28,7 @@ namespace e3
         viewport_.setBounds(content.withWidth(separator));      // this is the visible area
         modulePanel_->checkViewport();
 
-        //parameterPanel_->setBounds( content.withX( separator ).withX( 15 ).withWidth( width * 0.25 ) );
-        parameterPanel_->setBounds( separator + 15, 0, width - 15, 25 );
+        parameterPanel_->setBounds( separator + 15, 0, width - separator - 15, getHeight() );
     }
 
 } // namespace e3

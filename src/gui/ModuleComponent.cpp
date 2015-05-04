@@ -87,18 +87,18 @@ namespace e3 {
     {
         Rectangle<int> r = getLocalBounds();
 
-        Colour bkgndCol = findColour( Style::kModuleColourId );
+        Colour bkgndCol = findColour( Style::ModuleColourId );
         g.setColour( bkgndCol );
         g.fillRect( r );
 
-        int id = Style::kModuleBorderNormalColourId;
-        if (isSelected()) id = Style::kModuleBorderSelectedColourId;
-        if (hasKeyboardFocus( true )) id = Style::kModuleBorderFocusedColourId;
+        int id = Style::ModuleBorderNormalColourId;
+        if (isSelected()) id = Style::ModuleBorderSelectedColourId;
+        if (hasKeyboardFocus( true )) id = Style::ModuleBorderFocusedColourId;
 
         g.setColour( findColour( id ) );
         g.drawRect( r );
 
-        g.setColour( findColour( Style::kModuleText1ColourId ) );
+        g.setColour( findColour( Style::ModuleText1ColourId ) );
         g.drawText( module_->getLabel(), 0, 0, getWidth(), getHeight(), Justification::centred, true );
     }
 

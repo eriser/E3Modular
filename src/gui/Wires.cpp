@@ -30,8 +30,8 @@ namespace e3 {
 
     void Wire::paint( Graphics& g )
     {
-        Style* style = Settings::getInstance().getStyle();
-        Colour c = selected_ ? style->findColour( Style::kWire2ColourId ) : style->findColour( Style::kWire1ColourId );
+        Style& style = Style::getInstance();
+        Colour c = selected_ ? style.findColour( Style::Wire2ColourId ) : style.findColour( Style::Wire1ColourId );
         g.setColour( c );
         g.drawLine( Line<float>( first_.toFloat(), last_.toFloat() ), 1 );
     }

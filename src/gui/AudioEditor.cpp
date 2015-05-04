@@ -24,6 +24,8 @@ namespace e3 {
         AudioProcessorEditor( processor ),
         processor_( processor )
     {
+        Style::getInstance().setXml( Settings::getInstance().getStyleXml() );
+
         createComponents();
         restoreWindowState();
 
@@ -32,7 +34,7 @@ namespace e3 {
         addKeyListener( commandManager->getKeyMappings() );
         setWantsKeyboardFocus( true );
 
-        setLookAndFeel( Settings::getInstance().getStyle() );
+        setLookAndFeel( &Style::getInstance() );
 
         processor_->getPolyphony()->monitorUpdateSignal.Connect( monitor_.get(), &MonitorComponent::monitor );
 
@@ -58,7 +60,7 @@ namespace e3 {
 
     void AudioEditor::paint( Graphics& g )
     {
-        g.fillAll( findColour( Style::kBackgroundColourId ) );
+        g.fillAll( findColour( Style::BackgroundColourId ) );
     }
 
 
@@ -174,7 +176,7 @@ namespace e3 {
         if (fc.browseForFileToOpen())
         {
             std::string path = fc.getResult().getFullPathName().toStdString();
-            processor_->openBank( path );
+            processor_->loadBank( path );
             browserPanel_->updateContents( processor_->getBankXml() );
             processor_->loadInstrument();
             modulePanel_->createModules( processor_, browserPanel_->getSelectedInstrumentXml() );
@@ -216,8 +218,8 @@ namespace e3 {
         XmlElement* xml = browserPanel_->getSelectedInstrumentXml();
         if (xml != nullptr)
         {
-            int hash = xml->getIntAttribute( "hash" );
-            processor_->loadInstrument( hash );
+            int id = xml->getIntAttribute( "id" );
+            processor_->loadInstrument( id );
             modulePanel_->createModules( processor_, xml );
         }
     }

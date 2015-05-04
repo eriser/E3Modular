@@ -59,7 +59,7 @@ namespace e3 {
         std::string name_      = "Default";
         std::string category_;
         std::string comment_;
-        int hash_;
+        int id_ = -1;
 
     protected:
         bool hasAudioOutTerminal();

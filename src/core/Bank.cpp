@@ -10,7 +10,7 @@
 
 namespace e3 {
 
-    void Bank::open( const std::string& path )
+    void Bank::load( const std::string& path )
     {
         if (path.empty()) {
             createNewBank();
@@ -18,8 +18,8 @@ namespace e3 {
         else {
             XmlElement* root = BankSerializer::readBank( path );
             if (root != nullptr) {
-                setXml( root );
                 setPath( path );
+                setXml( root );
             }
         }
     }
@@ -62,13 +62,13 @@ namespace e3 {
     }
 
 
-    Instrument* Bank::loadInstrument( int hash )
+    Instrument* Bank::loadInstrument( int id )
     {
-        hash = (hash == 0) ? getInstrumentHash() : hash;
+        id = (id == -1) ? getCurrentInstrumentId() : id;
 
-        Instrument* instrument = BankSerializer::loadInstrument( getXml(), hash );
+        Instrument* instrument = BankSerializer::loadInstrument( getXml(), id );
         if (instrument != nullptr) {
-            setInstrumentHash( instrument->hash_ );
+            setCurrentInstrumentId( instrument->id_ );
         }
         return instrument;
     }
@@ -92,15 +92,15 @@ namespace e3 {
     }
 
 
-    void Bank::setInstrumentHash( int hash )
+    void Bank::setCurrentInstrumentId( int id )
     {
         if (xml_ != nullptr) {
-            xml_->setAttribute( "instrument", hash );
+            xml_->setAttribute( "instrument", id );
         }
     }
 
 
-    int Bank::getInstrumentHash() const
+    int Bank::getCurrentInstrumentId() const
     {
         return (xml_ != nullptr) ? xml_->getIntAttribute( "instrument" ) : 0;
     }

@@ -12,25 +12,32 @@ namespace e3 {
         public:
             StyleTest() 
             {
-                settings_.load();
-                XmlElement* e = settings_.getStyleXml();
-                style_ = new Style(e);
+                Settings& settings = Settings::getInstance();
+                settings.load();
+                XmlElement* e = settings.getStyleXml();
+                Style::getInstance().setXml( e );
             }
-
-            TestableSettings settings_;
-            ScopedPointer<Style> style_;
         };
 
         TEST_F(StyleTest, FindColours)
         {
-            EXPECT_NE(Colours::black, style_->findColour(Style::kBackgroundColourId));
-            EXPECT_NE(Colours::black, style_->findColour(Style::kContentBackground1ColourId));
-            EXPECT_NE(Colours::black, style_->findColour(Style::kContentBackground2ColourId));
-            EXPECT_NE(Colours::black, style_->findColour(Style::kTabButtonOffBackgroundColourId));
-            EXPECT_NE(Colours::black, style_->findColour(Style::kTabButtonOnBackgroundColourId));
-            EXPECT_NE(Colours::black, style_->findColour(Style::kTabButtonOffTextColourId));
-            EXPECT_EQ(Colours::black, style_->findColour(Style::kTabButtonOnTextColourId));
+            Style& style = Style::getInstance();
+            EXPECT_NE(Colours::black, style.findColour(Style::BackgroundColourId));
+            EXPECT_NE(Colours::black, style.findColour(Style::ContentBackground1ColourId));
+            EXPECT_NE(Colours::black, style.findColour(Style::ContentBackground2ColourId));
+            EXPECT_NE(Colours::black, style.findColour(Style::TabButtonOffBackgroundColourId));
+            EXPECT_NE(Colours::black, style.findColour(Style::TabButtonOnBackgroundColourId));
+            EXPECT_NE(Colours::black, style.findColour(Style::TabButtonOffTextColourId));
+            EXPECT_EQ(Colours::black, style.findColour(Style::TabButtonOnTextColourId));
         }
+
+        TEST_F( StyleTest, useDefaultStyle )
+        {
+            Style& style = Style::getInstance();
+            EXPECT_NO_THROW(style.setXml( nullptr ));
+            EXPECT_NE( Colours::black, style.findColour( Style::BackgroundColourId ) );
+        }
+
 
 
         // WireTest

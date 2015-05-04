@@ -23,8 +23,8 @@ namespace e3 {
 
         void PortComponent::paint(Graphics& g)
         {
-            Colour col1 = findColour(Style::kModulePort1ColourId);
-            Colour col2 = findColour(Style::kModulePort2ColourId);
+            Colour col1 = findColour(Style::ModulePort1ColourId);
+            Colour col2 = findColour(Style::ModulePort2ColourId);
             Colour col  = (numConnections_ > 0) ? col2 : col1;
 
             if (state_ & Reject)
@@ -51,13 +51,13 @@ namespace e3 {
 
             if ((state_ & Hover) || (state_ & Docking))	 // draw label
             {
-                //g.setColour(findColour(Style::kModuleColourId));
+                //g.setColour(findColour(Style::ModuleColourId));
                 g.setColour(col);
                 g.fillRect(rcBkgnd_);
 
                 int align = (getPortType() == PortTypeInport) ? Justification::centredLeft : Justification::centredRight;
                 g.setFont(10);
-                g.setColour(findColour(Style::kModuleText1ColourId).darker());
+                g.setColour(findColour(Style::ModuleText1ColourId).darker());
                 g.drawText(port_->getLabel(), rcText_, align, true);
             }
         }

@@ -6,7 +6,44 @@
 
 namespace e3
 {
-    class ParameterPanel : public Component, public Label::Listener
+    class InstrumentParameterPanel : public Component, 
+                                     public Label::Listener
+    { 
+    public:
+        InstrumentParameterPanel();
+
+        void paint( Graphics& g ) override;
+        void resized() override;
+        void update( Instrument* instrument );
+        void labelTextChanged( Label *labelThatHasChanged ) override;
+
+    protected:
+        Label headerLabel_;
+        Label nameLabel_;
+        Label nameEditor_;
+        Label categoryLabel_;
+        Label categoryEditor_;
+        Label commentLabel_;
+        Label commentEditor_;
+    };
+    
+    
+    class ModuleParameterPanel : public Component, public Label::Listener
+    {
+    public:
+        ModuleParameterPanel();
+
+        void paint( Graphics& g ) override;
+        void resized() override;
+        void update( Module* module );
+        void labelTextChanged( Label *labelThatHasChanged ) override;
+
+    protected:
+        Label headerLabel_;
+    };
+
+
+    class ParameterPanel : public Component
     {
     public:
         ParameterPanel();
@@ -17,10 +54,9 @@ namespace e3
         void showInstrument( Instrument* instrument );
         void showModule( Module* module );
 
-        void labelTextChanged( Label *labelThatHasChanged ) override;
-
     protected:
-        ScopedPointer<Label> headerLabel_;
+        ScopedPointer<InstrumentParameterPanel> instrumentPanel_;
+        ScopedPointer<ModuleParameterPanel> modulePanel_;
     };
 
 

@@ -14,27 +14,27 @@ namespace e3 {
         friend class BankSerializer;
 
     public:
-        void open(const std::string& path);
+        void load( const std::string& path );
+        void save( const std::string& path, bool saveCurrent=true, bool makeBackup=true );
         void createNewBank();
-        void save(const std::string& path, bool saveCurrent=true, bool makeBackup=true);
 
-        const std::string getName() const;    
-        void setName(const std::string& name); 
-                                                     
-        int getInstrumentHash() const;
-        void setInstrumentHash(int hash);
+        const std::string getName() const;
+        void setName( const std::string& name );
 
-        void setPath(const std::string& path);
+        int getCurrentInstrumentId() const;
+        void setCurrentInstrumentId( int id );
+
+        void setPath( const std::string& path );
         std::string getPath();
 
-        Instrument* loadInstrument(int hash=0);
-        void saveInstrument(Instrument* instrument);
+        Instrument* loadInstrument( int id = -1 );
+        void saveInstrument( Instrument* instrument );
 
-        void append(Instrument* instrument);
+        void append( Instrument* instrument );
 
         XmlElement* getXml();
-        void setXml(XmlElement* e);
-		bool hasLoaded() const;
+        void setXml( XmlElement* e );
+        bool hasLoaded() const;
 
     protected:
         std::unique_ptr<XmlElement> xml_          = nullptr;

@@ -20,7 +20,7 @@ namespace e3 {
         moduleType_( moduleType ),
         voicingType_( voicingType ),
         processingType_( processingType ),
-        style_( style ),
+        moduleStyle_( style ),
         mono_( voicingType_ == Monophonic )
     {}
 

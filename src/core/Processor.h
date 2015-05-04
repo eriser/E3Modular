@@ -77,10 +77,10 @@ namespace e3 {
         bool suspend();
         void resume( bool nested = false );
 
-        void openBank( const std::string& path );
+        void loadBank( const std::string& path );
         void newBank();
         void saveBank( const std::string& path = "" );
-        void loadInstrument( int hash = 0, bool saveCurrent = true );
+        void loadInstrument( int id = -1, bool saveCurrent = true );
 
         Link* addLink( const Link& link );
         void removeLink( const Link& link );

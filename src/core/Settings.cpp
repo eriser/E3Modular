@@ -3,7 +3,6 @@
 
 #include "e3_Trace.h"
 #include "e3_Exception.h"
-#include "gui/Style.h"
 #include "core/Settings.h"
 
 using std::string;
@@ -27,9 +26,6 @@ namespace e3 {
         } else {
             parse(file_);
         }
-
-        XmlElement* styleXml = getStyleXml();
-        style_ = new Style(styleXml);
     }
 
 
@@ -48,12 +44,6 @@ namespace e3 {
         
         needsStore_ = false;
         return root_->writeToFile(file_, String::empty);
-    }
-
-
-    Style* Settings::getStyle() const
-    {
-        return style_.get();
     }
 
 
@@ -125,19 +115,32 @@ namespace e3 {
     }
 
 
-    std::string Settings::getDefaultXml() 
+    std::string Settings::getDefaultXml() const
     {
         std::ostringstream os;
         os << "<" << rootTagname_ << ">" << std::endl;
         os << defaultXml_ << std::endl;
-        os << defaultStyleXml_ << std::endl;
         os << "</" << rootTagname_ << ">" << std::endl;
 
         return os.str();
     }
 
 
-    std::string Settings::getWindowState(const std::string& context) const
+    XmlElement* Settings::getStyleXml( const std::string& name ) const
+    {
+        if (root_ != nullptr)
+        {
+            forEachXmlChildElementWithTagName( *root_, e, "Style" ) {
+                if (e->getStringAttribute( "name" ) == name) {
+                    return e;
+                }
+            }
+        }
+        return nullptr;
+    }
+    
+    
+    std::string Settings::getWindowState( const std::string& context ) const
     {
         std::string defaultState = "0 0 1000 700";
         std::string path = context + "/Window";
@@ -248,23 +251,5 @@ namespace e3 {
         }
     }
 #endif
-
-    XmlElement* Settings::getStyleXml(const std::string& name)
-    {
-        if (root_ != nullptr) 
-        {
-            forEachXmlChildElementWithTagName(*root_, e, "Style") {
-                if (e->getStringAttribute("name") == name) {
-                    return e;
-                }
-            }
-
-            XmlElement* e = XmlDocument::parse(defaultStyleXml_);
-            ASSERT(e);
-            root_->addChildElement(e);
-            return e;
-        }
-        return nullptr;
-    }
 
 } // namespace e3

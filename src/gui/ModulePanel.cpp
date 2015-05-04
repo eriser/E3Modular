@@ -135,7 +135,7 @@ namespace e3 {
 
     void ModulePanel::paint( Graphics& g )
     {
-        Colour bkgndCol = findColour( Style::kContentBackground1ColourId );
+        Colour bkgndCol = findColour( Style::ContentBackground1ColourId );
         g.fillAll( bkgndCol );
     }
 

@@ -45,7 +45,7 @@ namespace e3 {
 
         if (instrument_ == nullptr)
         {
-            openBank( Settings::getInstance().getRecentBankPath() );
+            loadBank( Settings::getInstance().getRecentBankPath() );
             loadInstrument();
         }
         else {
@@ -98,9 +98,9 @@ namespace e3 {
     }
 
 
-    void Processor::openBank( const std::string& path )
+    void Processor::loadBank( const std::string& path )
     {
-        bank_->open( path );
+        bank_->load( path );
     }
 
 
@@ -116,7 +116,7 @@ namespace e3 {
     }
 
 
-    void Processor::loadInstrument( int hash, bool saveCurrent )
+    void Processor::loadInstrument( int id, bool saveCurrent )
     {
         suspend();
 
@@ -124,7 +124,7 @@ namespace e3 {
             bank_->saveInstrument( instrument_ );
         }
 
-        instrument_ = bank_->loadInstrument( hash );        // this calls instrument::ctor first!
+        instrument_ = bank_->loadInstrument( id );        // this calls instrument::ctor first!
         if (instrument_ != nullptr)
         {
             uint16_t numVoices = instrument_->numVoices_;

@@ -54,8 +54,8 @@ namespace e3 {
     {
         data_       = data;
         numRows_    = data_ ? data_->getNumChildElements() : 0;
-        int hash    = data_->getIntAttribute("instrument");
-        activeItem_ = data_->getChildByAttribute("hash", String(hash));
+        int id      = data_->getIntAttribute("instrument");
+        activeItem_ = data_->getChildByAttribute("id", String(id));
 
         table_.updateContent();
         table_.selectRow(getActiveRowNumber());
@@ -92,15 +92,15 @@ namespace e3 {
 
         // highlight active item
         if (isActiveItem(rowNumber)) {
-            g.setColour(findColour(Style::kHighlightColourId));
+            g.setColour(findColour(Style::HighlightColourId));
         }  else {
-            g.setColour(findColour(Style::kContentBackground1ColourId));
+            g.setColour(findColour(Style::ContentBackground1ColourId));
         }
         g.fillRect(Rectangle<float>(0, 0, (float)width, height - 0.5f));
 
         // highlight selected row
         if (rowIsSelected) {
-            g.setColour(findColour(Style::kHighlightColourId).withAlpha(0.1f));
+            g.setColour(findColour(Style::HighlightColourId).withAlpha(0.1f));
             g.fillRect(Rectangle<float>(0, 0, (float)width-1, height - 0.5f));
             g.setColour(Colours::black.withAlpha(0.6f));
             g.drawRect(Rectangle<float>(-1, 0, (float)width + 1, height - 0.5f), 1.f);
@@ -112,7 +112,7 @@ namespace e3 {
         g.drawText(text, 2, 0, width - 4, height, Justification::centredLeft, true);
         
         // draw column separator
-        g.setColour(findColour(Style::kContentBackground2ColourId));
+        g.setColour(findColour(Style::ContentBackground2ColourId));
         g.fillRect(Rectangle<float>((float)width - 1, 0, 1, (float)height));
     }
 

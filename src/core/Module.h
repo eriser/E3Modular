@@ -115,7 +115,7 @@ namespace e3 {
 
         const ModuleType moduleType_;
         const ProcessingType processingType_;
-        const ModuleStyle style_;
+        const ModuleStyle moduleStyle_;
 
     protected:
         std::string label_;

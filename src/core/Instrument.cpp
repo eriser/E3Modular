@@ -246,6 +246,4 @@ namespace e3 {
         return (getModule( ModuleTypeAudioOutTerminal ) != nullptr);
     }
 
-
-
 }  // namespace e3
