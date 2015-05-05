@@ -49,7 +49,6 @@ namespace e3 {
             SettingsTest() {
                 settings_.setPath( "e3m_valid.settings" );   // load settings file from current dir
             }
-
             TestableSettings settings_;
         };
 
@@ -495,8 +494,6 @@ namespace e3 {
                 polyphony_.setNumVoices( 1 );
             }
 
-            Polyphony polyphony_;
-
             void testInitialization( ModuleType moduleType )
             {
                 ScopedPointer<Module> module = ModuleFactory::create( moduleType );
@@ -511,6 +508,7 @@ namespace e3 {
 
             ScopedPointer<TestableSineOscil> sine_;
             ScopedPointer<TestableAudioOutTerminal> audioOutTerminal_;
+            Polyphony polyphony_;
 
             void connect()
             {
@@ -521,8 +519,8 @@ namespace e3 {
 
                 sine_->setId( 1 );
                 audioOutTerminal_->setId( 0 );
-                sine_->init( &polyphony_, 44100 );
-                audioOutTerminal_->init( &polyphony_, 44100 );
+                sine_->init( 44100, 1, &polyphony_ );
+                audioOutTerminal_->init( 44100, 1, &polyphony_ );
 
                 Link link;
                 link.value_ = 1;    // modulation value
@@ -778,20 +776,25 @@ namespace e3 {
                 return File::getCurrentWorkingDirectory().getChildFile( StringRef(filename)).getFullPathName().toStdString();
             }
 
+            Polyphony polyphony_;
             Settings settings_;
             TestableBank bank_;
 
             void checkBank( Bank& bank )
             {
                 EXPECT_EQ( "test", bank.getName() );
+                EXPECT_NE( nullptr, bank.getXml() );
             }
 
             void checkInstrument( Instrument* i )
             {
+                ASSERT_NE( nullptr, i );
+
+                polyphony_.setNumVoices( i->numVoices_ );
+
                 TestableInstrument* instrument = static_cast<TestableInstrument*>(i);
-                Polyphony polyphony;
-                polyphony.setNumVoices( 32 );
-                instrument->initModules( &polyphony, 44100 );
+                instrument->initModules( 44100, 32, &polyphony_ );
+                instrument->connectModules();
 
                 EXPECT_EQ( "instrument_0", instrument->name_ );
                 EXPECT_EQ( 32, instrument->numVoices_ );
@@ -864,6 +867,10 @@ namespace e3 {
                 
                 instrument->getLinksForModule( adsr->getId(), PortTypeOutport, linksForAdsr );
                 EXPECT_EQ( 1, linksForAdsr.size() );
+
+                Sink sink;
+                EXPECT_NO_THROW( sink.compile( instrument ) );
+                EXPECT_EQ( 4, sink.size() );
             }
 
             void checkMidiParameters( const Parameter& model )
@@ -909,15 +916,16 @@ namespace e3 {
             bank_.load( testBank_valid_filename );
             int id = bank_.getCurrentInstrumentId();
             ScopedPointer<Instrument> instrument = bank_.loadInstrument( id );
-            ASSERT_NE( nullptr, instrument );
             checkInstrument( instrument );
         }
 
         TEST_F( BankTest, store )
         {
+            std::string path = makeAbsolutePath( "TestBank_storeTest.e3mb" );
+
             bank_.load( testBank_valid_filename );
-            bank_.save( makeAbsolutePath("TestBank_storeTest.e3mb"), false, false );
-            bank_.load( makeAbsolutePath( "TestBank_storeTest.e3mb") );
+            bank_.save( path, false, false );
+            bank_.load( path );
             checkBank( bank_ );
 
             ScopedPointer<Instrument> instrument = bank_.loadInstrument();
@@ -926,8 +934,9 @@ namespace e3 {
             bank_.saveInstrument( instrument );
             int id = instrument->id_;
             bank_.setCurrentInstrumentId( id );
-            bank_.save( makeAbsolutePath("TestBank_storeTest.e3mb"), false, false );
-            bank_.load( makeAbsolutePath( "TestBank_storeTest.e3mb"));
+
+            bank_.save( path, false, false );
+            bank_.load( path );
             EXPECT_EQ( id, bank_.getCurrentInstrumentId() );
 
             instrument = bank_.loadInstrument();
@@ -938,23 +947,46 @@ namespace e3 {
         }
 
 
-
-        TEST_F( BankTest, compile )
+        TEST_F( BankTest, saveInstrumentAttributes1 )
         {
             bank_.load( testBank_valid_filename );
+            checkBank( bank_ );
+
             ScopedPointer<Instrument> instrument = bank_.loadInstrument();
+            instrument->name_ = "testName";
+            instrument->category_ = "testCategory";
+            instrument->comment_ = "testComment";
+            instrument->setNumVoices( 17 );
+            instrument->setNumUnison( 18 );
+            instrument->setUnisonSpread( 19 );
+            instrument->setHold( true );
+            instrument->setRetrigger( true );
+            instrument->setLegato( true );
+            bank_.saveInstrumentAttributes( instrument );
+
+            std::string path = makeAbsolutePath( "TestBank_storeTest.e3mb" );
+            File file( path );
+            file.deleteFile();
+            bank_.save( path, false, false );
+            bank_.load( path );
+            instrument = bank_.loadInstrument();
+
             ASSERT_NE( nullptr, instrument );
+            EXPECT_EQ( "testName", instrument->name_ );
+            EXPECT_EQ( "testCategory", instrument->category_ );
+            EXPECT_EQ( "testComment", instrument->comment_ );
+            EXPECT_EQ( 17, instrument->numVoices_ );
+            EXPECT_EQ( 18, instrument->numUnison_ );
+            EXPECT_EQ( 19, instrument->unisonSpread_ );
+            EXPECT_TRUE( instrument->hold_ );
+            EXPECT_TRUE( instrument->retrigger_ );
+            EXPECT_TRUE( instrument->legato_ );
 
-            Polyphony polyphony;
-            polyphony.setNumVoices( 4 );
-
-            instrument->initModules( &polyphony, 44100 );
-            instrument->connectModules();
-
-            Sink sink;
-            sink.compile( instrument );
-            EXPECT_EQ( 4, sink.size() );
+            instrument->name_ = "instrument_0";
+            instrument->setNumVoices( 32 );
+            checkInstrument( instrument );
         }
+
 
 
         //--------------------------------------------------------

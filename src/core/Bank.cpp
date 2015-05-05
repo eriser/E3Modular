@@ -92,6 +92,12 @@ namespace e3 {
     }
 
 
+    void Bank::saveInstrumentLinks( Instrument* instrument )
+    {
+        BankSerializer::saveInstrumentLinks( getXml(), instrument );
+    }
+
+
     XmlElement* Bank::getXml()
     {
         return xml_.get();

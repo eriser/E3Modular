@@ -47,19 +47,23 @@ namespace e3 {
         setColour( Label::textWhenEditingColourId, colourMap["darkText"] );
         setColour( Label::outlineWhenEditingColourId, colourMap["contentBackground2"] );
 
-        setColour( TextEditor::backgroundColourId, colourMap["TextEditorBackgroundColourId"] );
-        setColour( TextEditor::textColourId, colourMap["TextEditorTextColourId"] );
-        setColour( TextEditor::highlightColourId, colourMap["TextEditorHighlightColourId"] );
-        setColour( TextEditorFocusedColourId, colourMap["TextEditorFocusedColourId"] );
-        setColour( TextEditor::highlightedTextColourId, colourMap["TextEditorHighlightedTextColourId"] );
-        setColour( TextEditor::outlineColourId, colourMap["TextEditorOutlineColourId"] );
-        setColour( TextEditor::focusedOutlineColourId, colourMap["TextEditorFocusedOutlineColourId"] );
-        setColour( TextEditor::shadowColourId, colourMap["TextEditorShadowColourId"] );
+        setColour( TextEditor::backgroundColourId, colourMap["textEditorBackgroundColourId"] );
+        setColour( TextEditor::textColourId, colourMap["textEditorTextColourId"] );
+        setColour( TextEditor::highlightColourId, colourMap["textEditorHighlightColourId"] );
+        setColour( TextEditorFocusedColourId, colourMap["textEditorFocusedColourId"] );
+        setColour( TextEditor::highlightedTextColourId, colourMap["textEditorHighlightedTextColourId"] );
+        setColour( TextEditor::outlineColourId, colourMap["textEditorOutlineColourId"] );
+        setColour( TextEditor::focusedOutlineColourId, colourMap["textEditorFocusedOutlineColourId"] );
+        setColour( TextEditor::shadowColourId, colourMap["textEditorShadowColourId"] );
 
         setColour( TextButton::buttonColourId, colourMap["buttonOffBackground"] );
         setColour( TextButton::buttonOnColourId, colourMap["buttonOnBackground"] );
         setColour( TextButton::textColourOffId, colourMap["buttonOffText"] );
         setColour( TextButton::textColourOnId, colourMap["buttonOnText"] );
+
+        setColour( ToggleButton::textColourId, colourMap["toggleButtonTextColourId"] );
+        setColour( ToggleButtonBackgroundColourId, colourMap["toggleButtonBackgroundColourId"] );
+        setColour( ToggleButtonTickColourId, colourMap["toggleButtonTickColourId"] );
 
         //setColour(TabbedComponent::backgroundColourId, colourMap["contentBackground2"]);
         setColour( TabbedComponent::backgroundColourId, Colours::transparentBlack );
@@ -160,13 +164,13 @@ namespace e3 {
     }
 
 
-    void Style::fillTextEditorBackground( Graphics& g, int /*width*/, int /*height*/, TextEditor& textEditor )
-    {
-        Colour c = textEditor.hasKeyboardFocus( true ) ?
-            findColour( TextEditorFocusedColourId ) :
-            findColour( TextEditor::backgroundColourId );
-        g.fillAll( c );
-    }
+    //void Style::fillTextEditorBackground( Graphics& g, int /*width*/, int /*height*/, TextEditor& textEditor )
+    //{
+    //    Colour c = textEditor.hasKeyboardFocus( true ) ?
+    //        findColour( TextEditorFocusedColourId ) :
+    //        findColour( TextEditor::backgroundColourId );
+    //    g.fillAll( c );
+    //}
 
 
     void Style::drawButtonBackground( Graphics& g, Button& button, const Colour& color,
@@ -182,6 +186,70 @@ namespace e3 {
         g.setColour( c );
         g.fillRect( button.getLocalBounds() );
     }
+
+
+    void Style::drawToggleButton( Graphics& g, ToggleButton& button,
+        bool isMouseOverButton, bool isButtonDown )
+    {
+        //if (button.hasKeyboardFocus( true ))
+        //{
+        //    g.setColour( button.findColour( TextEditor::focusedOutlineColourId ) );
+        //    g.drawRect( 0, 0, button.getWidth(), button.getHeight() );
+        //}
+
+        const float tickWidth = (float)button.getHeight();
+
+        drawTickBox( g, button, 0, 0,
+            tickWidth, tickWidth,
+            button.getToggleState(),
+            button.isEnabled(),
+            isMouseOverButton,
+            isButtonDown );
+
+        g.setColour( button.findColour( ToggleButton::textColourId ) );
+        g.setFont( 12 );
+
+        if (!button.isEnabled())
+            g.setOpacity( 0.5f );
+
+        const int textX = (int)tickWidth + 10;
+
+        g.drawFittedText( button.getButtonText(),
+            textX, 0,
+            button.getWidth() - textX - 2, button.getHeight(),
+            Justification::centredLeft, 10 );
+    }
+
+
+    void Style::drawTickBox( Graphics& g, Component& component,
+                             float x, float y, float w, float h,
+                             bool ticked,
+                             bool isEnabled,
+                             bool isMouseOverButton,
+                             bool isButtonDown )
+    {
+        UNUSED( isMouseOverButton );
+        UNUSED( isButtonDown );
+        
+        Rectangle<float> r = Rectangle<float>( x, y, w, h ).reduced( w*0.1f, w*0.1f );
+
+        // outline
+        Colour bkgndCol = component.findColour( Style::ToggleButtonBackgroundColourId );
+        isEnabled ? g.setColour( bkgndCol ) : g.setColour( bkgndCol.withAlpha( 0.5f ) );
+        g.setColour( bkgndCol );
+        g.drawRect( r );
+
+        // tick
+        if (ticked) 
+        {
+            Colour tickCol  = component.findColour( Style::ToggleButtonTickColourId );
+            isEnabled ? g.setColour( tickCol ) : g.setColour( tickCol.withAlpha( 0.5f ) );
+            g.setColour( tickCol );
+            g.fillRect( r.reduced( 3, 3 ) );
+        }
+    }
+
+
 
 
     int Style::getTabButtonBestWidth( TabBarButton &, int tabDepth )

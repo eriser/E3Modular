@@ -22,22 +22,22 @@ namespace e3 {
         Polyphony();
         ~Polyphony() {}
 
-        void handleMidiMessage(const MidiMessage& m);
+        void handleMidiMessage( const MidiMessage& m );
 
-        void startVoice(int voice, double pitch, double gate);
-        void endVoice(int voice);
+        void startVoice( int voice, double pitch, double gate );
+        void endVoice( int voice );
 
-        void setNumVoices(int numVoices);
+        void setNumVoices( int numVoices );
         int getNumVoices() const                    { return numVoices_; }
-        bool isVoiceActive(int voice) const	        { return voices_[voice].state_ != Voice::Silent; }
-        
-        //void setNumUnison(uint16_t numUnison);
-        //void setUnisonSpread(uint16_t cent);
-        //void setHold(bool hold);
-        //void setSustain(bool sustain);
-        //void setRetrigger(bool retrigger) { retrigger_ = retrigger; }
-        //void setLegato(bool legato);
-        //double getPreviousPitch(uint16_t voice);
+        bool isVoiceActive( int voice ) const	    { return voices_[voice].state_ != Voice::Silent; }
+
+        void setNumUnison( int numUnison );
+        void setUnisonSpread( int cent );
+        void setHold( bool hold );
+        void setSustain( bool sustain );
+        void setRetrigger( bool retrigger )         { retrigger_ = retrigger; }
+        void setLegato( bool legato );
+        double getPreviousPitch( int voice );
 
         VoiceList voices_;
         Buffer< int > soundingVoices_;
@@ -56,12 +56,12 @@ namespace e3 {
 
     protected:
 
-        void noteOn(double pitch, double gate);
-        void noteOff(double pitch);
-        void allNotesOff(bool reset);
+        void noteOn( double pitch, double gate );
+        void noteOff( double pitch );
+        void allNotesOff( bool reset );
 
         int getUnusedVoice();
-        void combineVoices(double basePitch, double gate);
+        void combineVoices( double basePitch, double gate );
         void updateSoundingVoices();
 
         //void dumpStack(const string& msg);

@@ -4,6 +4,7 @@
 #include <string>
 #include "JuceHeader.h"
 #include "core/GlobalHeader.h"
+#include "gui/Widgets.h"
 
 
 
@@ -13,7 +14,8 @@ namespace e3
 
 
     class InstrumentParameterPanel : public Component, 
-                                     public Label::Listener
+                                     public Label::Listener,
+                                     public Button::Listener
     { 
     public:
         InstrumentParameterPanel(ParameterPanel* owner);
@@ -21,7 +23,10 @@ namespace e3
         void resized() override;
         void paint( Graphics& g ) override;
         void update( Instrument* instrument );
+
         void labelTextChanged( Label *labelThatHasChanged ) override;
+        void buttonClicked( Button* button ) override;
+        //void buttonStateChanged( Button* button ) override;
 
     protected:
         Label headerLabel_;
@@ -31,6 +36,16 @@ namespace e3
         Label nameEditor_;
         Label categoryEditor_;
         Label commentEditor_;
+        Label voicesLabel_;
+        Label unisonLabel_;
+        Label spreadLabel_;
+        NumericLabel voicesEditor_;
+        NumericLabel unisonEditor_;
+        NumericLabel spreadEditor_;
+
+        ToggleButton holdButton_;
+        ToggleButton retriggerButton_;
+        ToggleButton legatoButton_;
 
         ParameterPanel* owner_;
     };

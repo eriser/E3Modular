@@ -31,6 +31,7 @@ namespace e3 {
         void saveInstrument( Instrument* instrument );
         void saveInstrumentAttributes( Instrument* instrument );
         void saveInstrumentAttribute( int instrumentId, const std::string& name, const var& value );
+        void saveInstrumentLinks( Instrument* instrument );
 
         void append( Instrument* instrument );
 

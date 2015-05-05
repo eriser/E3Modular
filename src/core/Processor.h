@@ -99,6 +99,7 @@ namespace e3 {
     private:
         void initInstrument();
         void resetAndInitInstrument();
+        void setNumVoices( int numVoices );
 
         Sink* sink_ = nullptr;
         ScopedPointer<Polyphony> polyphony_;

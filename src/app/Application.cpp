@@ -47,7 +47,7 @@ namespace e3 {
             audioEngine_->getProcessor()->editorBeingDeleted( editor );
             window_->clearContentComponent();
         }
-        window_ = nullptr;
+        window_      = nullptr;
         audioEngine_ = nullptr;
     }
 

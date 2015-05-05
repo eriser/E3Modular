@@ -30,6 +30,7 @@ namespace e3 {
         static void saveInstrument( XmlElement* root, Instrument* instrument );
         static void saveInstrumentAttributes( XmlElement* root, Instrument* instrument );
         static void saveInstrumentAttribute( XmlElement* root, int id, const std::string& name, const var value );
+        static void saveInstrumentLinks( XmlElement* root, Instrument* instrument );
 
     protected:
         static void readInstrument( XmlElement* element, Instrument* instrument );
@@ -41,6 +42,7 @@ namespace e3 {
         static void writeBank( XmlElement* const e, const Bank* const bank );
         static void writeInstrument( XmlElement* const e, Instrument* instrument );
         static void writeInstrumentAttributes( XmlElement* const e, Instrument* instrument );
+        static void BankSerializer::writeInstrumentLinks( XmlElement* const e, Instrument* instrument );
         static void writeModule( XmlElement* const e, const Module* module );
         static void writeParameters( XmlElement* const e, const Module* module );
         static void writeParameter( XmlElement* const e, const Parameter& param, const Parameter& defaultParam );

@@ -50,7 +50,7 @@ namespace e3 {
         }
         else {
             try {
-                instrument_->setSampleRate( sampleRate );
+                resetAndInitInstrument();
             }
             catch (const std::exception& e) {
                 TRACE( e.what() );
@@ -131,8 +131,13 @@ namespace e3 {
         instrument_ = bank_->loadInstrument( id );        // this calls instrument::ctor first!
         if (instrument_ != nullptr)
         {
-            uint16_t numVoices = instrument_->numVoices_;
-            polyphony_->setNumVoices( numVoices );
+            polyphony_->setNumVoices( instrument_->numVoices_ );
+            polyphony_->setNumUnison( instrument_->numUnison_ );
+            polyphony_->setUnisonSpread( instrument_->unisonSpread_ );
+            polyphony_->setHold( instrument_->hold_ );
+            polyphony_->setRetrigger( instrument_->retrigger_ );
+            polyphony_->setLegato( instrument_->legato_ );
+
             initInstrument();
         }
 
@@ -142,6 +147,10 @@ namespace e3 {
 
     void Processor::resetAndInitInstrument()
     {
+        ASSERT( instrument_ );
+        ASSERT( polyphony_ );
+        ASSERT( instrument_->numVoices_ == polyphony_->getNumVoices() );
+
         instrument_->resetModules();
         initInstrument();
     }
@@ -149,7 +158,7 @@ namespace e3 {
 
     void Processor::initInstrument()
     {
-        instrument_->initModules( polyphony_, getSampleRate() );
+        instrument_->initModules( getSampleRate(), instrument_->numVoices_, polyphony_ );
         instrument_->connectModules();
         instrument_->updateModules();
 
@@ -163,6 +172,7 @@ namespace e3 {
         suspend();
         try {
             result = instrument_->addLink( link );
+            bank_->saveInstrumentLinks( instrument_ );
             resetAndInitInstrument();
         }
         catch (const std::exception& e) {
@@ -179,12 +189,12 @@ namespace e3 {
         suspend();
         try {
             instrument_->removeLink( link );
+            bank_->saveInstrumentLinks( instrument_ );
             resetAndInitInstrument();
         }
         catch (const std::exception& e) 
         {
             TRACE( e.what() );
-            //checkAppState();
             return;
         }
         resume();
@@ -196,6 +206,7 @@ namespace e3 {
         Module* module = nullptr;
         try {
             module = instrument_->createAndAddModule( (ModuleType)moduleType );
+            bank_->saveInstrument( instrument_ );
         }
         catch (const std::exception& e) 
         {
@@ -214,12 +225,12 @@ namespace e3 {
         suspend();
         try {
             instrument_->deleteModule( module );
+            bank_->saveInstrument( instrument_ );
             resetAndInitInstrument();
         }
         catch (const std::exception& e) 
         {
             TRACE( e.what() );
-            //checkAppState();
             return;
         }
         resume();
@@ -231,7 +242,33 @@ namespace e3 {
         ASSERT( instrument_ );
         if (instrument_ == nullptr) return;
 
-        instrument_->setAttribute( name, value );
+        if (name == "name")          instrument_->name_     = value.toString().toStdString();
+        else if (name == "category") instrument_->category_ = value.toString().toStdString();
+        else if (name == "comment")  instrument_->comment_  = value.toString().toStdString();
+
+        else if (name == "numVoices") {
+            setNumVoices( value );
+        }
+        else if (name == "numUnison") {
+            instrument_->setNumUnison( value );
+            polyphony_->setNumUnison( value );
+        }
+        else if (name == "unisonSpread") {
+            instrument_->setUnisonSpread( value );
+            polyphony_->setUnisonSpread( value );
+        }
+        else if (name == "hold") {
+            instrument_->setHold( value );
+            polyphony_->setHold( value );
+        }
+        else if (name == "retrigger") {
+            instrument_->setRetrigger( value );
+            polyphony_->setRetrigger( value );
+        }
+        else if (name == "legato") {
+            instrument_->setLegato( value );
+            polyphony_->setLegato( value );
+        }
         bank_->saveInstrumentAttributes( instrument_ );
     }
 
@@ -239,10 +276,28 @@ namespace e3 {
     void Processor::setInstrumentAttribute( int instrumentId, const std::string& name, const var& value )
     {
         if (instrument_ != nullptr && instrumentId == instrument_->id_) {
-            instrument_->setAttribute( name, value );
+            setInstrumentAttributes( name, value );
         }
         bank_->saveInstrumentAttribute( instrumentId, name, value );
     }
+
+    
+    void Processor::setNumVoices( int numVoices )
+    {
+        suspend();
+        try {
+            polyphony_->setNumVoices( numVoices );
+            instrument_->setNumVoices( numVoices );
+            resetAndInitInstrument();
+        }
+        catch (const std::exception& e)
+        {
+            TRACE( e.what() );
+            return;
+        }
+        resume();
+    }
+
 
     //-------------------------------------------------------
     // Processing

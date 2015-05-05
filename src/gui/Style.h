@@ -18,15 +18,23 @@ namespace e3 {
         void drawDocumentWindowTitleBar(
             DocumentWindow& window, Graphics& g,
             int w, int h, int titleSpaceX, int titleSpaceW,
-            const Image* icon, bool drawTitleTextOnLeft );
+            const Image* icon, bool drawTitleTextOnLeft ) override;
 
         Button* createDocumentWindowButton( int buttonType ) override;
 
-        void fillTextEditorBackground( Graphics& g, int width, int height, TextEditor& textEditor );
+        //void fillTextEditorBackground( Graphics& g, int width, int height, TextEditor& textEditor ) override;
 
         void drawButtonBackground(
             Graphics& g, Button& button, const Colour& backgroundColour,
             bool isMouseOverButton, bool isButtonDown ) override;
+
+        void drawToggleButton( Graphics& g, ToggleButton& button, bool isMouseOverButton, bool isButtonDown ) override;
+        void drawTickBox( Graphics& g, Component& component,
+                          float x, float y, float w, float h,
+                          bool ticked,
+                          bool isEnabled,
+                          bool isMouseOverButton,
+                          bool isButtonDown ) override;
 
         int getTabButtonBestWidth( TabBarButton &, int tabDepth ) override;
         int getTabButtonOverlap( int tabDepth ) override;
@@ -52,6 +60,8 @@ namespace e3 {
             TabButtonOnBackgroundColourId   = 0x2000031,
             TabButtonOffTextColourId        = 0x2000032,
             TabButtonOnTextColourId         = 0x2000033,
+            ToggleButtonBackgroundColourId  = 0x2000040,
+            ToggleButtonTickColourId        = 0x2000041,
 
             ModuleColourId                  = 0x2000050,
             ModuleMonoColourId              = 0x2000051,

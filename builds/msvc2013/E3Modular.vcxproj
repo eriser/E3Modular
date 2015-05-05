@@ -483,6 +483,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\gui\Resources.h" />
     <ClInclude Include="..\..\src\gui\Style.h" />
     <ClInclude Include="..\..\src\gui\EditorPanel.h" />
+    <ClInclude Include="..\..\src\gui\Widgets.h" />
     <ClInclude Include="..\..\src\gui\Wires.h" />
     <ClInclude Include="..\..\src\modules\Delay.h" />
     <ClInclude Include="..\..\src\modules\Envelopes.h" />

@@ -129,7 +129,7 @@ namespace e3 {
         ProcessFunctionPointer processFunction_ = nullptr;
 
         // Constructs all member and initializes them with the current sample rate and number of voices.
-        virtual void init(Polyphony* polyphony, double sampleRate);
+        virtual void init( double sampleRate, int numVoices, Polyphony* polyphony );
 
         // Update after all modules are connected. Links remain valid.
         virtual void update();

@@ -235,22 +235,26 @@ namespace e3 {
     }
 
 
-    void AudioEditor::parameterPanelAttributesChanged( const std::string& attributeName, var value )
+    void AudioEditor::parameterPanelAttributesChanged( const std::string& name, var value )
     {
         TRACE( "AudioEditor::parameterPanelAttributesChanged: name=%s, value=%s\n",
-            attributeName.c_str(), value.toString().toRawUTF8() );
+            name.c_str(), value.toString().toRawUTF8() );
 
-        processor_->setInstrumentAttributes( attributeName, value );
-        browserPanel_->updateContents( processor_->getBankXml() );  // TODO: update only active row
+        processor_->setInstrumentAttributes( name, value );
+
+        if (name == "name" || name == "category" || name == "comment") {
+            browserPanel_->updateContents( processor_->getBankXml() );  // TODO: update only active row
+        }
     }
 
 
-    void AudioEditor::browserPanelAttributesChanged( int instrumentId, const std::string& attributeName, var value )
+    void AudioEditor::browserPanelAttributesChanged( int instrumentId, const std::string& name, var value )
     {
+        ASSERT( name == "name" || name == "category" || name == "comment" );
         TRACE( "AudioEditor::parameterPanelAttributesChanged: name=%s, value=%s\n",
-            attributeName.c_str(), value.toString().toRawUTF8() );
+            name.c_str(), value.toString().toRawUTF8() );
 
-        processor_->setInstrumentAttribute( instrumentId, attributeName, value );
+        processor_->setInstrumentAttribute( instrumentId, name, value );
         parameterPanel_->showInstrument(processor_->getInstrument());
     }
 

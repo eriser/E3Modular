@@ -68,7 +68,6 @@ namespace e3 {
         {
             try {
                 e->deleteAllChildElementsWithTagName( "modules" );
-                e->deleteAllChildElementsWithTagName( "links" );
                 writeInstrument( e, instrument );
             }
             catch (const std::exception& e) {       // parse error
@@ -99,6 +98,21 @@ namespace e3 {
         if (e != nullptr)
         {
             e->setAttribute( Identifier(name), value.toString() );
+        }
+    }
+
+
+    void BankSerializer::saveInstrumentLinks( XmlElement* root, Instrument* instrument )
+    {
+        XmlElement* e = root->getChildByAttribute( "id", String( instrument->id_ ) );
+        if (e != nullptr)
+        {
+            try {
+                writeInstrumentLinks( e, instrument );
+            }
+            catch (const std::exception& e) {       // xml error
+                TRACE( e.what() );
+            }
         }
     }
 
@@ -225,18 +239,15 @@ namespace e3 {
             writeModule( em, *it );
         }
 
-        XmlElement* links = e->createNewChildElement( "links" );
-        const LinkList& linkList = instrument->getLinks();
-        for (LinkList::const_iterator it = linkList.begin(); it != linkList.end(); it++)
-        {
-            XmlElement* const el = links->createNewChildElement( "link" );
-            writeLink( el, *it );
-        }
+        writeInstrumentLinks( e, instrument );
     }
 
 
     void BankSerializer::writeInstrumentAttributes( XmlElement* const e, Instrument* instrument )
     {
+        e->removeAllAttributes();
+
+        e->setAttribute( "id", instrument->id_ );
         e->setAttribute( "name", instrument->name_ );
         e->setAttribute( "category", instrument->category_ );
         e->setAttribute( "comment", instrument->comment_ );
@@ -255,6 +266,20 @@ namespace e3 {
     }
 
 
+    void BankSerializer::writeInstrumentLinks( XmlElement* const e, Instrument* instrument )
+    {
+        e->deleteAllChildElementsWithTagName( "links" );
+        XmlElement* links = e->createNewChildElement( "links" );
+
+        const LinkList& linkList = instrument->getLinks();
+        for (LinkList::const_iterator it = linkList.begin(); it != linkList.end(); it++)
+        {
+            XmlElement* const el = links->createNewChildElement( "link" );
+            writeLink( el, *it );
+        }
+    }
+
+
     void BankSerializer::writeModule( XmlElement* const e, const Module* module )
     {
         e->setAttribute( "id", module->getId() );
@@ -264,6 +289,7 @@ namespace e3 {
 
         writeParameters( e, module );
     }
+
 
     void BankSerializer::writeParameters( XmlElement* const e, const Module* module )
     {

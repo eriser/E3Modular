@@ -91,12 +91,12 @@ namespace e3 {
     }
 
 
-    void Instrument::initModules( Polyphony* polyphony, double sampleRate )
+    void Instrument::initModules( double sampleRate, int numVoices, Polyphony* polyphony )
     {
         for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             Module* m = *it;
-            m->init( polyphony, sampleRate );
+            m->init( sampleRate, numVoices, polyphony );
         }
     }
 
@@ -129,23 +129,6 @@ namespace e3 {
                 }
             }
         }
-        //for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
-        //{
-        //    Module* target = (*it);
-
-        //    for (LinkList::iterator it = links_.begin(); it != links_.end(); ++it)
-        //    {
-        //        Link* link = &(*it);
-        //        if (link->rightModule_ == target->id_)
-        //        {
-        //            Module* source = getModule( link->leftModule_ );
-        //            ASSERT( source );
-        //            if (source) {
-        //                source->connectPort( target, link );
-        //            }
-        //        }
-        //    }
-        //}
     }
 
 
@@ -184,38 +167,6 @@ namespace e3 {
             }
         }
         return nullptr;
-    }
-
-
-    void Instrument::setSampleRate( double sampleRate )
-    {
-        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
-        {
-            Module* m = *it;
-            m->setSampleRate( sampleRate );
-        }
-    }
-
-
-    void Instrument::setNumVoices( uint16_t numVoices )
-    {
-        ASSERT( numVoices > 0 );
-        numVoices_ = numVoices;
-
-        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
-        {
-            Module* m = *it;
-            m->setNumVoices( numVoices_ );
-            m->update();
-        }
-    }
-
-
-    void Instrument::setAttribute( const std::string& name, const var& value )
-    {
-        if (name == "name")          name_     = value.toString().toStdString();
-        else if (name == "category") category_ = value.toString().toStdString();
-        else if (name == "comment")  comment_  = value.toString().toStdString();
     }
 
 

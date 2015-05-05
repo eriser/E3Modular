@@ -24,7 +24,6 @@ namespace e3 {
     
     void MidiGate::connectSignals()
     {
-        ASSERT( polyphony_ );
         if (polyphony_) {
             polyphony_->midiGateSignal.Connect( this, &MidiGate::onMidiGate );
         }
@@ -95,7 +94,6 @@ namespace e3 {
 
     void MidiFrequency::connectSignals()
     {
-        ASSERT( polyphony_ );
         if (polyphony_)
         {
             polyphony_->midiNoteSignal.Connect( this, &MidiFrequency::onMidiNote );
@@ -230,7 +228,6 @@ namespace e3 {
 
     void MidiInput::connectSignals()
     {
-        ASSERT( polyphony_ );
         if (polyphony_) {
             polyphony_->midiNoteSignal.Connect( this, &MidiInput::onMidiNote );
             polyphony_->midiPitchbendSignal.Connect( this, &MidiFrequency::onMidiPitchbend );

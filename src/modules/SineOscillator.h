@@ -48,13 +48,9 @@ namespace e3 {
 
         Inport  freqInport_;
         Inport  ampInport_;
-        //Inport  fmInport_;
-        //Inport  amInport_;
         Outport audioOutport_;
         double* freqInportPointer_ = nullptr;
         double* ampInportPointer_  = nullptr;
-        //double* fmInportPointer_ = nullptr;
-        //double* amInportPointer_ = nullptr;
         
         static Buffer<double> tableBuffer_;
         static double* table_;

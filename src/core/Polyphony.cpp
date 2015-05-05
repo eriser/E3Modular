@@ -280,4 +280,63 @@ namespace e3 {
         return idxKill;
     }
 
+
+    double Polyphony::getPreviousPitch( int voice )
+    {
+        if (lastPitch_ >= 0 && voice >= 0 && voice < (int)voices_.size())
+        {
+            Voice& current = voices_[voice];
+            int diff       = current.tag_ - current.unisonGroup_;
+
+            ASSERT( diff >= 0 );
+            return lastPitch_ + diff * unisonSpread_;
+        }
+        return -1;
+    }
+
+
+    void Polyphony::setNumUnison( int numUnison )
+    {
+        numUnison_ = std::min<int>( numVoices_, numUnison );
+    }
+
+
+    void Polyphony::setUnisonSpread( int cent )
+    {
+        unisonSpread_ = cent / 100.f;
+    }
+
+
+    void Polyphony::setHold( bool hold )
+    {
+        hold_ = hold;
+        if (hold_ == false)
+            allNotesOff( false );
+    }
+
+
+    void Polyphony::setSustain( bool sustain )
+    {
+        sustain_ = sustain;
+        if (sustain_ == false)
+        {
+            for (int i = 0; i < numVoices_; i++)
+            {
+                Voice* next = &voices_[i];
+                if (next->state_ == Voice::NoteOff)
+                {
+                    midiGateSignal( 0, next->id_ );
+                    midiNoteSignal( next->pitch_, 0, next->id_ );
+                }
+            }
+        }
+    }
+
+
+    void Polyphony::setLegato( bool legato )
+    {
+        legato_ = legato;
+    }
+
+
 } // namespace e3

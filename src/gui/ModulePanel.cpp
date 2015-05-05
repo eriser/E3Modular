@@ -290,9 +290,10 @@ namespace e3 {
 
     void ModulePanel::checkViewport()
     {
-        Rectangle<int> minimum = getParentComponent()->getBounds();     // this is a viewport
+        Rectangle<int> minimum = getParentComponent()->getBounds();   
         Rectangle<int> used    = getUsedArea();
-        Rectangle<int> needed  = minimum.getUnion( used );
+        //Rectangle<int> needed  = minimum.getUnion( used );
+        Rectangle<int> needed  = minimum.getUnion( used ).withTrimmedBottom( 0 );
 
         setBounds( needed );
     }

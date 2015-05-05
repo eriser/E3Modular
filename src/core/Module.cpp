@@ -33,20 +33,18 @@ namespace e3 {
     }
 
 
-    void Module::init( Polyphony* polyphony, double sampleRate )
+    void Module::init( double sampleRate, int numVoices, Polyphony* polyphony )
     {
+        ASSERT( sampleRate > 0 );
+        ASSERT( numVoices > 0 );
+        ASSERT( polyphony != nullptr );
+
         polyphony_  = polyphony;
-
-        setSampleRate( sampleRate );
-        setNumVoices( polyphony->getNumVoices() );
-
-        ASSERT( sampleRate_ > 0 );
-        ASSERT( numVoices_ > 0 );
-
-        connectSignals();
-
+        setNumVoices( numVoices );
         initData();
         initParameters();
+        setSampleRate( sampleRate );
+        connectSignals();
     }
 
 
@@ -104,10 +102,13 @@ namespace e3 {
 
     void Module::updateParameters()
     {
-        for (ParameterMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
+        if (numVoices_ > 0)
         {
-            Parameter& param = it->second;
-            setParameter( it->first, param.value_, 0, -1 );  // set all parameters to zero
+            for (ParameterMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
+            {
+                Parameter& param = it->second;
+                setParameter( it->first, param.value_, 0, -1 );  // set all parameters to zero
+            }
         }
     }
 
