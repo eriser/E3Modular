@@ -1,26 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <E3MSettings>
-  <Application Autosave="1" RecentBank=""  Style="Default"/>
+  <Application Autosave="1" RecentBank="D:\Dev\C++\Projects\E3Modular\banks\DevBank.e3mb"
+               Style="Default"/>
   <Standalone>
-    <Window state="109 30 944 668"/>
-    <AudioDeviceState DeviceType="" OutputDeviceName="" InputDeviceName=""
+    <Window state="70 58 1043 600"/>
+    <AudioDeviceState DeviceType="ASIO" OutputDeviceName="ASIO4ALL v2" InputDeviceName="ASIO4ALL v2"
                       SampleRate="44100" BufferSize="512"/>
-    <MidiInput name=""/>
+    <MidiInput name="QUNEO"/>
+    <MidiInput name="microKEY-25"/>
   </Standalone>
   <Plugin>
-    <Window state="110 58 942 640"/>
+    <Window state="71 85 1041 572"/>
   </Plugin>
   <Style name="Default">
-    <Color name="background" argb="ff5f5f60"/>
-    <Color name="contentBackground1" argb="ffbebdbb"/>
-    <Color name="contentBackground2" argb="ff808080"/>
-    <Color name="darkText" argb="ff000000"/>
-    <Color name="lightText" argb="ffbdbcba"/>
-    <Color name="highlight" argb="ffd08930"/>
-    <Color name="buttonOffBackground" argb="ff3e4042"/>
-    <Color name="buttonOnBackground" argb="ffd08930"/>
-    <Color name="buttonOffText" argb="ffbdbcba"/>
-    <Color name="buttonOnText" argb="ff000000"/>
+    <Color argb="ff5f5f60" name="background"/>
+    <Color argb="ffbebdbb" name="contentBackground1"/>
+    <Color argb="ff808080" name="contentBackground2"/>
+    <Color argb="ff000000" name="darkText"/>
+    <Color argb="ffbdbcba" name="lightText"/>
+    <Color argb="ffd08930" name="highlight"/>
+    <Color argb="ff5f5f60" name="textEditorBackgroundColourId"/>
+    <Color argb="ffbdbcba" name="textEditorTextColourId"/>
+    <Color argb="ffbebdbb" name="textEditorFocusedColourId"/>
+    <Color argb="ffd08930" name="textEditorHighlightColourId"/>
+    <Color argb="ff000000" name="textEditorHighlightedTextColourId"/>
+    <Color argb="ffbdbcba" name="textEditorOutlineColourId"/>
+    <Color argb="ffd08930" name="textEditorFocusedOutlineColourId"/>
+    <Color argb="00ffffff" name="textEditorShadowColourId"/>
+    <Color argb="ffbdbcba" name="toggleButtonTextColourId"/>
+    <Color argb="ffbebdbb" name="toggleButtonBackgroundColourId"/>
+    <Color argb="ffd08930" name="toggleButtonTickColourId"/>
+    <Color argb="ff3e4042" name="buttonOffBackground"/>
+    <Color argb="ffd08930" name="buttonOnBackground"/>
+    <Color argb="ffbdbcba" name="buttonOffText"/>
+    <Color argb="ff000000" name="buttonOnText"/>
+    <Color argb="ff8e8e8e" name="module"/>
+    <Color argb="ff4d5f53" name="moduleMono"/>
+    <Color argb="ff666666" name="modulePort1"/>
+    <Color argb="ffd08930" name="modulePort2"/>
+    <Color argb="ff555555" name="moduleText1"/>
+    <Color argb="ffA21D08" name="moduleText2"/>
+    <Color argb="ff6f6f6f" name="moduleBorderNormal"/>
+    <Color argb="ffd08930" name="moduleBorderSelected"/>
+    <Color argb="ffa21d08" name="moduleBorderFocused"/>
+    <Color argb="ff777777" name="wire1"/>
+    <Color argb="ffd08930" name="wire2"/>
   </Style>
 </E3MSettings>
