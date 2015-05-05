@@ -455,6 +455,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\gui\BrowserPanel.h" />
     <ClInclude Include="..\..\src\gui\CommandTarget.h" />
     <ClInclude Include="..\..\src\gui\EditableTableCell.h" />
+    <ClInclude Include="..\..\src\gui\InstrumentBrowser.h" />
     <ClInclude Include="..\..\src\gui\ModuleComponent.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Debug|Win32'">false</ExcludedFromBuild>
@@ -538,6 +539,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\gui\CommandTarget.cpp" />
     <ClCompile Include="..\..\src\gui\EditableTableCell.cpp" />
     <ClCompile Include="..\..\src\gui\EditorPanel.cpp" />
+    <ClCompile Include="..\..\src\gui\TableComponent.cpp" />
     <ClCompile Include="..\..\src\gui\ModuleComponent.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Debug|Win32'">false</ExcludedFromBuild>
@@ -559,7 +561,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\gui\PreferencesPanel.cpp" />
     <ClCompile Include="..\..\src\gui\SetupPanel.cpp" />
     <ClCompile Include="..\..\src\gui\TabComponent.cpp" />
-    <ClCompile Include="..\..\src\gui\TableComponent.cpp" />
+    <ClCompile Include="..\..\src\gui\InstrumentBrowser.cpp" />
     <ClCompile Include="..\..\src\gui\MonitorComponent.cpp" />
     <ClCompile Include="..\..\src\gui\Resources.cpp" />
     <ClCompile Include="..\..\src\gui\Style.cpp" />

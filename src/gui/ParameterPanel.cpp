@@ -13,9 +13,9 @@ namespace e3 {
     // class InstrumentParameterPanel
     //--------------------------------------------------------------
 
-    InstrumentParameterPanel::InstrumentParameterPanel()
+    InstrumentParameterPanel::InstrumentParameterPanel(ParameterPanel* owner) :
+        owner_(owner)
     {
-        
         headerLabel_.setFont( Font( 18, Font::bold ) );
         headerLabel_.setEditable( false, true, true );
         headerLabel_.addListener( this );
@@ -25,6 +25,10 @@ namespace e3 {
         nameLabel_.setText( "Instrument Name:", dontSendNotification );
         categoryLabel_.setText( "Category:", dontSendNotification );
         commentLabel_.setText( "Comment:", dontSendNotification );
+
+        nameEditor_.setName( "name" );
+        categoryEditor_.setName( "category" );
+        commentEditor_.setName( "comment" );
 
         Label* labels[]  = { &nameLabel_, &categoryLabel_, &commentLabel_ };
         Label* editors[] = { &nameEditor_, &categoryEditor_, &commentEditor_ };
@@ -77,13 +81,13 @@ namespace e3 {
         nameEditor_.setText( instrument->name_, dontSendNotification );
         categoryEditor_.setText( instrument->category_, dontSendNotification );
         commentEditor_.setText( instrument->comment_, dontSendNotification );
-
     }
 
 
     void InstrumentParameterPanel::labelTextChanged( Label* label )
     {
         TRACE( "InstrumentParameterPanel::labelTextChanged, text=%s\n", label->getText().toRawUTF8() );
+        owner_->instrumentAttributesSignal( label->getName().toStdString(), label->getText() );
     }
 
 
@@ -92,7 +96,8 @@ namespace e3 {
     // class ModuleParameterPanel
     //--------------------------------------------------------------
 
-    ModuleParameterPanel::ModuleParameterPanel()
+    ModuleParameterPanel::ModuleParameterPanel(ParameterPanel* owner) :
+        owner_(owner)
     {
         headerLabel_.setFont( Font( 18, Font::bold ) );
         headerLabel_.setEditable( false, true, true );
@@ -125,6 +130,7 @@ namespace e3 {
     void ModuleParameterPanel::labelTextChanged( Label* label )
     {
         TRACE( "ModuleParameterPanel::labelTextChanged, text=%s\n", label->getText().toRawUTF8() );
+        owner_->instrumentAttributesSignal( label->getName().toStdString(), label->getText() );
     }
 
 
@@ -134,8 +140,8 @@ namespace e3 {
 
     ParameterPanel::ParameterPanel()
     {
-        instrumentPanel_ = new InstrumentParameterPanel();
-        modulePanel_     = new ModuleParameterPanel();
+        instrumentPanel_ = new InstrumentParameterPanel( this );
+        modulePanel_     = new ModuleParameterPanel( this );
 
         addChildComponent( instrumentPanel_ );
         addChildComponent( modulePanel_ );
@@ -151,20 +157,15 @@ namespace e3 {
     }
 
 
-    void ParameterPanel::paint( Graphics& )
-    {
-        //g.setColour( Colours::blue );
-        //g.fillAll();
-    }
-
-
     void ParameterPanel::showInstrument( Instrument* instrument )
     {
         ASSERT( instrument );
         if (instrument == nullptr) return;
 
-        instrumentPanel_->setVisible( true );
-        instrumentPanel_->toFront( true );
+        if (instrumentPanel_->isVisible() == false) {
+            instrumentPanel_->setVisible( true );
+            instrumentPanel_->toFront( true );
+        }
         instrumentPanel_->update( instrument );
     }
 

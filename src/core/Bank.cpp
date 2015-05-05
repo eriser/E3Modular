@@ -80,6 +80,18 @@ namespace e3 {
     }
 
 
+    void Bank::saveInstrumentAttributes( Instrument* instrument )
+    {
+        BankSerializer::saveInstrumentAttributes( getXml(), instrument );
+    }
+
+
+    void Bank::saveInstrumentAttribute( int instrumentId, const std::string& name, const var& value )
+    {
+        BankSerializer::saveInstrumentAttribute( getXml(), instrumentId, name, value );
+    }
+
+
     XmlElement* Bank::getXml()
     {
         return xml_.get();

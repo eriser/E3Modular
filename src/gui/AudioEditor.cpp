@@ -12,6 +12,7 @@
 #include "gui/ParameterPanel.h"
 #include "gui/BrowserPanel.h"
 #include "gui/SetupPanel.h"
+#include "gui/InstrumentBrowser.h"
 #include "gui/TabComponent.h"
 #include "gui/MonitorComponent.h"
 
@@ -37,9 +38,12 @@ namespace e3 {
         setLookAndFeel( &Style::getInstance() );
 
         processor_->getPolyphony()->monitorUpdateSignal.Connect( monitor_.get(), &MonitorComponent::monitor );
-
+        
         modulePanel_->showInstrumentSignal.Connect( parameterPanel_.get(), &ParameterPanel::showInstrument );
         modulePanel_->showModuleSignal.Connect( parameterPanel_.get(), &ParameterPanel::showModule );
+
+        parameterPanel_->instrumentAttributesSignal.Connect( this, &AudioEditor::parameterPanelAttributesChanged );
+        instrumentBrowser_->instrumentAttributesSignal.Connect( this, &AudioEditor::browserPanelAttributesChanged );
 
         browserPanel_->updateContents( processor_->getBankXml() );
         modulePanel_->createModules( processor_, browserPanel_->getSelectedInstrumentXml() );
@@ -50,6 +54,9 @@ namespace e3 {
     {
         modulePanel_->showInstrumentSignal.Disconnect( parameterPanel_.get(), &ParameterPanel::showInstrument );
         modulePanel_->showModuleSignal.Disconnect( parameterPanel_.get(), &ParameterPanel::showModule );
+
+        parameterPanel_->instrumentAttributesSignal.Disconnect( this, &AudioEditor::parameterPanelAttributesChanged );
+        instrumentBrowser_->instrumentAttributesSignal.Disconnect( this, &AudioEditor::browserPanelAttributesChanged );
 
         processor_->getPolyphony()->monitorUpdateSignal.Disconnect( monitor_.get(), &MonitorComponent::monitor );
         removeKeyListener( getCommandManager()->getKeyMappings() );
@@ -136,13 +143,16 @@ namespace e3 {
 
     void AudioEditor::createComponents()
     {
-        modulePanel_    = new ModulePanel();
-        parameterPanel_ = new ParameterPanel();
-        editorPanel_    = new EditorPanel();
-        browserPanel_   = new BrowserPanel();
-        setupPanel_     = new SetupPanel();
+        modulePanel_       = new ModulePanel();
+        parameterPanel_    = new ParameterPanel();
+        editorPanel_       = new EditorPanel();
+        browserPanel_      = new BrowserPanel();
+        setupPanel_        = new SetupPanel();
+        instrumentBrowser_ = new InstrumentBrowser();
+        presetBrowser_     = new Component();
 
-        editorPanel_->setContent( modulePanel_, parameterPanel_ );
+        editorPanel_->setComponents( modulePanel_, parameterPanel_ );
+        browserPanel_->setComponents( instrumentBrowser_, presetBrowser_ );
 
         tabPanel_ = new TabComponent( TabbedButtonBar::TabsAtBottom, 10 );
         tabPanel_->addTab( "Editor", Colours::transparentBlack, editorPanel_, false, kEditorPanel );
@@ -224,5 +234,24 @@ namespace e3 {
         }
     }
 
+
+    void AudioEditor::parameterPanelAttributesChanged( const std::string& attributeName, var value )
+    {
+        TRACE( "AudioEditor::parameterPanelAttributesChanged: name=%s, value=%s\n",
+            attributeName.c_str(), value.toString().toRawUTF8() );
+
+        processor_->setInstrumentAttributes( attributeName, value );
+        browserPanel_->updateContents( processor_->getBankXml() );  // TODO: update only active row
+    }
+
+
+    void AudioEditor::browserPanelAttributesChanged( int instrumentId, const std::string& attributeName, var value )
+    {
+        TRACE( "AudioEditor::parameterPanelAttributesChanged: name=%s, value=%s\n",
+            attributeName.c_str(), value.toString().toRawUTF8() );
+
+        processor_->setInstrumentAttribute( instrumentId, attributeName, value );
+        parameterPanel_->showInstrument(processor_->getInstrument());
+    }
 
 } // namespace e3

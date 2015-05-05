@@ -6,7 +6,7 @@
 
 namespace e3
 {
-    void EditorPanel::setContent(ModulePanel* modulePanel, ParameterPanel* parameterPanel)
+    void EditorPanel::setComponents(ModulePanel* modulePanel, ParameterPanel* parameterPanel)
     {
         modulePanel_    = modulePanel;
         parameterPanel_ = parameterPanel;

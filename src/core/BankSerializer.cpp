@@ -58,42 +58,47 @@ namespace e3 {
             }
         }
         return nullptr;
-
-        //forEachXmlChildElementWithTagName( *root, e, "instrument" )
-        //{
-        //    int i = e->getIntAttribute( "id" );
-        //    if (i == id) {
-        //        try {
-        //            Instrument* instrument = new Instrument();  // processor will be owner of the instrument
-        //            readInstrument( e, instrument );
-        //            return instrument;
-        //        }
-        //        catch (const std::exception& e) {               // parse error, skip instrument
-        //            TRACE( e.what() );
-        //            return nullptr;
-        //        }
-        //    }
-        //}
-        //return nullptr;
     }
 
 
     void BankSerializer::saveInstrument( XmlElement* root, Instrument* instrument )
     {
-        forEachXmlChildElementWithTagName( *root, e, "instrument" )
+        XmlElement* e = root->getChildByAttribute( "id", String( instrument->id_ ) );
+        if (e != nullptr)
         {
-            int id = e->getIntAttribute( "id" );
-            if (id == instrument->id_) {
-                try {
-                    e->deleteAllChildElementsWithTagName( "modules" );
-                    e->deleteAllChildElementsWithTagName( "links" );
-                    writeInstrument( e, instrument );
-                    return;
-                }
-                catch (const std::exception& e) {       // parse error
-                    TRACE( e.what() );
-                }
+            try {
+                e->deleteAllChildElementsWithTagName( "modules" );
+                e->deleteAllChildElementsWithTagName( "links" );
+                writeInstrument( e, instrument );
             }
+            catch (const std::exception& e) {       // parse error
+                TRACE( e.what() );
+            }
+        }
+    }
+
+
+    void BankSerializer::saveInstrumentAttributes( XmlElement* root, Instrument* instrument )
+    {
+        XmlElement* e = root->getChildByAttribute( "id", String( instrument->id_ ) );
+        if (e != nullptr)
+        {
+            try {
+                writeInstrumentAttributes( e, instrument );
+            }
+            catch (const std::exception& e) {       // xml error
+                TRACE( e.what() );
+            }
+        }
+    }
+
+
+    void BankSerializer::saveInstrumentAttribute( XmlElement* root, int id, const std::string& name, const var value )
+    {
+        XmlElement* e = root->getChildByAttribute( "id", String( id ) );
+        if (e != nullptr)
+        {
+            e->setAttribute( Identifier(name), value.toString() );
         }
     }
 
@@ -210,21 +215,7 @@ namespace e3 {
 
     void BankSerializer::writeInstrument( XmlElement* const e, Instrument* instrument )
     {
-        e->setAttribute( "name", instrument->name_ );
-        e->setAttribute( "category", instrument->category_ );
-        e->setAttribute( "comment", instrument->comment_ );
-        e->setAttribute( "voices", instrument->numVoices_ );
-
-        if (instrument->numUnison_ > 1) {
-            e->setAttribute( "unison", instrument->numUnison_ );
-            e->setAttribute( "spread", instrument->unisonSpread_ );
-        }
-        if (instrument->hold_)
-            e->setAttribute( "hold", instrument->hold_ );
-        if (instrument->retrigger_)
-            e->setAttribute( "retrigger", instrument->retrigger_ );
-        if (instrument->legato_)
-            e->setAttribute( "legato", instrument->legato_ );
+        writeInstrumentAttributes( e, instrument );
 
         XmlElement* modules = e->createNewChildElement( "modules" );
         const ModuleList& moduleList = instrument->getModules();
@@ -241,6 +232,26 @@ namespace e3 {
             XmlElement* const el = links->createNewChildElement( "link" );
             writeLink( el, *it );
         }
+    }
+
+
+    void BankSerializer::writeInstrumentAttributes( XmlElement* const e, Instrument* instrument )
+    {
+        e->setAttribute( "name", instrument->name_ );
+        e->setAttribute( "category", instrument->category_ );
+        e->setAttribute( "comment", instrument->comment_ );
+        e->setAttribute( "voices", instrument->numVoices_ );
+
+        if (instrument->numUnison_ > 1) {
+            e->setAttribute( "unison", instrument->numUnison_ );
+            e->setAttribute( "spread", instrument->unisonSpread_ );
+        }
+        if (instrument->hold_)
+            e->setAttribute( "hold", instrument->hold_ );
+        if (instrument->retrigger_)
+            e->setAttribute( "retrigger", instrument->retrigger_ );
+        if (instrument->legato_)
+            e->setAttribute( "legato", instrument->legato_ );
     }
 
 

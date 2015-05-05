@@ -7,31 +7,26 @@
 namespace e3
 {
     class TabComponent;
-    class TableComponent;
+    class InstrumentBrowser;
 
     class BrowserPanel : public Component
     {
     public:
-        BrowserPanel();
-
         void resized() override;
 
-        void updateContents(XmlElement* root);
+        void BrowserPanel::setComponents( InstrumentBrowser* instrumentBrowser, Component* presetBrowser );
+        void updateContents( XmlElement* root );
         XmlElement* getSelectedInstrumentXml();
 
     protected:
-        enum TabIds { 
-            kBankTab,
-            kInstrumentTab
-        };
         ScopedPointer<TabComponent> tabPanel_;
-        ScopedPointer<TableComponent> instrumentBrowser_;
-        ScopedPointer<Component> presetBrowser_;
+        InstrumentBrowser* instrumentBrowser_ = nullptr;
+        Component* presetBrowser_ = nullptr;
 
-        ScopedPointer<TextButton> openButton_;
-        ScopedPointer<TextButton> saveButton_;
-        ScopedPointer<TextButton> saveAsButton_;
-        ScopedPointer<TextButton> newButton_;
+        TextButton openButton_;
+        TextButton saveButton_;
+        TextButton saveAsButton_;
+        TextButton newButton_;
     };
 
 

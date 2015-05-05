@@ -12,7 +12,7 @@ namespace e3
     class EditorPanel : public Component
     {
     public:
-        void setContent(ModulePanel* modulePanel, ParameterPanel* parameterPanel);
+        void setComponents(ModulePanel* modulePanel, ParameterPanel* parameterPanel);
         void resized() override;
 
     protected:

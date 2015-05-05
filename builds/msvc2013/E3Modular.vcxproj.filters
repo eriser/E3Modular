@@ -153,6 +153,9 @@
     <ClInclude Include="..\..\src\modules\SineOscillator.h">
       <Filter>src\modules</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\gui\InstrumentBrowser.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp">
@@ -224,9 +227,6 @@
     <ClCompile Include="..\..\src\gui\Style.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\TableComponent.cpp">
-      <Filter>src\gui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\gui\TabComponent.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
@@ -277,6 +277,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\modules\SineOscillator.cpp">
       <Filter>src\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\InstrumentBrowser.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\TableComponent.cpp">
+      <Filter>src\gui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

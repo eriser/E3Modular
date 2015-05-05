@@ -20,6 +20,7 @@
 *.pdb
 *.bak
 *.opensdf
+.git*.*
 ipch/
 wav/
 Debug/

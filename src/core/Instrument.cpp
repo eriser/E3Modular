@@ -159,6 +159,22 @@ namespace e3 {
     }
 
 
+    void Instrument::resumeModules()
+    {
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++) {
+            (*it)->resume();
+        }
+    }
+
+
+    void Instrument::suspendModules()
+    {
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++) {
+            (*it)->suspend();
+        }
+    }
+
+
     Module* Instrument::getModule( int moduleId ) const
     {
         for (ModuleList::const_iterator it = modules_.begin(); it != modules_.end(); it++)
@@ -195,6 +211,14 @@ namespace e3 {
     }
 
 
+    void Instrument::setAttribute( const std::string& name, const var& value )
+    {
+        if (name == "name")          name_     = value.toString().toStdString();
+        else if (name == "category") category_ = value.toString().toStdString();
+        else if (name == "comment")  comment_  = value.toString().toStdString();
+    }
+
+
     int Instrument::createModuleId( ModuleType type )
     {
         if (type == ModuleTypeAudioOutTerminal) {
@@ -210,22 +234,6 @@ namespace e3 {
         }
         ASSERT( id <= maxId );
         return id;
-    }
-
-
-    void Instrument::resumeModules()
-    {
-        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++) {
-            (*it)->resume();
-        }
-    }
-
-
-    void Instrument::suspendModules()
-    {
-        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++) {
-            (*it)->suspend();
-        }
     }
 
 

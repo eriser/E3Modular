@@ -91,13 +91,8 @@ namespace e3 {
         Instrument* getInstrument() const   { return instrument_; }
         XmlElement* getBankXml() const;
 
-        //enum Parameters
-        //{
-        //    gainParam = 0,
-        //    delayParam,
-
-        //    totalNumParams
-        //};
+        void setInstrumentAttributes( const std::string& name, const var& value );
+        void setInstrumentAttribute( int instrumentId, const std::string& name, const var& value );
 
         float gain_ = 0.75;
 

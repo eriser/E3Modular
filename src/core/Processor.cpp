@@ -92,6 +92,10 @@ namespace e3 {
     }
 
 
+    //-----------------------------------------------------
+    // Bank, Instrument, Modules
+    //-----------------------------------------------------
+
     XmlElement* Processor::getBankXml() const
     {
         return (bank_ != nullptr) ? bank_->getXml() : nullptr;
@@ -222,6 +226,27 @@ namespace e3 {
     }
 
 
+    void Processor::setInstrumentAttributes( const std::string& name, const var& value )
+    {
+        ASSERT( instrument_ );
+        if (instrument_ == nullptr) return;
+
+        instrument_->setAttribute( name, value );
+        bank_->saveInstrumentAttributes( instrument_ );
+    }
+
+
+    void Processor::setInstrumentAttribute( int instrumentId, const std::string& name, const var& value )
+    {
+        if (instrument_ != nullptr && instrumentId == instrument_->id_) {
+            instrument_->setAttribute( name, value );
+        }
+        bank_->saveInstrumentAttribute( instrumentId, name, value );
+    }
+
+    //-------------------------------------------------------
+    // Processing
+    //-------------------------------------------------------
 
     void Processor::processBlock( AudioSampleBuffer& audioBuffer, MidiBuffer& midiBuffer )
     {

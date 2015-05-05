@@ -22,8 +22,8 @@ namespace e3 {
         void resetModules();
         void connectModules();
         void updateModules();
-        void resumeModules();
         void suspendModules();
+        void resumeModules();
 
         void setSampleRate( double sampleRate );
         void setNumVoices( uint16_t numVoices );
@@ -40,6 +40,7 @@ namespace e3 {
         LinkList& getLinks()                            { return links_; }
         void getLinksForModule( int moduleId, PortType portType, LinkList& list );
 
+        void setAttribute( const std::string& name, const var& value );
 
         void setNumUnison( uint16_t numUnison )         { numUnison_    = numUnison; }
         void setUnisonSpread( uint16_t unisonSpread )   { unisonSpread_ = unisonSpread; }

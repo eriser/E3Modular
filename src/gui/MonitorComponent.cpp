@@ -11,11 +11,11 @@ namespace e3 {
 
     MonitorComponent::MonitorComponent() : Component()
     {
-        labels_.insert(std::make_pair(kType, new Label()));
-        labels_.insert(std::make_pair(kValue1, new Label()));
-        labels_.insert(std::make_pair(kValue2, new Label()));
-        labels_.insert(std::make_pair(kVoices, new Label()));
-        labels_.insert(std::make_pair(kCpuMeter, new Label()));
+        labels_.insert(std::make_pair(MonitorType, new Label()));
+        labels_.insert(std::make_pair(MonitorValue1, new Label()));
+        labels_.insert(std::make_pair(MonitorValue2, new Label()));
+        labels_.insert(std::make_pair(MonitorVoices, new Label()));
+        labels_.insert(std::make_pair(MonitorCpuMeter, new Label()));
 
         for (LabelMap::iterator it = labels_.begin(); it != labels_.end(); it++)
         { 
@@ -34,11 +34,11 @@ namespace e3 {
 
     void MonitorComponent::resized()
     {
-        labels_[kType]->setBounds(Rectangle<int>(0, 0, 45, 25));
-        labels_[kValue1]->setBounds(Rectangle<int>(48, 0, 27, 25));
-        labels_[kValue2]->setBounds(Rectangle<int>(78, 0, 27, 25));
-        labels_[kVoices]->setBounds(Rectangle<int>(118, 0, 27, 25));
-        labels_[kCpuMeter]->setBounds(Rectangle<int>(148, 0, 45, 25));
+        labels_[MonitorType]->setBounds(Rectangle<int>(0, 0, 45, 25));
+        labels_[MonitorValue1]->setBounds(Rectangle<int>(48, 0, 27, 25));
+        labels_[MonitorValue2]->setBounds(Rectangle<int>(78, 0, 27, 25));
+        labels_[MonitorVoices]->setBounds(Rectangle<int>(118, 0, 27, 25));
+        labels_[MonitorCpuMeter]->setBounds(Rectangle<int>(148, 0, 45, 25));
     }
 
 
@@ -51,51 +51,51 @@ namespace e3 {
         case MonitorVoices:
         {
             stream << e.numVoices;
-            labels_[kVoices]->setText(stream.str(), dontSendNotification);
+            labels_[MonitorVoices]->setText(stream.str(), dontSendNotification);
             break;
         }
         case MonitorCpuMeter:
         {
             stream << std::setprecision(2) << std::fixed << e.value1 << "%";
-            labels_[kCpuMeter]->setText(stream.str(), dontSendNotification);
+            labels_[MonitorCpuMeter]->setText(stream.str(), dontSendNotification);
             break;
         }
         case MonitorNote:
         {
-            labels_[kType]->setText("Note", dontSendNotification);
+            labels_[MonitorType]->setText("Note", dontSendNotification);
 
             double intpart;
             if (modf(e.value1, &intpart) == 0)
                 stream << (int)e.value1;
             else
                 stream << std::setprecision(2) << std::fixed << e.value1;
-            labels_[kValue1]->setText(stream.str(), dontSendNotification);
+            labels_[MonitorValue1]->setText(stream.str(), dontSendNotification);
 
             stream.str("");
             //stream << std::setprecision(2) << std::fixed << evt.value2;
             stream << (int)(e.value2 * 128);
-            labels_[kValue2]->setText(stream.str(), dontSendNotification);
+            labels_[MonitorValue2]->setText(stream.str(), dontSendNotification);
             break;
         }
         case MonitorController:
         {
-            labels_[kType]->setText("CC", dontSendNotification);
+            labels_[MonitorType]->setText("CC", dontSendNotification);
 
             stream << (int)e.value1;
-            labels_[kValue1]->setText(stream.str(), dontSendNotification);
+            labels_[MonitorValue1]->setText(stream.str(), dontSendNotification);
 
             stream.str("");
             stream << e.value2;
-            labels_[kValue2]->setText(stream.str(), dontSendNotification);
+            labels_[MonitorValue2]->setText(stream.str(), dontSendNotification);
             break;
         }
         case MonitorPitchbend:
         {
-            labels_[kType]->setText("PB", dontSendNotification);
+            labels_[MonitorType]->setText("PB", dontSendNotification);
 
             stream << e.value1 - 8192;
-            labels_[kValue1]->setText(stream.str(), dontSendNotification);
-            labels_[kValue2]->setText("", dontSendNotification);
+            labels_[MonitorValue1]->setText(stream.str(), dontSendNotification);
+            labels_[MonitorValue2]->setText("", dontSendNotification);
             break;
         }
         }

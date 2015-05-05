@@ -53,8 +53,8 @@ namespace e3 {
                     }
                 }
                 createWires( instrument->getLinks() );
-                showInstrumentSignal( instrument );   // update parameterPanel
             }
+            showInstrumentSignal( instrument );   // update parameterPanel
         }
     }
 

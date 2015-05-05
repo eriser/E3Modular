@@ -18,11 +18,11 @@ namespace e3 {
 
     private:
         enum LabelIds {
-            kType,
-            kValue1,
-            kValue2,
-            kVoices,
-            kCpuMeter
+            MonitorType,
+            MonitorValue1,
+            MonitorValue2,
+            MonitorVoices,
+            MonitorCpuMeter
         };
 
         typedef std::map<int, ScopedPointer<Label> > LabelMap;
