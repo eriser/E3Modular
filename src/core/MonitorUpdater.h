@@ -13,6 +13,7 @@ namespace e3 {
         MonitorPitchbend,
         MonitorVoices,
         MonitorCpuMeter,
+		MonitorProcessorState
     };
 
 
@@ -38,6 +39,7 @@ namespace e3 {
 
         void monitorVoiceEvent(int numSounding);
         void monitorCpuMeterEvent(double value);
+		void monitorProcessorStateEvent( double value );
 
         void monitorNoteEvent(double pitch, double gate);
         void monitorControllerEvent(int controllerId, int value);

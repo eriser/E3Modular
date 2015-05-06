@@ -37,8 +37,8 @@
       <link left_module="1" right_module="3" left_port="1" right_port="1" value="1" label="Gate"/>
       <link left_module="2" right_module="3" left_port="0" right_port="0" value="1" label="Sine-&gt;In"/>
       <link left_module="1" right_module="4" left_port="0" right_port="0" value="1"/>
-      <link left_module="1" right_module="2" left_port="0" right_port="0" value="1"/>
       <link left_module="3" right_module="0" left_port="0" right_port="0" value="1"/>
+      <link left_module="1" right_module="2" left_port="0" right_port="0" value="1"/>
     </links>
   </instrument>
   <instrument name="instrument_1" id="1" category="default" comment="klingt gut" voices="1">

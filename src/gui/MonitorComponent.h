@@ -17,6 +17,8 @@ namespace e3 {
         void monitor(MonitorEvent e);
 
     private:
+		Colour getProcessorStateColour( double state ) const;
+
         enum LabelIds {
             MonitorType,
             MonitorValue1,

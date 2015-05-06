@@ -56,7 +56,9 @@ namespace e3
 
     void BrowserPanel::updateContents( XmlElement* root )
     {
-        instrumentBrowser_->loadData( root );
+		if( root != nullptr ) {
+			instrumentBrowser_->loadData( root );
+		}
     }
 
 

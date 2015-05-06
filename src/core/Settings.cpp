@@ -200,7 +200,8 @@ namespace e3 {
                 THROW(std::runtime_error, "Error initializing default audio devices: %s\n", error);
             }
         }
-        ASSERT(manager->getCurrentAudioDevice() != nullptr);
+		//AudioIODevice* device = manager->getCurrentAudioDevice();
+		//ASSERT( device );
     }
 
 

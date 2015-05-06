@@ -29,6 +29,7 @@ namespace e3 {
         cpuMeter_( new CpuMeter() )
     {
         Settings::getInstance().load();
+		setState( ProcessorNotInitialized );
     }
 
 
@@ -177,6 +178,7 @@ namespace e3 {
         }
         catch (const std::exception& e) {
             TRACE( e.what() );
+			setState( ProcessorCrashed );
             return nullptr;
         }
         resume();
@@ -194,7 +196,8 @@ namespace e3 {
         }
         catch (const std::exception& e) 
         {
-            TRACE( e.what() );
+			TRACE( e.what() );
+			setState( ProcessorCrashed );
             return;
         }
         resume();
@@ -231,6 +234,7 @@ namespace e3 {
         catch (const std::exception& e) 
         {
             TRACE( e.what() );
+			setState( ProcessorCrashed );
             return;
         }
         resume();
@@ -299,6 +303,49 @@ namespace e3 {
     }
 
 
+	//------------------------------------------------------------------------------
+	// State
+	//------------------------------------------------------------------------------
+
+	void Processor::setState( ProcessorState state )
+	{
+		state_ = state;
+		polyphony_->monitorProcessorStateEvent( state_ );
+	}
+
+
+	bool Processor::suspend()
+	{
+		bool nested = isSuspended();
+
+		if( !nested )
+		{
+			suspendProcessing( true );
+			if( instrument_ ) {
+				instrument_->suspendModules();
+			}
+		}
+		setState( ProcessorSuspended );
+		return nested;
+	}
+
+
+	void Processor::resume( bool nested )
+	{
+		if( nested ) {
+			return;
+		}
+		if( isSuspended() ) {
+			suspendProcessing( false );
+			if( instrument_ ) {
+				instrument_->resumeModules();
+			}
+		}
+		setState( ProcessorRunning );
+	}
+
+
+
     //-------------------------------------------------------
     // Processing
     //-------------------------------------------------------
@@ -343,37 +390,5 @@ namespace e3 {
         }
     }
 
-
-    //------------------------------------------------------------------------------
-    // Processing
-    //------------------------------------------------------------------------------
-
-    bool Processor::suspend()
-    {
-        bool nested = isSuspended();
-
-        if (!nested)
-        {
-            suspendProcessing( true );
-            if (instrument_) {
-                instrument_->suspendModules();
-            }
-        }
-        return nested;
-    }
-
-
-    void Processor::resume( bool nested )
-    {
-        if (nested) {
-            return;
-        }
-        if (isSuspended()) {
-            suspendProcessing( false );
-            if (instrument_) {
-                instrument_->resumeModules();
-            }
-        }
-    }
 
 } // namespace e3

@@ -17,7 +17,14 @@ namespace e3 {
     }
 
 
-    void MonitorUpdater::monitorNoteEvent(double pitch, double gate)
+	void MonitorUpdater::monitorProcessorStateEvent( double value )
+	{
+		pendingEvents_.push_back( MonitorEvent( MonitorProcessorState, value ) );
+		triggerAsyncUpdate();
+	}
+	
+	
+	void MonitorUpdater::monitorNoteEvent( double pitch, double gate )
     {
         pendingEvents_.push_back(MonitorEvent(MonitorNote, pitch, gate));
         triggerAsyncUpdate();

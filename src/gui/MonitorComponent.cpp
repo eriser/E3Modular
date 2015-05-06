@@ -5,7 +5,9 @@
 #include <e3_Trace.h>
 #include <e3_CommonMacros.h>
 #include "core/GlobalHeader.h"
+#include "core/Processor.h"
 #include "gui/MonitorComponent.h"
+
 
 namespace e3 {
 
@@ -60,6 +62,11 @@ namespace e3 {
             labels_[MonitorCpuMeter]->setText(stream.str(), dontSendNotification);
             break;
         }
+		case MonitorProcessorState:
+		{
+			labels_[MonitorCpuMeter]->setColour( Label::backgroundColourId, getProcessorStateColour( e.value1 ) );
+			break;
+		}
         case MonitorNote:
         {
             labels_[MonitorType]->setText("Note", dontSendNotification);
@@ -100,6 +107,19 @@ namespace e3 {
         }
         }
     }
+
+
+	Colour MonitorComponent::getProcessorStateColour( double state ) const
+	{
+		switch( (int)state )
+		{
+		case ProcessorNotInitialized: return Colours::red;
+		case ProcessorRunning:        return Colour( 0xff3e4042 );
+		case ProcessorSuspended:      return Colours::beige;
+		case ProcessorCrashed:        return Colours::red;
+		}
+		return Colours::transparentBlack;
+	}
 
 
 } // namespace e3
