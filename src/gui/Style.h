@@ -49,31 +49,43 @@ namespace e3 {
             int width, int height, bool isMouseOver, bool isMouseDown,
             int columnFlags ) override;
 
+		void drawLinearSlider( Graphics& g, int x, int y, int width, int height,
+			float sliderPos, float minSliderPos, float maxSliderPos,
+			const Slider::SliderStyle style, Slider& slider );
+
         enum ColourIds
         {
             BackgroundColourId              = 0x2000000,
             ContentBackground1ColourId      = 0x2000001,
             ContentBackground2ColourId      = 0x2000002,
             HighlightColourId               = 0x2000010,
-            TextEditorFocusedColourId       = 0x2000020,
-            TabButtonOffBackgroundColourId  = 0x2000030,
-            TabButtonOnBackgroundColourId   = 0x2000031,
-            TabButtonOffTextColourId        = 0x2000032,
-            TabButtonOnTextColourId         = 0x2000033,
-            ToggleButtonBackgroundColourId  = 0x2000040,
-            ToggleButtonTickColourId        = 0x2000041,
 
-            ModuleColourId                  = 0x2000050,
-            ModuleMonoColourId              = 0x2000051,
-            ModulePort1ColourId             = 0x2000052,
-            ModulePort2ColourId             = 0x2000053,
-            ModuleText1ColourId             = 0x2000054,
-            ModuleText2ColourId             = 0x2000055,
-            ModuleBorderNormalColourId      = 0x2000056,
-            ModuleBorderSelectedColourId    = 0x2000057,
-            ModuleBorderFocusedColourId     = 0x2000058,
-            Wire1ColourId                   = 0x2000059,
-            Wire2ColourId                   = 0x200005a,
+			MonitorText                     = 0x2000020,
+			MonitorBackground               = 0x2000021,
+			MonitorNotInitialized           = 0x2000022,
+			MonitorReady                    = 0x2000023,
+			MonitorSuspended                = 0x2000024,
+			MonitorCrashed                  = 0x2000025,
+
+            TextEditorFocusedColourId       = 0x2000030,
+            TabButtonOffBackgroundColourId  = 0x2000040,
+            TabButtonOnBackgroundColourId   = 0x2000041,
+            TabButtonOffTextColourId        = 0x2000042,
+            TabButtonOnTextColourId         = 0x2000043,
+            ToggleButtonBackgroundColourId  = 0x2000050,
+            ToggleButtonTickColourId        = 0x2000051,
+
+            ModuleColourId                  = 0x2000060,
+            ModuleMonoColourId              = 0x2000061,
+            ModulePort1ColourId             = 0x2000062,
+            ModulePort2ColourId             = 0x2000063,
+            ModuleText1ColourId             = 0x2000064,
+            ModuleText2ColourId             = 0x2000065,
+            ModuleBorderNormalColourId      = 0x2000066,
+            ModuleBorderSelectedColourId    = 0x2000067,
+            ModuleBorderFocusedColourId     = 0x2000068,
+            Wire1ColourId                   = 0x2000069,
+            Wire2ColourId                   = 0x200006a,
         };
 
     protected:

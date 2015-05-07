@@ -170,18 +170,26 @@ namespace e3 {
     ModuleParameterPanel::ModuleParameterPanel(ParameterPanel* owner) :
         owner_(owner)
     {
-        headerLabel_.setFont( Font( 18, Font::bold ) );
-        headerLabel_.setEditable( false, true, true );
-        headerLabel_.addListener( this );
-        addAndMakeVisible( &headerLabel_ );
-    }
+		Style& style = Style::getInstance();
+		Colour textColour = style.findColour( TextEditor::textColourId );
+
+		headerLabel_.setFont( Font( 18, Font::bold ) );
+		headerLabel_.setColour( Label::textColourId, textColour );
+		headerLabel_.setEditable( false, true, true );
+		headerLabel_.setBorderSize( BorderSize<int>( 0, 0, 0, 0 ) );
+		headerLabel_.addListener( this );
+		headerLabel_.setText( "Instrument", dontSendNotification );
+		addAndMakeVisible( &headerLabel_ );
+	}
 
 
     void ModuleParameterPanel::resized()
     {
         Rectangle<int> bounds = getLocalBounds();
 
-        headerLabel_.setBounds( bounds.withHeight( 25 ) );
+		int w = getWidth();
+
+        headerLabel_.setBounds( 10, 0, w - 20, 25 );
     }
 
 
@@ -195,7 +203,34 @@ namespace e3 {
     void ModuleParameterPanel::update( Module* module )
     {
         headerLabel_.setText( module->getLabel(), dontSendNotification );
+
+		removeAllParameters();
+
+		Rectangle<int> r( 0, 50, 200, 25 );
+		ParameterMap& parameters = module->getParameters();
+		for( ParameterMap::iterator it = parameters.begin(); it != parameters.end(); it++ )
+		{
+			Parameter& p = it->second;
+			if( p.controlType_ != ControlHidden )
+			{
+				ParameterStrip* strip = new ParameterStrip( r, module, p );
+				parameters_.add( strip );
+				addAndMakeVisible( strip );
+				r.translate( 0, 30 );
+			}
+		}
     }
+
+
+	void ModuleParameterPanel::removeAllParameters()
+	{
+		for( int i = 0; i < parameters_.size(); ++i )
+		{
+			ParameterStrip* strip = parameters_.getUnchecked( i );
+			removeChildComponent( strip );
+		}
+		parameters_.clear();
+	}
 
 
     void ModuleParameterPanel::labelTextChanged( Label* label )
@@ -203,6 +238,48 @@ namespace e3 {
         TRACE( "ModuleParameterPanel::labelTextChanged, text=%s\n", label->getText().toRawUTF8() );
         owner_->instrumentAttributesSignal( label->getName().toStdString(), label->getText() );
     }
+
+
+	//--------------------------------------------------------------
+	// class ParameterStrip
+	//--------------------------------------------------------------
+
+	ParameterStrip::ParameterStrip( const Rectangle<int>& bounds, Module* module, Parameter& parameter ) :
+		parameter_(parameter)
+	{
+		setBounds( bounds );
+
+		Style& style = Style::getInstance();
+		Colour textColour = style.findColour( TextEditor::textColourId );
+
+		label_.setText( parameter.label_, dontSendNotification );
+		label_.setColour( Label::textColourId, textColour );
+		label_.setEditable( false, true, true );
+		label_.setBorderSize( BorderSize<int>( 0, 0, 0, 0 ) );
+		label_.setFont( Font( 10, Font::plain ) );
+		addAndMakeVisible( &label_ );
+
+		switch( parameter_.controlType_ )
+		{
+		case ControlSlider:
+		case ControlBiSlider:
+		{
+			slider_.setSliderStyle( Slider::LinearBar );
+			slider_.setRange( 0.0, 100.0, 0.1 );
+			slider_.setPopupMenuEnabled( true );
+			slider_.setValue( parameter_.value_, dontSendNotification );
+
+			slider_.setBounds( 10, 0, 120, 20 );
+			label_.setBounds( 140, 0, 80, 20 );
+			addAndMakeVisible( &slider_ );
+			break;
+		}
+		case ControlCheckbox:
+			break;
+		case ControlNumEdit:
+			break;
+		}
+	}
 
 
     //--------------------------------------------------------------

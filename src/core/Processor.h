@@ -28,7 +28,7 @@ namespace e3 {
 
 	enum ProcessorState {
 		ProcessorNotInitialized = 0,
-		ProcessorRunning        = 1,
+		ProcessorReady          = 1,
 		ProcessorSuspended      = 2,
 		ProcessorCrashed        = 3,
 	};

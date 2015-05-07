@@ -24,10 +24,11 @@ namespace e3 {
         void startPlaying();
         void stopPlaying();
 
-    private:
+		void storeAudioSettings();
+	
+	private:
         void setupDevices();
         void shutdownDevices();
-        void storeAudioSettings();
         void createProcessor();
         void deleteProcessor();
 

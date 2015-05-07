@@ -6,6 +6,7 @@
 #include <e3_CommonMacros.h>
 #include "core/GlobalHeader.h"
 #include "core/Processor.h"
+#include "gui/Style.h"
 #include "gui/MonitorComponent.h"
 
 
@@ -19,14 +20,18 @@ namespace e3 {
         labels_.insert(std::make_pair(MonitorVoices, new Label()));
         labels_.insert(std::make_pair(MonitorCpuMeter, new Label()));
 
+		Style& style = Style::getInstance();
+		Colour bkgndCol = style.findColour( Style::MonitorBackground );
+		Colour textCol = style.findColour( Style::MonitorText );
+
         for (LabelMap::iterator it = labels_.begin(); it != labels_.end(); it++)
         { 
             Label* label = it->second;
             label->setFont(Font("Lucida Console", 10, Font::plain));
             label->setJustificationType(Justification::centred);
             label->setMinimumHorizontalScale(0.5f);
-            label->setColour(Label::backgroundColourId, Colour(0xff3e4042));
-            label->setColour(Label::textColourId, Colour(0xffbdbcba));
+            label->setColour(Label::backgroundColourId, bkgndCol);
+			label->setColour( Label::textColourId, textCol );
 
             addAndMakeVisible(*label);
         }
@@ -111,12 +116,14 @@ namespace e3 {
 
 	Colour MonitorComponent::getProcessorStateColour( double state ) const
 	{
+		Style& style = Style::getInstance();
+
 		switch( (int)state )
 		{
-		case ProcessorNotInitialized: return Colours::red;
-		case ProcessorRunning:        return Colour( 0xff3e4042 );
-		case ProcessorSuspended:      return Colours::beige;
-		case ProcessorCrashed:        return Colours::red;
+		case ProcessorNotInitialized: return style.findColour( Style::MonitorNotInitialized);
+		case ProcessorReady:          return style.findColour( Style::MonitorReady );
+		case ProcessorSuspended:      return style.findColour( Style::MonitorSuspended );
+		case ProcessorCrashed:        return style.findColour( Style::MonitorCrashed );
 		}
 		return Colours::transparentBlack;
 	}

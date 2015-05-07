@@ -10,7 +10,9 @@
 
 namespace e3
 {
-    class ParameterPanel;
+	class Module;
+	class ParameterPanel;
+	class ParameterStrip;
 
 
     class InstrumentParameterPanel : public Component, 
@@ -62,13 +64,42 @@ namespace e3
         void labelTextChanged( Label *labelThatHasChanged ) override;
 
     protected:
+		void removeAllParameters();
+
         ParameterPanel* owner_;
 
         Label headerLabel_;
+		OwnedArray<ParameterStrip> parameters_;
     };
 
 
-    class ParameterPanel : public Component
+	//--------------------------------------------------------------------------------------
+	// class ParameterStrip
+	//--------------------------------------------------------------------------------------
+
+	class ParameterStrip : public Component
+	{
+	public:
+		ParameterStrip( const Rectangle<int>& bounds, Module* module, Parameter& parameter );
+
+		//void mouseDown( const MouseEvent& e ) override;
+
+		//void valueChanged( Component* source );
+		//void attachOrDetach();
+		//void onController( int controllerId, double value );
+
+	protected:
+		//void addControl( const Rectangle<int> bounds, Module* module );
+		//CMouseEventResult showCtrlDialog( const CPoint& pos );
+
+		Module* module_;
+		Parameter& parameter_;
+		Label label_;
+		Slider slider_;
+	};
+
+	
+	class ParameterPanel : public Component
     {
     public:
         ParameterPanel();

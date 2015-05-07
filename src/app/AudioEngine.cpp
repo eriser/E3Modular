@@ -18,7 +18,6 @@ namespace e3 {
 
 	AudioEngine::~AudioEngine()
 	{
-		storeAudioSettings();
 		deleteProcessor();
 		shutdownDevices();
 	}

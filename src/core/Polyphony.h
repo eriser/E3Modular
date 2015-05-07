@@ -18,6 +18,8 @@ namespace e3 {
     //----------------------------------------------------------------------------------
     class Polyphony : public MonitorUpdater
     {
+		friend class Processor;
+
     public:
         Polyphony();
         ~Polyphony() {}

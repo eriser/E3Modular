@@ -152,7 +152,8 @@ namespace e3 {
         ASSERT( polyphony_ );
         ASSERT( instrument_->numVoices_ == polyphony_->getNumVoices() );
 
-        instrument_->resetModules();
+		polyphony_->allNotesOff( true );
+		instrument_->resetModules();
         initInstrument();
     }
 
@@ -341,7 +342,7 @@ namespace e3 {
 				instrument_->resumeModules();
 			}
 		}
-		setState( ProcessorRunning );
+		setState( ProcessorReady );
 	}
 
 

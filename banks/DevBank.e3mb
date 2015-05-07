@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <bank name="test" instrument="0">
-  <instrument id="0" name="wonne und freude" category="Einfach" comment="traumhaft" voices="99" unison="5" spread="1190">
+  <instrument id="0" name="wonne und freude" category="Einfach" comment="traumhaft" voices="50" unison="5" spread="1190">
     <panel>
       <module id="0" pos="621, 249" collapsed="0"/>
       <module id="1" pos="169, 249" collapsed="0"/>
       <module id="2" pos="330, 187" collapsed="0"/>
       <module id="3" pos="478, 249" collapsed="0"/>
-      <module id="4" pos="332, 296" collapsed="0"/>
+      <module id="4" pos="334, 338" collapsed="0"/>
     </panel>
     <modules>
       <module id="0" label="AudioOut" type="0" poly="0">
@@ -39,6 +39,7 @@
       <link left_module="1" right_module="4" left_port="0" right_port="0" value="1"/>
       <link left_module="3" right_module="0" left_port="0" right_port="0" value="1"/>
       <link left_module="1" right_module="2" left_port="0" right_port="0" value="1"/>
+      <link left_module="4" right_module="2" left_port="0" right_port="1" value="1"/>
     </links>
   </instrument>
   <instrument name="instrument_1" id="1" category="default" comment="klingt gut" voices="1">

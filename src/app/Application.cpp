@@ -44,6 +44,7 @@ namespace e3 {
         if (AudioProcessorEditor* editor = dynamic_cast<AudioProcessorEditor*> (window_->getContentComponent()))
         {
             Settings::getInstance().setWindowState( window_->getWindowStateAsString().toStdString(), "Standalone" );
+			audioEngine_->storeAudioSettings();
             audioEngine_->getProcessor()->editorBeingDeleted( editor );
             window_->clearContentComponent();
         }

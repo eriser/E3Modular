@@ -45,10 +45,10 @@ namespace e3
         preferencesPanel_ = new PreferencesPanel();
 
         tabPanel_ = new TabComponent(TabbedButtonBar::TabsAtLeft);
-        tabPanel_->addTab("Preferences", Colours::transparentBlack, preferencesPanel_, false, kPreferencesTab);
-        tabPanel_->addTab("Audio", Colours::transparentBlack, audioPanel_, false, kAudioTab);
+		tabPanel_->addTab( "Audio", Colours::transparentBlack, audioPanel_, false, kAudioTab );
+		tabPanel_->addTab( "Preferences", Colours::transparentBlack, preferencesPanel_, false, kPreferencesTab );
 
-        addAndMakeVisible(tabPanel_);
+		addAndMakeVisible(tabPanel_);
     }
 #endif
 

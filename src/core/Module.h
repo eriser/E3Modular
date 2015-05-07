@@ -14,158 +14,159 @@
 
 namespace e3 {
 
-    class Module;
-    class Outport;
-    class Polyphony;
+	class Module;
+	class Outport;
+	class Polyphony;
 
-    // Pointer type to the audio processing function of a module.
-    typedef void (Module::*ProcessFunctionPointer)(void) throw();
+	// Pointer type to the audio processing function of a module.
+	typedef void ( Module::*ProcessFunctionPointer )( void ) throw( );
 
-    enum ModuleType {
-        ModuleTypeUndefined        = -1,
-        
-        // system modules
-        ModuleTypeAudioOutTerminal = 0,
-        ModuleTypeMidiGate         = 1,
-        ModuleTypeMidiFrequency    = 2,
-        ModuleTypeMidiInput        = 3,
-        
-        // audio
-        ModuleTypeSineOscillator   = 10,
-        ModuleTypeAdsrEnvelope     = 11,
-        ModuleTypeDelay            = 12,
-    };
+	enum ModuleType {
+		ModuleTypeUndefined = -1,
+
+		// system modules
+		ModuleTypeAudioOutTerminal = 0,
+		ModuleTypeMidiGate = 1,
+		ModuleTypeMidiFrequency = 2,
+		ModuleTypeMidiInput = 3,
+
+		// audio
+		ModuleTypeSineOscillator = 10,
+		ModuleTypeAdsrEnvelope = 11,
+		ModuleTypeDelay = 12,
+	};
 
 
-    enum ProcessingType
-    {
-        ProcessEvent   = 1,
-        ProcessControl = 2,
-        ProcessAudio   = 4
-    };
+	enum ProcessingType
+	{
+		ProcessEvent = 1,
+		ProcessControl = 2,
+		ProcessAudio = 4
+	};
 
-    enum VoicingType
-    {
-        Monophonic = 0,
-        Polyphonic = 1
-    };
+	enum VoicingType
+	{
+		Monophonic = 0,
+		Polyphonic = 1
+	};
 
-    enum ModuleStyle
-    {
-        ModuleStyleNothing = 0,
-        ModuleStyleVisible = 1,
-        ModuleStyleLabel   = 2
-    };
+	enum ModuleStyle
+	{
+		ModuleStyleNothing = 0,
+		ModuleStyleVisible = 1,
+		ModuleStyleLabel = 2
+	};
 
-    
-    //--------------------------------------------------------------------------
-    // class Module
-    // Abstract base class for Modules.
-    //--------------------------------------------------------------------------
 
-    class Module
-    {
-        friend class Instrument;
-        friend class Sink;
+	//--------------------------------------------------------------------------
+	// class Module
+	// Abstract base class for Modules.
+	//--------------------------------------------------------------------------
 
-    protected:
-        Module(
-            ModuleType moduleType,
-            const std::string& label,
-            VoicingType voicingType,
-            ProcessingType processingType,
-            ModuleStyle style = (ModuleStyle)(ModuleStyleVisible | ModuleStyleLabel));
+	class Module
+	{
+		friend class Instrument;
+		friend class Sink;
 
-    public:
-        virtual ~Module();
+	protected:
+		Module(
+			ModuleType moduleType,
+			const std::string& label,
+			VoicingType voicingType,
+			ProcessingType processingType,
+			ModuleStyle style = (ModuleStyle)( ModuleStyleVisible | ModuleStyleLabel ) );
 
-        void processAudio() throw() {}
-        virtual void processEvent(double value, uint16_t voices) throw() {}
-        virtual void processControl() throw () {}
+	public:
+		virtual ~Module();
 
-        virtual void onMidiController( int controllerNum, int value );
+		void processAudio() throw( ) {}
+		virtual void processEvent( double value, uint16_t voices ) throw( ) {}
+		virtual void processControl() throw ( ) {}
 
-        virtual void suspend() {}
-        virtual void resume() {}
+		virtual void onMidiController( int controllerNum, int value );
 
-        virtual void setSampleRate(double sampleRate);
-        virtual void setNumVoices(int numVoices);
+		virtual void suspend() {}
+		virtual void resume() {}
 
-        virtual void setParameter(int paramId, double value, double modulation = 0.f, int voice = -1) {}
-        const Parameter& getParameter(int parameterId) const;
+		virtual void setSampleRate( double sampleRate );
+		virtual void setNumVoices( int numVoices );
 
-        int getNumParameters() const                 { return parameters_.size(); }
-        const ParameterMap& getParameters() const    { return parameters_; }
-        void updateParameter( const Parameter& p )   { parameters_.update( p ); }
-        void setDefaultParameters()                  { parameters_.setDefaultValues(); }
+		virtual void setParameter( int paramId, double value, double modulation = 0.f, int voice = -1 ) {}
+		const Parameter& getParameter( int parameterId ) const;
 
-        const InportList& getInports() const         { return inports_; }
-        const OutportList& getOutports() const       { return outports_; }
-        Inport* getInport( int portId ) const;
-        Outport* getOutport( int portId ) const;
-        int getNumInports() const                    { return inports_.size(); }
-        int getNumOutports() const                   { return outports_.size(); }
+		ParameterMap& getParameters()                { return parameters_; }
+		int getNumParameters() const                 { return parameters_.size(); }
+		const ParameterMap& getParameters() const    { return parameters_; }
+		void updateParameter( const Parameter& p )   { parameters_.update( p ); }
+		void setDefaultParameters()                  { parameters_.setDefaultValues(); }
 
-        int getId() const                            { return id_; }
-        void setId( int id )                         { id_ = id; }
-        const std::string& getLabel() const          { return label_; }
-        void setLabel( const std::string& label )    { label_ = label; }
-        VoicingType getVoicingType() const           { return voicingType_; }
-        void setVoicingType( VoicingType type )      { voicingType_ = type; }
+		const InportList& getInports() const         { return inports_; }
+		const OutportList& getOutports() const       { return outports_; }
+		Inport* getInport( int portId ) const;
+		Outport* getOutport( int portId ) const;
+		int getNumInports() const                    { return inports_.size(); }
+		int getNumOutports() const                   { return outports_.size(); }
 
-        const ModuleType moduleType_;
-        const ProcessingType processingType_;
-        const ModuleStyle moduleStyle_;
+		int getId() const                            { return id_; }
+		void setId( int id )                         { id_ = id; }
+		const std::string& getLabel() const          { return label_; }
+		void setLabel( const std::string& label )    { label_ = label; }
+		VoicingType getVoicingType() const           { return voicingType_; }
+		void setVoicingType( VoicingType type )      { voicingType_ = type; }
 
-    protected:
-        std::string label_;
-        int id_ = -1;
-        VoicingType voicingType_;
+		const ModuleType moduleType_;
+		const ProcessingType processingType_;
+		const ModuleStyle moduleStyle_;
 
-        ParameterMap parameters_;
-        InportList inports_;
-        OutportList outports_;
+	protected:
+		std::string label_;
+		int id_ = -1;
+		VoicingType voicingType_;
 
-        ProcessFunctionPointer processFunction_ = nullptr;
+		ParameterMap parameters_;
+		InportList inports_;
+		OutportList outports_;
 
-        // Constructs all member and initializes them with the current sample rate and number of voices.
-        virtual void init( double sampleRate, int numVoices, Polyphony* polyphony );
+		ProcessFunctionPointer processFunction_ = nullptr;
 
-        // Update after all modules are connected. Links remain valid.
-        virtual void update();
+		// Constructs all member and initializes them with the current sample rate and number of voices.
+		virtual void init( double sampleRate, int numVoices, Polyphony* polyphony );
 
-        // Deletes all members and links. After reset the module is in the same state as before init().
-        virtual void reset();
+		// Update after all modules are connected. Links remain valid.
+		virtual void update();
 
-        virtual void connectSignals() {}
-        virtual void disconnectSignals() {}
+		// Deletes all members and links. After reset the module is in the same state as before init().
+		virtual void reset();
 
-        virtual void initData();
-        virtual void initParameters();
+		virtual void connectSignals() {}
+		virtual void disconnectSignals() {}
 
-        virtual void updatePorts() {}
-        virtual void updateParameters();
+		virtual void initData();
+		virtual void initParameters();
 
-        virtual void disconnectPorts();
-        void connectPort(Module* target, const Link& link);
+		virtual void updatePorts() {}
+		virtual void updateParameters();
 
-        void addInport( int portId, const std::string& label, Inport* port );
-        void addOutport( int portId, const std::string& label, Outport* port, PortType portType );
+		virtual void disconnectPorts();
+		void connectPort( Module* target, const Link& link );
 
-        VoiceAdapterType selectVoiceAdapter(VoicingType other) const;
+		void addInport( int portId, const std::string& label, Inport* port );
+		void addOutport( int portId, const std::string& label, Outport* port, PortType portType );
 
-        double sampleRate_ = INITIAL_SAMPLERATE;
-        int numVoices_     = 0;
-        bool mono_         = false;
+		VoiceAdapterType selectVoiceAdapter( VoicingType other ) const;
 
-        Polyphony* polyphony_ = nullptr;
+		double sampleRate_ = INITIAL_SAMPLERATE;
+		int numVoices_ = 0;
+		bool mono_ = false;
 
-    private: // Make non copyable and prevent C4512
-        Module( const Module& ) = delete;
-        Module& operator=(const Module&) = delete;
-    };
+		Polyphony* polyphony_ = nullptr;
 
-    typedef std::vector<Module*> ModuleList;
+	private: // Make non copyable and prevent C4512
+		Module( const Module& ) = delete;
+		Module& operator=( const Module& ) = delete;
+	};
+
+	typedef std::vector<Module*> ModuleList;
 
 } // namespace e3
 
