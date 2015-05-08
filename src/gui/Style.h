@@ -49,9 +49,9 @@ namespace e3 {
             int width, int height, bool isMouseOver, bool isMouseDown,
             int columnFlags ) override;
 
-		void drawLinearSlider( Graphics& g, int x, int y, int width, int height,
-			float sliderPos, float minSliderPos, float maxSliderPos,
-			const Slider::SliderStyle style, Slider& slider );
+        void drawLinearSlider( Graphics& g, int x, int y, int width, int height,
+            float sliderPos, float minSliderPos, float maxSliderPos,
+            const Slider::SliderStyle style, Slider& slider );
 
         enum ColourIds
         {
@@ -60,12 +60,12 @@ namespace e3 {
             ContentBackground2ColourId      = 0x2000002,
             HighlightColourId               = 0x2000010,
 
-			MonitorText                     = 0x2000020,
-			MonitorBackground               = 0x2000021,
-			MonitorNotInitialized           = 0x2000022,
-			MonitorReady                    = 0x2000023,
-			MonitorSuspended                = 0x2000024,
-			MonitorCrashed                  = 0x2000025,
+            MonitorText                     = 0x2000020,
+            MonitorBackground               = 0x2000021,
+            MonitorNotInitialized           = 0x2000022,
+            MonitorReady                    = 0x2000023,
+            MonitorSuspended                = 0x2000024,
+            MonitorCrashed                  = 0x2000025,
 
             TextEditorFocusedColourId       = 0x2000030,
             TabButtonOffBackgroundColourId  = 0x2000040,

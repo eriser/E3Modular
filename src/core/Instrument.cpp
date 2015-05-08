@@ -1,7 +1,7 @@
 
 
 #include "core/Polyphony.h"
-#include "modules/Envelopes.h"
+#include "modules/AdsrEnvelope.h"
 #include "modules/ModuleFactory.h"
 #include "core/Instrument.h"
 
@@ -35,8 +35,9 @@ namespace e3 {
     Module* Instrument::createAndAddModule( ModuleType type )
     {
         Module* module = ModuleFactory::create( type );
+        module->setDefaultParameters();
         modules_.push_back( module );
-        module->id_ = createModuleId( type );
+        module->id_ = createUniqueId( type );
 
         return module;
     }
@@ -57,6 +58,51 @@ namespace e3 {
             modules_.erase( std::remove( modules_.begin(), modules_.end(), module ), modules_.end() );
             ASSERT( std::find( modules_.begin(), modules_.end(), module ) == modules_.end() );
             delete module;
+        }
+    }
+
+
+    void Instrument::initParameters()
+    {
+        const Preset& preset     = getPreset();
+        ParameterSet& parameters = preset.getModuleParameters();
+
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
+        {
+            Module* m = *it;
+            int id    = m->getId();
+
+            for (ParameterSet::iterator it = parameters.ownerFirst( id ); it != parameters.ownerLast( id ); ++it)
+            {
+                const Parameter& p = *it;
+                m->updateParameter( p );
+            }
+        }
+    }
+
+
+    const Preset& Instrument::getPreset()
+    {
+        if (presetSet_.empty()) {
+            createDefaultPreset();
+        }
+
+        bool contains = presetSet_.contains( presetId_ );
+        presetId_ = contains ? presetId_ : 0;
+
+        return presetSet_.get( presetId_ );
+    }
+
+
+    void Instrument::createDefaultPreset()
+    {
+        const Preset& preset = presetSet_.createNewPreset();
+
+        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
+        {
+            Module* m = *it;
+            const ParameterSet& parameters = m->getDefaultParameters();
+            preset.addModuleParameterSet( parameters );
         }
     }
 
@@ -170,14 +216,14 @@ namespace e3 {
     }
 
 
-    int Instrument::createModuleId( ModuleType type )
+    int Instrument::createUniqueId( ModuleType type )
     {
         if (type == ModuleTypeAudioOutTerminal) {
             return (int)ModuleTypeAudioOutTerminal;
         }
 
         int minId = ModuleTypeAudioOutTerminal + 1;
-        int maxId = (uint16_t)modules_.size();
+        int maxId = modules_.size();
         int id    = minId;
 
         for (; id <= maxId; id++) {
@@ -192,7 +238,7 @@ namespace e3 {
     {
         if (module->moduleType_ == ModuleTypeAdsrEnvelope)
         {
-            ADSREnvelope* adsr = dynamic_cast<ADSREnvelope*>(module);
+            AdsrEnvelope* adsr = dynamic_cast<AdsrEnvelope*>(module);
             adsr->setSentinel( true );
             return true;
         }

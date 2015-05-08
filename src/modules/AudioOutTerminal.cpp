@@ -20,6 +20,20 @@ namespace e3 {
         parameters_.add(paramVolume);
     }
 
+
+    ParameterSet& AudioOutTerminal::getDefaultParameters() const
+    {
+        static ParameterSet set;
+        set.clear();
+
+        Parameter paramVolume( ParamVolume, id_, "Volume", ControlSlider, 0.35 );
+        paramVolume.numberFormat_ = NumberDecibel;
+        paramVolume.unit_ = "db";
+        set.add( paramVolume );
+
+        return set;
+    }
+
     
     void AudioOutTerminal::initData()
     {
@@ -45,4 +59,6 @@ namespace e3 {
         *audioInportPointer_ = 0.0f;
         value_ = std::max<double>(-1, std::min<double>(1, input * volume_));
     }
-}
+
+
+} // namespace e3

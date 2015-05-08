@@ -79,15 +79,15 @@ namespace e3 {
         setColour( ListBox::outlineColourId, Colours::transparentBlack );
         setColour( ListBox::textColourId, colourMap["lightText"] );
 
-		setColour( Slider::backgroundColourId, colourMap["sliderBackgroundColourId"]);
-		setColour( Slider::thumbColourId, colourMap["sliderThumbColourId"] );
-		setColour( Slider::trackColourId, colourMap["sliderTrackColourId"] );
-		setColour( Slider::rotarySliderFillColourId, colourMap["sliderRotarySliderFillColourId"] );
-		setColour( Slider::rotarySliderOutlineColourId, colourMap["sliderRotarySliderOutlineColourId"] );
-		setColour( Slider::textBoxTextColourId, colourMap["sliderTextBoxTextColourId"] );
-		setColour( Slider::textBoxBackgroundColourId, colourMap["sliderTextBoxBackgroundColourId"] );
-		setColour( Slider::textBoxHighlightColourId, colourMap["sliderTextBoxHighlightColourId"] );
-		setColour( Slider::textBoxOutlineColourId, colourMap["sliderTextBoxOutlineColourId"] );
+        setColour( Slider::backgroundColourId, colourMap["sliderBackgroundColourId"]);
+        setColour( Slider::thumbColourId, colourMap["sliderThumbColourId"] );
+        setColour( Slider::trackColourId, colourMap["sliderTrackColourId"] );
+        setColour( Slider::rotarySliderFillColourId, colourMap["sliderRotarySliderFillColourId"] );
+        setColour( Slider::rotarySliderOutlineColourId, colourMap["sliderRotarySliderOutlineColourId"] );
+        setColour( Slider::textBoxTextColourId, colourMap["sliderTextBoxTextColourId"] );
+        setColour( Slider::textBoxBackgroundColourId, colourMap["sliderTextBoxBackgroundColourId"] );
+        setColour( Slider::textBoxHighlightColourId, colourMap["sliderTextBoxHighlightColourId"] );
+        setColour( Slider::textBoxOutlineColourId, colourMap["sliderTextBoxOutlineColourId"] );
 
         // custom colours
         setColour( BackgroundColourId, colourMap["background"] );
@@ -99,12 +99,12 @@ namespace e3 {
         setColour( TabButtonOffTextColourId, colourMap["buttonOffText"] );
         setColour( TabButtonOnTextColourId, colourMap["buttonOnText"] );
 
-		setColour( MonitorText, colourMap["monitorText"] );
-		setColour( MonitorBackground, colourMap["monitorBackground"] );
-		setColour( MonitorNotInitialized, colourMap["monitorNotInitialized"] );
-		setColour( MonitorReady, colourMap["monitorReady"] );
-		setColour( MonitorSuspended, colourMap["monitorSuspended"] );
-		setColour( MonitorCrashed, colourMap["monitorCrashed"] );
+        setColour( MonitorText, colourMap["monitorText"] );
+        setColour( MonitorBackground, colourMap["monitorBackground"] );
+        setColour( MonitorNotInitialized, colourMap["monitorNotInitialized"] );
+        setColour( MonitorReady, colourMap["monitorReady"] );
+        setColour( MonitorSuspended, colourMap["monitorSuspended"] );
+        setColour( MonitorCrashed, colourMap["monitorCrashed"] );
 
         setColour( ModuleColourId, colourMap["module"] );
         setColour( ModuleMonoColourId, colourMap["moduleMono"] );
@@ -364,40 +364,40 @@ namespace e3 {
     }
 
 
-	void Style::drawLinearSlider( Graphics& g, int x, int y, int width, int height,
-		float sliderPos, float minSliderPos, float maxSliderPos,
-		const Slider::SliderStyle style, Slider& slider )
-	{
-		g.fillAll( slider.findColour( Slider::backgroundColourId ) );
+    void Style::drawLinearSlider( Graphics& g, int x, int y, int width, int height,
+        float sliderPos, float minSliderPos, float maxSliderPos,
+        const Slider::SliderStyle style, Slider& slider )
+    {
+        g.fillAll( slider.findColour( Slider::backgroundColourId ) );
 
-		if( style == Slider::LinearBar || style == Slider::LinearBarVertical )
-		{
-			const float fx = (float)x, fy = (float)y, fw = (float)width, fh = (float)height;
+        if( style == Slider::LinearBar || style == Slider::LinearBarVertical )
+        {
+            const float fx = (float)x, fy = (float)y, fw = (float)width, fh = (float)height;
 
-			Path p;
+            Path p;
 
-			if( style == Slider::LinearBarVertical )
-				p.addRectangle( fx, sliderPos, fw, 1.0f + fh - sliderPos );
-			else
-				p.addRectangle( fx, fy, sliderPos - fx, fh );
+            if( style == Slider::LinearBarVertical )
+                p.addRectangle( fx, sliderPos, fw, 1.0f + fh - sliderPos );
+            else
+                p.addRectangle( fx, fy, sliderPos - fx, fh );
 
-			Colour baseColour( slider.findColour( Slider::thumbColourId )
-				.withMultipliedSaturation( slider.isEnabled() ? 1.0f : 0.5f ));
+            Colour baseColour( slider.findColour( Slider::thumbColourId )
+                .withMultipliedSaturation( slider.isEnabled() ? 1.0f : 0.5f ));
 
-			g.setColour( baseColour );
-			g.fillPath( p );
+            g.setColour( baseColour );
+            g.fillPath( p );
 
-			if( style == Slider::LinearBarVertical )
-				g.fillRect( fx, sliderPos, fw, 1.0f );
-			else
-				g.fillRect( sliderPos, fy, 1.0f, fh );
-		}
-		else
-		{
-			drawLinearSliderBackground( g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider );
-			drawLinearSliderThumb( g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider );
-		}
-	}
+            if( style == Slider::LinearBarVertical )
+                g.fillRect( fx, sliderPos, fw, 1.0f );
+            else
+                g.fillRect( sliderPos, fy, 1.0f, fh );
+        }
+        else
+        {
+            drawLinearSliderBackground( g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider );
+            drawLinearSliderThumb( g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider );
+        }
+    }
 
 
     void Style::drawCornerResizer( Graphics& g, int w, int h, bool, bool )

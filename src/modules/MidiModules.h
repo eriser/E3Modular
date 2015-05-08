@@ -8,6 +8,10 @@
 namespace e3 {
     class Polyphony;
 
+    //------------------------------------------------------------------
+    // class MidiGate
+    //------------------------------------------------------------------
+
     class MidiGate : public Module 
     {
     public:
@@ -24,7 +28,11 @@ namespace e3 {
     };
 
 
-    class MidiFrequency : public Module 
+    //------------------------------------------------------------------
+    // class MidiFrequency
+    //------------------------------------------------------------------
+
+    class MidiFrequency : public Module
     {
     public:
         MidiFrequency();
@@ -34,6 +42,7 @@ namespace e3 {
             VoicingType voicingType,
             ProcessingType processingType);
 
+        ParameterSet& getDefaultParameters() const override;
         void connectSignals() override;
         void disconnectSignals() override;
 
@@ -72,6 +81,10 @@ namespace e3 {
         Outport freqOutport_;
     };
 
+
+    //------------------------------------------------------------------
+    // class MidiInput
+    //------------------------------------------------------------------
 
     class MidiInput : public MidiFrequency
     {

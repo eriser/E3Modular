@@ -10,9 +10,10 @@
 
 namespace e3
 {
-	class Module;
-	class ParameterPanel;
-	class ParameterStrip;
+    class Module;
+    class Instrument;
+    class ParameterPanel;
+    class ParameterStrip;
 
 
     class InstrumentParameterPanel : public Component, 
@@ -60,46 +61,48 @@ namespace e3
 
         void resized() override;
         void paint( Graphics& g ) override;
-        void update( Module* module );
+        void update( Instrument* instrument, Module* module );
         void labelTextChanged( Label *labelThatHasChanged ) override;
 
     protected:
-		void removeAllParameters();
+        void removeAllParameters();
 
         ParameterPanel* owner_;
 
         Label headerLabel_;
-		OwnedArray<ParameterStrip> parameters_;
+        OwnedArray<ParameterStrip> parameters_;
     };
 
 
-	//--------------------------------------------------------------------------------------
-	// class ParameterStrip
-	//--------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------
+    // class ParameterStrip
+    //--------------------------------------------------------------------------------------
 
-	class ParameterStrip : public Component
-	{
-	public:
-		ParameterStrip( const Rectangle<int>& bounds, Module* module, Parameter& parameter );
+    class ParameterStrip : public Component, public Slider::Listener
+    {
+    public:
+        ParameterStrip( const Rectangle<int>& bounds, Module* module, const Parameter* parameter );
 
-		//void mouseDown( const MouseEvent& e ) override;
+        void sliderValueChanged( Slider* slider );
 
-		//void valueChanged( Component* source );
-		//void attachOrDetach();
-		//void onController( int controllerId, double value );
+        //void mouseDown( const MouseEvent& e ) override;
 
-	protected:
-		//void addControl( const Rectangle<int> bounds, Module* module );
-		//CMouseEventResult showCtrlDialog( const CPoint& pos );
+        //void valueChanged( Component* source );
+        //void attachOrDetach();
+        //void onController( int controllerId, double value );
 
-		Module* module_;
-		Parameter& parameter_;
-		Label label_;
-		Slider slider_;
-	};
+    protected:
+        //void addControl( const Rectangle<int> bounds, Module* module );
+        //CMouseEventResult showCtrlDialog( const CPoint& pos );
 
-	
-	class ParameterPanel : public Component
+        Module* module_;
+        const Parameter* parameter_;
+        Label label_;
+        Slider slider_;
+    };
+
+    
+    class ParameterPanel : public Component
     {
     public:
         ParameterPanel();
@@ -107,7 +110,7 @@ namespace e3
         void resized() override;
 
         void showInstrument( Instrument* instrument );
-        void showModule( Module* module );
+        void showModule( Instrument* instrument, Module* module );
 
         Gallant::Signal2<const std::string&, var> instrumentAttributesSignal;     // attributeName, value
   

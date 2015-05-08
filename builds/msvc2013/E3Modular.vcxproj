@@ -439,6 +439,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\core\Link.h" />
     <ClInclude Include="..\..\src\core\MonitorUpdater.h" />
     <ClInclude Include="..\..\src\core\Module.h" />
+    <ClInclude Include="..\..\src\core\Preset.h" />
     <ClInclude Include="..\..\src\core\Processor.h" />
     <ClInclude Include="..\..\src\core\CpuMeter.h" />
     <ClInclude Include="..\..\src\core\Settings.h" />
@@ -486,7 +487,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\gui\Widgets.h" />
     <ClInclude Include="..\..\src\gui\Wires.h" />
     <ClInclude Include="..\..\src\modules\Delay.h" />
-    <ClInclude Include="..\..\src\modules\Envelopes.h" />
+    <ClInclude Include="..\..\src\modules\AdsrEnvelope.h" />
     <ClInclude Include="..\..\src\modules\AudioOutTerminal.h" />
     <ClInclude Include="..\..\src\modules\MidiModules.h" />
     <ClInclude Include="..\..\src\modules\ModuleFactory.h" />
@@ -523,6 +524,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\core\BankSerializer.cpp" />
     <ClCompile Include="..\..\src\core\CpuMeter.cpp" />
     <ClCompile Include="..\..\src\core\Module.cpp" />
+    <ClCompile Include="..\..\src\core\Preset.cpp" />
     <ClCompile Include="..\..\src\core\Processor.cpp" />
     <ClCompile Include="..\..\src\core\Settings.cpp" />
     <ClCompile Include="..\..\src\core\ParameterShaper.cpp" />
@@ -568,7 +570,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\gui\Style.cpp" />
     <ClCompile Include="..\..\src\gui\Wires.cpp" />
     <ClCompile Include="..\..\src\modules\Delay.cpp" />
-    <ClCompile Include="..\..\src\modules\Envelopes.cpp" />
+    <ClCompile Include="..\..\src\modules\AdsrEnvelope.cpp" />
     <ClCompile Include="..\..\src\modules\AudioOutTerminal.cpp" />
     <ClCompile Include="..\..\src\modules\MidiModules.cpp" />
     <ClCompile Include="..\..\src\modules\ModuleFactory.cpp" />

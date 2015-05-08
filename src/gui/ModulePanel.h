@@ -19,52 +19,53 @@ namespace e3 {
 
 
     class ModulePanel : public Component,
-                        public LassoSource<ModuleComponent*>,
-                        public ChangeListener
+        public LassoSource<ModuleComponent*>,
+        public ChangeListener
     {
     public:
         ModulePanel();
 
-        void paint(Graphics& g) override;
-        void paintOverChildren(Graphics& g) override;
+        void paint( Graphics& g ) override;
+        void paintOverChildren( Graphics& g ) override;
 
-        void createModules(Processor* processor, XmlElement* instrumentXml);
-        void createModule( int moduleId, Point<int> pos );
+        void createModules( Processor* processor, XmlElement* instrumentXml );
+        void createModule( int moduleType, Point<int> pos );
         void deleteSelectedModules();
-        void storeModulePosition(int moduleId, Point<int> pos);
+        void saveModulePosition( int moduleId, Point<int> pos, bool isNewModule );
 
-        void mouseDown(const MouseEvent& e) override;
-        void mouseDrag(const MouseEvent& e) override;
-        void mouseUp(const MouseEvent& e) override;
+        void mouseDown( const MouseEvent& e ) override;
+        void mouseDrag( const MouseEvent& e ) override;
+        void mouseUp( const MouseEvent& e ) override;
 
         ModuleSelection& getLassoSelection() override;
-        void findLassoItemsInArea(Array<ModuleComponent*>& results, const Rectangle<int>& area) override;
-        void changeListenerCallback(ChangeBroadcaster* broadcaster) override;
+        void findLassoItemsInArea( Array<ModuleComponent*>& results, const Rectangle<int>& area ) override;
+        void changeListenerCallback( ChangeBroadcaster* broadcaster ) override;
 
         void selectAll();
         void deselectAll();
         void focusGained( FocusChangeType ) override;
+        void moduleFocusGained( ModuleComponent* module );
 
         void checkViewport();
-        void selectWires(ModuleComponent* module, bool select);
+        void selectWires( ModuleComponent* module, bool select );
         Rectangle<int> getUsedArea() const;
 
-        ModuleComponent* getModule(int id);
-        PortComponent* getPort(const Link& link, PortType portType);
+        ModuleComponent* getModule( int id );
+        PortComponent* getPort( const Link& link, PortType portType );
 
-        ModuleComponent* getModuleAtPosition(const Point<int>& pos) const;
-        PortComponent* getPortAtPosition(const Point<int>& pos) const;
+        ModuleComponent* getModuleAtPosition( const Point<int>& pos ) const;
+        PortComponent* getPortAtPosition( const Point<int>& pos ) const;
 
-        void portAction(PortComponent* port, PortAction action, const Point<int>& pos);
+        void portAction( PortComponent* port, PortAction action, const Point<int>& pos );
 
         Processor* getProcessor() const;
 
         Gallant::Signal1<Instrument*> showInstrumentSignal;
-        Gallant::Signal1<Module*> showModuleSignal;
+        Gallant::Signal2<Instrument*, Module*> showModuleSignal;
 
-    protected: 
+    protected:
         ModuleComponent* createModuleComponent( Module* module, int x, int y );
-        void createWires(LinkList& links);
+        void createWires( LinkList& links );
 
         void showPopupMenu( Point<int> pos );
         PopupMenu createPopupMenu();
@@ -89,9 +90,9 @@ namespace e3 {
             MenuModuleNew      = 1,
             MenuModuleDelete   = 2,
             MenuCopy           = 3,
-            MenuCut            = 4, 
+            MenuCut            = 4,
             MenuPaste          = 5,
-            MenuSelectAll      = 6, 
+            MenuSelectAll      = 6,
             MenuUnselectAll    = 7,
             MenuSubModuleFirst = 10,
         };

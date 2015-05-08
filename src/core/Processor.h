@@ -26,12 +26,12 @@ namespace e3 {
     class Module;
     class Link;
 
-	enum ProcessorState {
-		ProcessorNotInitialized = 0,
-		ProcessorReady          = 1,
-		ProcessorSuspended      = 2,
-		ProcessorCrashed        = 3,
-	};
+    enum ProcessorState {
+        ProcessorNotInitialized = 0,
+        ProcessorReady          = 1,
+        ProcessorSuspended      = 2,
+        ProcessorCrashed        = 3,
+    };
 
 
     //-----------------------------------------------------------------
@@ -102,7 +102,7 @@ namespace e3 {
         void setInstrumentAttributes( const std::string& name, const var& value );
         void setInstrumentAttribute( int instrumentId, const std::string& name, const var& value );
 
-		Gallant::Signal2<int, int>             midiControllerSignal;
+        Gallant::Signal2<int, int>             midiControllerSignal;
 
         float gain_ = 0.75;
 
@@ -110,7 +110,7 @@ namespace e3 {
         void initInstrument();
         void resetAndInitInstrument();
         void setNumVoices( int numVoices );
-		void setState( ProcessorState state );
+        void setState( ProcessorState state );
 
 
         Sink* sink_ = nullptr;
@@ -119,7 +119,7 @@ namespace e3 {
         ScopedPointer<Instrument> instrument_;
         ScopedPointer<CpuMeter> cpuMeter_;
 
-		ProcessorState state_ = ProcessorNotInitialized;
+        ProcessorState state_ = ProcessorNotInitialized;
         CriticalSection lock_;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( Processor )

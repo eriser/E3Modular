@@ -13,6 +13,7 @@ namespace e3 {
     public:
         SineOscillator();
 
+        ParameterSet& getDefaultParameters() const override;
         void initData() override;
         void updatePorts() override;
 

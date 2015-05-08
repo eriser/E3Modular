@@ -129,6 +129,89 @@ namespace e3 {
 
 
         //-----------------------------------------------------------------------------
+        // ParameterTest
+        //-----------------------------------------------------------------------------
+
+        TEST( ParameterTest, eqOperator )
+        {
+            Parameter p1( 17, 18, "test1", ControlSlider );
+            Parameter p2( 17, 18, "test2", ControlBiSlider );
+            EXPECT_EQ( p1, p2 );
+        }
+
+        //-----------------------------------------------------------------------------
+        // ParameterSetTest
+        //-----------------------------------------------------------------------------
+
+        class ParameterSetTest : public ::testing::Test
+        {
+        public:
+            ParameterSetTest() 
+            {
+                Parameter arr[] = { 
+                    Parameter( 0, 2 ), Parameter( 1, 2 ),  Parameter( 2, 2 ),
+                    Parameter( 0, 1 ), Parameter( 1, 1 ),  Parameter( 2, 1 ),
+                    Parameter( 0, 0 ), Parameter( 1, 0 ),  Parameter( 2, 0 )
+                };
+                for (int i = 0; i < ARRAY_SIZE( arr ); i++) {
+                    auto result = set_.insert( arr[i] );
+                }
+            }
+            ParameterSet set_;
+        };
+
+        TEST_F( ParameterSetTest, sorting )
+        {
+            Parameter prev(-1, -1);
+            for (auto it = set_.begin(); it != set_.end(); ++it)
+            {
+                const Parameter& next = *it;
+                EXPECT_GE( next.id_, prev.id_ );
+                EXPECT_GE( next.ownerId_, prev.ownerId_ );
+            }
+        }
+
+        TEST_F( ParameterSetTest, add )
+        {
+            Parameter p1( 0, 3 );
+            EXPECT_NO_THROW( set_.add( Parameter( 0, 3 ) ) );
+            EXPECT_NO_THROW( set_.add( Parameter( 17, 138 ) ) );
+
+            EXPECT_THROW( set_.add( Parameter( 0, 3 ) ), Assertion );
+            EXPECT_THROW( set_.add( Parameter( 0, -1 ) ), Assertion );
+            EXPECT_THROW( set_.add( Parameter( -1, -1 ) ), Assertion );
+            EXPECT_THROW( set_.add( Parameter( -1, 0 ) ), Assertion );
+        }
+
+
+        TEST_F( ParameterSetTest, ownerFirstLast )
+        {
+            int count = 0;
+            for (ParameterSet::iterator it = set_.ownerFirst( 1 ); it != set_.ownerLast( 1 ); ++it)
+            {
+                const Parameter& p = *it;
+                EXPECT_EQ( 1, p.ownerId_ );
+                count++;
+            }
+            EXPECT_EQ( 3, count );
+
+            for (ParameterSet::iterator it = set_.ownerFirst( 17 ); it != set_.ownerLast( 17 ); ++it)
+            {
+                EXPECT_TRUE( false );
+            }
+        }
+
+        TEST_F( ParameterSetTest, eraseAllByOwner )
+        {
+            set_.eraseAllByOwner( 0 );
+            EXPECT_EQ( 6, set_.size() );
+            set_.eraseAllByOwner( 17 );
+            EXPECT_EQ( 6, set_.size() );
+        }
+
+
+        
+        //-----------------------------------------------------------------------------
         // ParameterShaperTest
         //-----------------------------------------------------------------------------
 
@@ -313,20 +396,6 @@ namespace e3 {
             EXPECT_THROW( map_.at( 0 ), std::out_of_range );
         }
 
-        TEST_F( ParameterMapTest, SetModel )
-        {
-            std::string label = "testing";
-
-            Parameter p;
-            p.id_ = id_;
-            p.label_ = label;
-            map_.update( p );
-
-            EXPECT_EQ( label, map_.at( id_ ).label_ );
-
-            p.id_ = 0;
-            EXPECT_THROW( map_.update( p ), std::out_of_range );
-        }
 
 
         //----------------------------------------------------------------------------------------
@@ -362,18 +431,6 @@ namespace e3 {
 
             l1.leftModule_ = 0;
             EXPECT_NE( link_, l1 );
-        }
-
-        TEST_F( LinkTest, OperatorLess )
-        {
-            Link l1 = link_;
-            l1.rightModule_ = 44;
-            EXPECT_LT( l1, link_ );
-            EXPECT_GT( link_, l1 );
-
-            l1 = link_;
-            l1.leftPort_ = 0;
-            EXPECT_LT( l1, link_ );
         }
 
 
@@ -450,8 +507,8 @@ namespace e3 {
             { testModuleTypes[1], { ProcessEvent, Polyphonic, 0, 1, 0 } },
             { testModuleTypes[2], { ProcessEvent | ProcessControl, Polyphonic, 0, 1, 3 } },
             { testModuleTypes[3], { ProcessEvent | ProcessControl, Polyphonic, 0, 2, 3 } },
-            { testModuleTypes[4], { ProcessAudio, Polyphonic, 2, 1, 4 } },
-            { testModuleTypes[5], { ProcessAudio | ProcessControl, Polyphonic, 2, 1, 6 } },
+            { testModuleTypes[4], { ProcessAudio, Polyphonic, 2, 1, 2 } },
+            { testModuleTypes[5], { ProcessAudio | ProcessControl, Polyphonic, 2, 1, 4 } },
             { testModuleTypes[6], { ProcessAudio, Polyphonic, 1, 1, 3 } },
         };
 
@@ -535,7 +592,6 @@ namespace e3 {
             }
         };
 
-
         TEST_F( ModuleTest, ModuleInitialization )
         {
             ModuleTestMap::const_iterator it = moduleTestMap.begin();
@@ -543,6 +599,15 @@ namespace e3 {
             {
                 testInitialization( it->first );
             }
+        }
+
+        TEST_F( ModuleTest, getDefaultParameters )
+        {
+            AudioOutTerminal t;
+            t.setId( 0 );
+            ParameterSet& set = t.getDefaultParameters();
+            int size = set.size();
+            EXPECT_EQ( size, t.getDefaultParameters().size() );
         }
 
         TEST_F( ModuleTest, ParameterMap_setDefaultValues )
@@ -618,7 +683,7 @@ namespace e3 {
             //TestableInstrument(const Instrument& other) : Instrument(other) {}
 
             using Instrument::getModule;
-            using Instrument::createModuleId;
+            using Instrument::createUniqueId;
             using Instrument::hasAudioOutTerminal;
         };
 
@@ -667,11 +732,11 @@ namespace e3 {
             EXPECT_NE( nullptr, m );
         }
 
-        TEST_F( InstrumentTest, createModuleId )
+        TEST_F( InstrumentTest, createUniqueId )
         {
             Module* m = nullptr;
 
-            uint16_t id = instrument_.createModuleId( ModuleTypeAudioOutTerminal );
+            uint16_t id = instrument_.createUniqueId( ModuleTypeAudioOutTerminal );
             EXPECT_EQ( ModuleTypeAudioOutTerminal, id );
 
             // erase single element and append new element
@@ -845,18 +910,18 @@ namespace e3 {
                 EXPECT_EQ( 3, m->getId() );
                 EXPECT_EQ( ModuleTypeAdsrEnvelope, m->moduleType_ );
 
-                checkMidiParameters( input->getParameter(0) );
-                checkMidiParameters( input->getParameter(1) );
-                checkMidiParameters( input->getParameter(2) );
-                checkMidiParameters( sine ->getParameter(0) );
-                checkMidiParameters( sine ->getParameter(1) );
-                checkMidiParameters( instrument->getLinks()[1] );
-                checkMidiParameters( adsr->getParameter(0) );
-                checkMidiParameters( adsr->getParameter(1) );
-                checkMidiParameters( adsr->getParameter(2) );
-                checkMidiParameters( adsr->getParameter(3) );
-                checkMidiParameters( instrument->getLinks()[2] );
-                checkMidiParameters( instrument->getLinks()[3] );
+                //checkMidiParameters( input->getParameter(0) );
+                //checkMidiParameters( input->getParameter(1) );
+                //checkMidiParameters( input->getParameter(2) );
+                //checkMidiParameters( sine ->getParameter(0) );
+                //checkMidiParameters( sine ->getParameter(1) );
+                //checkMidiParameters( instrument->getLinks()[1] );
+                //checkMidiParameters( adsr->getParameter(0) );
+                //checkMidiParameters( adsr->getParameter(1) );
+                //checkMidiParameters( adsr->getParameter(2) );
+                //checkMidiParameters( adsr->getParameter(3) );
+                //checkMidiParameters( instrument->getLinks()[2] );
+                //checkMidiParameters( instrument->getLinks()[3] );
 
                 LinkList linksForAdsr;
                 instrument->getLinksForModule( adsr->getId(), PortTypeUndefined, linksForAdsr );

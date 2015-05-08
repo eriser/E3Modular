@@ -43,11 +43,13 @@ namespace e3 {
                     String posString = e->getStringAttribute( "pos" ).toStdString();
                     StringArray tokens;
                     int numTokens = tokens.addTokens( posString, false );
+                    ASSERT( numTokens == 2 );
 
-                    uint16_t id = (uint16_t)e->getIntAttribute( "id", -1 );
+                    int id = e->getIntAttribute( "id", -1 );
                     Module* module = instrument->getModule( id );
+                    ASSERT( module );
 
-                    if (module != nullptr && numTokens >= 2)
+                    if (module != nullptr && numTokens == 2)
                     {
                         createModuleComponent( module, tokens[0].getIntValue(), tokens[1].getIntValue() );
                     }
@@ -80,16 +82,16 @@ namespace e3 {
     }
 
 
-    void ModulePanel::createModule( int moduleId, Point<int> pos )
+    void ModulePanel::createModule( int moduleType, Point<int> pos )
     {
         ASSERT( processor_ );
         if (processor_ == nullptr) return;
 
-        Module* module = processor_->addModule( moduleId );
+        Module* module = processor_->addModule( moduleType );
         if (module != nullptr)
         {
             ModuleComponent* comp = createModuleComponent( module, pos.x, pos.y );
-            storeModulePosition( moduleId, pos );
+            saveModulePosition( module->getId(), pos, true );
 
             selection_->selectOnly( comp );
             focusModule( comp );
@@ -260,8 +262,13 @@ namespace e3 {
 
     void ModulePanel::focusGained( FocusChangeType )
     {
-        TRACE( "ModulePanel::focusGained\n" );
         showInstrumentSignal( processor_->getInstrument() );
+    }
+
+
+    void ModulePanel::moduleFocusGained( ModuleComponent* module )
+    {
+        showModuleSignal( processor_->getInstrument(), module->getModule() );
     }
 
 
@@ -371,10 +378,19 @@ namespace e3 {
     }
 
 
-    void ModulePanel::storeModulePosition( int moduleId, Point<int> pos )
+    void ModulePanel::saveModulePosition( int moduleId, Point<int> pos, bool isNewModule )
     {
-        if (panelXml_ != nullptr) {
+        ASSERT( panelXml_ );
+        if (panelXml_ != nullptr) 
+        {
             XmlElement* e = panelXml_->getChildByAttribute( "id", String( moduleId ) );
+            ASSERT( (isNewModule && e == nullptr) || e != nullptr );
+
+            if (e == nullptr && isNewModule) 
+            {
+                e = panelXml_->createNewChildElement( "module" );
+                e->setAttribute( "id", moduleId );
+            }
             if (e != nullptr) {
                 e->setAttribute( "pos", pos.toString() );
             }
@@ -405,8 +421,8 @@ namespace e3 {
 
         default: if (result >= MenuSubModuleFirst)
         {
-            int moduleId = result - MenuSubModuleFirst;
-            panel->createModule( moduleId, panel->popupMenuPosition_ );
+            int moduleType = result - MenuSubModuleFirst;
+            panel->createModule( moduleType, panel->popupMenuPosition_ );
         }
         }
     }

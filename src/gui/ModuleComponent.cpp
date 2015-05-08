@@ -124,15 +124,14 @@ namespace e3 {
     {
         Point<int> pos = getPosition();
         if (positionBeforeDragging_ != pos) {
-            panel_->storeModulePosition( module_->getId(), pos );
+            panel_->saveModulePosition( module_->getId(), pos, false );
         }
     }
 
 
     void ModuleComponent::focusGained( FocusChangeType )
     {
-        TRACE( "ModuleComponent::focusGained, id=%d\n", getModuleId() );
-        panel_->showModuleSignal( getModule() );
+        panel_->moduleFocusGained( this );
     }
 
 

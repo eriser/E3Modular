@@ -42,7 +42,6 @@ namespace e3 {
         polyphony_  = polyphony;
         setNumVoices( numVoices );
         initData();
-        initParameters();
         setSampleRate( sampleRate );
         connectSignals();
     }
@@ -102,20 +101,20 @@ namespace e3 {
 
     void Module::updateParameters()
     {
-        if (numVoices_ > 0)
-        {
-            for (ParameterMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
-            {
-                Parameter& param = it->second;
-                setParameter( it->first, param.value_, 0, -1 );  // set all parameters to zero
-            }
-        }
+        //if (numVoices_ > 0)
+        //{
+        //    for (ParameterMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
+        //    {
+        //        Parameter& param = it->second;
+        //        setParameter( it->first, param.value_, 0, -1 );  
+        //    }
+        //}
     }
 
 
-    const Parameter& Module::getParameter( int parameterId ) const
+    void Module::updateParameter( const Parameter& parameter )
     {
-        return parameters_.at( parameterId );
+        setParameter( parameter.getId(), parameter.value_, 0, -1 );
     }
 
 
@@ -194,6 +193,21 @@ namespace e3 {
         return (voicingType_ == otherVoicingType) ? AdapterNone :
             (voicingType_ == Monophonic) ? AdapterMonoToPoly : AdapterPolyToMono;
     }
+
+
+    ParameterSet& Module::getDefaultParameters() const
+    {
+        static ParameterSet defaultParameters;
+        return defaultParameters;
+    }
+
+
+    const Parameter& Module::getDefaultParameter( int parameterId ) const
+    {
+        ParameterSet& set = getDefaultParameters();
+        return set.get( parameterId, id_ );
+    }
+
 
 
 } // namespace e3

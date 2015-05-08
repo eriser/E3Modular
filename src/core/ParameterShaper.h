@@ -22,9 +22,9 @@ namespace e3 {
         //               negative values create a concave curve.
         //               Useful values are between -6 and 24.
         // @param steps  Quantize value
-        ParameterShaper(double min=0, double max=1, int16_t steps=100, int16_t factor=12) :
+        ParameterShaper(double min=0, double max=1, int steps=100, int factor=12) :
             BoundedRange(min, max),
-            steps_(steps),
+            numSteps_(steps),
             factor_(factor)
         {}
 
@@ -34,11 +34,13 @@ namespace e3 {
         // Converts the given value to a linear scale.
         double linear(double value) const;
 
-        int16_t getFactor() const         { return factor_; }
+        int getFactor() const             { return factor_; }
         void setFactor(int16_t factor)    { factor_ = factor; }
 
-        int16_t getSteps() const          { return steps_; }
-        void setSteps(int16_t steps)      { steps_ = steps; }
+        int getNumSteps() const           { return numSteps_; }
+        void setNumSteps(int steps)       { numSteps_ = steps; }
+
+        double getInterval() const        { return abs( getRange() / numSteps_ ); }
 
     protected:
         
@@ -47,9 +49,9 @@ namespace e3 {
         double validate(double value) const;
 
 
-        double base_    = 1.122;
-        int16_t factor_ = 12;
-        int16_t steps_  = 12;
+        double base_  = 1.122;
+        int factor_   = 12;
+        int numSteps_ = 12;
     };
 
 

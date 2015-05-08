@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "JuceHeader.h"
+#include "core/Preset.h"
 #include "core/Module.h"
 
 
@@ -25,9 +26,14 @@ namespace e3 {
         void suspendModules();
         void resumeModules();
 
+        void initParameters();
+        const PresetSet& getPresets() const                      { return presetSet_; }
+        const Preset& getPreset();
+        const Preset& Instrument::createNewPreset(int id = -1)   { return presetSet_.createNewPreset( id ); }
+
         Module* getModule( int moduleId ) const;
-        const ModuleList& getModules() const { return modules_; }
-        int getNumModules() const            { return modules_.size(); }
+        const ModuleList& getModules() const    { return modules_; }
+        int getNumModules() const               { return modules_.size(); }
 
         Module* createAndAddModule( ModuleType type );
         void deleteModule( Module* module );
@@ -47,6 +53,7 @@ namespace e3 {
         bool checkSentinel( Module* module );
 
         int id_           = -1;
+        int presetId_     = 0;
         int numVoices_    = 1;
         int numUnison_    = 1;
         int unisonSpread_ = 5;
@@ -61,10 +68,12 @@ namespace e3 {
 
     protected:
         bool hasAudioOutTerminal();
-        int createModuleId( ModuleType type );
+        int createUniqueId( ModuleType type );
+        void createDefaultPreset();
 
         ModuleList modules_;
         LinkList links_;
+        PresetSet presetSet_;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( Instrument )
     };

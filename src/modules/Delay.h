@@ -12,6 +12,7 @@ namespace e3 {
     public:
         Delay();
 
+        ParameterSet& getDefaultParameters() const override;
         void initData() override;
         
         void processAudio() throw();
@@ -30,13 +31,13 @@ namespace e3 {
     protected:
         void updateBuffer();
 
-        uint32_t delayTime_  = 0;
-        double feedback_     = 0;
-        double gain_         = 0;
-        uint32_t bufferSize_ = 0;
+        double feedback_          = 0;
+        double gain_              = 0;
+        uint_fast32_t delayTime_  = 0;
+        uint_fast32_t bufferSize_ = 0;
 
-        Buffer<uint32_t> cursorBuffer_;
-        uint32_t* cursorBufferPointer_ = nullptr;
+        Buffer<uint_fast32_t> cursorBuffer_;
+        uint_fast32_t* cursorBufferPointer_ = nullptr;
         
         Buffer< double > delayBuffer_;
         double* delayBufferPointer_ = nullptr;

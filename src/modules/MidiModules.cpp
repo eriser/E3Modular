@@ -74,6 +74,29 @@ namespace e3 {
     }
 
 
+    ParameterSet& MidiFrequency::getDefaultParameters() const
+    {
+        static ParameterSet set;
+        set.clear();
+
+        Parameter paramBend( ParamBendRange, id_, "BendRange", ControlBiSlider, 2 );
+        paramBend.valueShaper_ ={ -48, 48, 96 };
+        set.add( paramBend );
+
+        Parameter paramTime( ParamGlideTime, id_, "Portamento Time", ControlSlider, 0 );
+        paramTime.valueShaper_ ={ 0, 2000 };
+        paramTime.unit_ = "msec";
+        paramTime.numberFormat_ = NumberFloat;
+        set.add( paramTime );
+
+        Parameter paramAuto( ParamGlideAuto, id_, "Portamento Auto", ControlCheckbox, 0 );
+        paramBend.valueShaper_ ={ 0, 1 };
+        set.add( paramAuto );
+
+        return set;
+    }
+    
+    
     void MidiFrequency::createParameters()
     {
         Parameter paramBend( ParamBendRange, "BendRange", ControlBiSlider, 2 );
@@ -187,9 +210,7 @@ namespace e3 {
         if (glideFrames_ > 0)
         {
             glideTarget_[voice] = freq;
-            //double prevPitch    = polyphony_->getPreviousPitch( voice );
-            double prevPitch = 0;
-            ASSERT( prevPitch == 1 );
+            double prevPitch    = polyphony_->getPreviousPitch( voice );
 
             if (prevPitch == -1 || glideAuto_ && polyphony_->numActive_ <= polyphony_->numUnison_) {
                 glideDeltaBuffer_.set( 0 );

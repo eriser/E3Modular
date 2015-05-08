@@ -1,4 +1,5 @@
 
+#include "core/Polyphony.h"
 #include "modules/Delay.h"
 
 
@@ -29,6 +30,30 @@ namespace e3 {
         paramGain.unit_ = "db";
         paramGain.numberFormat_ = NumberDecibel;
         parameters_.add( paramGain );
+    }
+
+
+    ParameterSet& Delay::getDefaultParameters() const
+    {
+        static ParameterSet set;
+        set.clear();
+
+        Parameter paramTime( ParamDelaytime, id_, "Time", ControlSlider, 0.5 );
+        paramTime.unit_ = "sec";
+        paramTime.numberFormat_ = NumberFloat;
+        set.add( paramTime );
+
+        Parameter paramRepeats( ParamFeedback, id_, "Repeats", ControlSlider, 0.5 );
+        paramRepeats.unit_ = "sec";
+        paramRepeats.numberFormat_ = NumberFloat;
+        set.add( paramRepeats );
+
+        Parameter paramGain( ParamGain, id_, "Gain", ControlSlider, 0.5 );
+        paramGain.unit_ = "db";
+        paramGain.numberFormat_ = NumberDecibel;
+        set.add( paramGain );
+
+        return set;
     }
 
 
@@ -63,7 +88,7 @@ namespace e3 {
 
     void Delay::updateBuffer()
     {
-        bufferSize_          = (uint32_t)sampleRate_;
+        bufferSize_          = (uint_fast32_t)sampleRate_;
         delayBufferPointer_  = delayBuffer_.resize( numVoices_ * bufferSize_ );
         cursorBufferPointer_ = cursorBuffer_.resize( numVoices_ );
     }
@@ -77,14 +102,14 @@ namespace e3 {
 
     void Delay::processAudio() throw()
     {
+        //int_fast32_t maxVoices = std::min<int_fast32_t>( numVoices_, polyphony_->numSounding_ );
         double output, input;
-        uint32_t index;
-        uint16_t v;
+        int_fast32_t index, v;
 
-        for (v = 0; v < numVoices_; v++)
+        for (v = 0; v < numVoices_; v++)        // TODO: use maxVoices
         {
             input = audioInportPointer_[v];
-            audioInportPointer_[v] = 0.f;
+            audioInportPointer_[v] = 0;
 
             index  = v * bufferSize_ + cursorBufferPointer_[v];
             output = delayBufferPointer_[index];

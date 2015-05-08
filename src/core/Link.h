@@ -25,22 +25,9 @@ namespace e3 {
                 other.leftPort_    == leftPort_ &&
                 other.rightPort_   == rightPort_;
         }
-
-
-        bool operator<(const Link& other) const
-        {
-            if (other.rightModule_ != rightModule_) return rightModule_ < other.rightModule_;
-            if (other.leftModule_  != leftModule_)  return leftModule_  < other.leftModule_;
-            if (other.rightPort_   != rightPort_)   return rightPort_   < other.rightPort_;
-            if (other.leftPort_    != leftPort_)    return leftPort_    < other.leftPort_;
-
-            return false;
-        }
-
         bool operator==(const Link* other) const   { return operator==(*other); }
         bool operator!=(const Link& other) const   { return !(*this == other); }
         bool operator!=(const Link* other) const   { return !(this == other); }
-        bool operator>(const  Link& other) const   { return !(*this == other && *this < other); }
 
 
         bool isLeftValid() const

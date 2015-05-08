@@ -3,7 +3,7 @@
 #include "core/Module.h"
 #include "modules/AudioOutTerminal.h"
 #include "modules/MidiModules.h"
-#include "modules/Envelopes.h"
+#include "modules/AdsrEnvelope.h"
 #include "modules/SineOscillator.h"
 #include "modules/Delay.h"
 
@@ -22,7 +22,7 @@ namespace e3 {
         case ModuleTypeMidiFrequency:    return new MidiFrequency();
         case ModuleTypeMidiInput:        return new MidiInput();
         case ModuleTypeSineOscillator:   return new SineOscillator();
-        case ModuleTypeAdsrEnvelope:     return new ADSREnvelope();
+        case ModuleTypeAdsrEnvelope:     return new AdsrEnvelope();
         case ModuleTypeDelay:	         return new Delay();
 
         default: THROW( std::domain_error, "module type %d does not exist", type );

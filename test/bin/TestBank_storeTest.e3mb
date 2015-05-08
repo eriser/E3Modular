@@ -34,6 +34,7 @@
       <module id="2" pos="330, 187" collapsed="0"/>
       <module id="3" pos="486, 293" collapsed="0"/>
     </panel>
+    <presets/>
   </instrument>
   <instrument name="instrument_1" id="1" category="default" comment="klingt gut" voices="1"/>
   <instrument name="instrument_2" id="2" category="default" comment="klingt noch besser" voices="1"/>

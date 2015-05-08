@@ -170,24 +170,24 @@ namespace e3 {
     ModuleParameterPanel::ModuleParameterPanel(ParameterPanel* owner) :
         owner_(owner)
     {
-		Style& style = Style::getInstance();
-		Colour textColour = style.findColour( TextEditor::textColourId );
+        Style& style = Style::getInstance();
+        Colour textColour = style.findColour( TextEditor::textColourId );
 
-		headerLabel_.setFont( Font( 18, Font::bold ) );
-		headerLabel_.setColour( Label::textColourId, textColour );
-		headerLabel_.setEditable( false, true, true );
-		headerLabel_.setBorderSize( BorderSize<int>( 0, 0, 0, 0 ) );
-		headerLabel_.addListener( this );
-		headerLabel_.setText( "Instrument", dontSendNotification );
-		addAndMakeVisible( &headerLabel_ );
-	}
+        headerLabel_.setFont( Font( 18, Font::bold ) );
+        headerLabel_.setColour( Label::textColourId, textColour );
+        headerLabel_.setEditable( false, true, true );
+        headerLabel_.setBorderSize( BorderSize<int>( 0, 0, 0, 0 ) );
+        headerLabel_.addListener( this );
+        headerLabel_.setText( "Instrument", dontSendNotification );
+        addAndMakeVisible( &headerLabel_ );
+    }
 
 
     void ModuleParameterPanel::resized()
     {
         Rectangle<int> bounds = getLocalBounds();
 
-		int w = getWidth();
+        int w = getWidth();
 
         headerLabel_.setBounds( 10, 0, w - 20, 25 );
     }
@@ -200,37 +200,36 @@ namespace e3 {
     }
 
 
-    void ModuleParameterPanel::update( Module* module )
+    void ModuleParameterPanel::update( Instrument* instrument, Module* module )
     {
         headerLabel_.setText( module->getLabel(), dontSendNotification );
 
-		removeAllParameters();
+        removeAllParameters();
 
-		Rectangle<int> r( 0, 50, 200, 25 );
-		ParameterMap& parameters = module->getParameters();
-		for( ParameterMap::iterator it = parameters.begin(); it != parameters.end(); it++ )
-		{
-			Parameter& p = it->second;
-			if( p.controlType_ != ControlHidden )
-			{
-				ParameterStrip* strip = new ParameterStrip( r, module, p );
-				parameters_.add( strip );
-				addAndMakeVisible( strip );
-				r.translate( 0, 30 );
-			}
-		}
+        Rectangle<int> r( 0, 50, 200, 25 );
+        ParameterSet& parameters = instrument->getPreset().getModuleParameters();
+        int id = module->getId();
+
+        for (ParameterSet::iterator it = parameters.ownerFirst( id ); it != parameters.ownerLast( id ); ++it)
+        {
+            const Parameter& p = *it;
+            ParameterStrip* strip = new ParameterStrip( r, module, &p );
+            parameters_.add( strip );
+            addAndMakeVisible( strip );
+            r.translate( 0, 30 );
+        }
     }
 
 
-	void ModuleParameterPanel::removeAllParameters()
-	{
-		for( int i = 0; i < parameters_.size(); ++i )
-		{
-			ParameterStrip* strip = parameters_.getUnchecked( i );
-			removeChildComponent( strip );
-		}
-		parameters_.clear();
-	}
+    void ModuleParameterPanel::removeAllParameters()
+    {
+        for( int i = 0; i < parameters_.size(); ++i )
+        {
+            ParameterStrip* strip = parameters_.getUnchecked( i );
+            removeChildComponent( strip );
+        }
+        parameters_.clear();
+    }
 
 
     void ModuleParameterPanel::labelTextChanged( Label* label )
@@ -240,46 +239,57 @@ namespace e3 {
     }
 
 
-	//--------------------------------------------------------------
-	// class ParameterStrip
-	//--------------------------------------------------------------
+    //--------------------------------------------------------------
+    // class ParameterStrip
+    //--------------------------------------------------------------
 
-	ParameterStrip::ParameterStrip( const Rectangle<int>& bounds, Module* module, Parameter& parameter ) :
-		parameter_(parameter)
-	{
-		setBounds( bounds );
+    ParameterStrip::ParameterStrip( const Rectangle<int>& bounds, Module* module, const Parameter* parameter ) :
+        module_(module),
+        parameter_(parameter)
+    {
+        setBounds( bounds );
 
-		Style& style = Style::getInstance();
-		Colour textColour = style.findColour( TextEditor::textColourId );
+        Style& style = Style::getInstance();
+        Colour textColour = style.findColour( TextEditor::textColourId );
 
-		label_.setText( parameter.label_, dontSendNotification );
-		label_.setColour( Label::textColourId, textColour );
-		label_.setEditable( false, true, true );
-		label_.setBorderSize( BorderSize<int>( 0, 0, 0, 0 ) );
-		label_.setFont( Font( 10, Font::plain ) );
-		addAndMakeVisible( &label_ );
+        label_.setText( parameter->label_, dontSendNotification );
+        label_.setColour( Label::textColourId, textColour );
+        label_.setEditable( false, true, true );
+        label_.setBorderSize( BorderSize<int>( 0, 0, 0, 0 ) );
+        label_.setFont( Font( 10, Font::plain ) );
+        addAndMakeVisible( &label_ );
 
-		switch( parameter_.controlType_ )
-		{
-		case ControlSlider:
-		case ControlBiSlider:
-		{
-			slider_.setSliderStyle( Slider::LinearBar );
-			slider_.setRange( 0.0, 100.0, 0.1 );
-			slider_.setPopupMenuEnabled( true );
-			slider_.setValue( parameter_.value_, dontSendNotification );
+        switch( parameter_->controlType_ )
+        {
+        case ControlSlider:
+        case ControlBiSlider:
+        {
+            slider_.setPopupMenuEnabled( false );
+            slider_.setSliderStyle( Slider::LinearBar );
+            slider_.setRange( parameter_->getMin(), parameter_->getMax(), parameter_->getInterval() );
+            slider_.setValue( parameter_->value_, dontSendNotification );
+            slider_.addListener( this );
 
-			slider_.setBounds( 10, 0, 120, 20 );
-			label_.setBounds( 140, 0, 80, 20 );
-			addAndMakeVisible( &slider_ );
-			break;
-		}
-		case ControlCheckbox:
-			break;
-		case ControlNumEdit:
-			break;
-		}
-	}
+            slider_.setBounds( 10, 0, 120, 20 );
+            label_.setBounds( 140, 0, 80, 20 );
+            addAndMakeVisible( &slider_ );
+            break;
+        }
+        case ControlCheckbox:
+            break;
+        case ControlNumEdit:
+            break;
+        }
+    }
+
+
+    void ParameterStrip::sliderValueChanged( Slider* slider )
+    {
+        ASSERT( slider == &slider_ );
+        parameter_->value_ = slider->getValue();
+        module_->updateParameter( *parameter_ );
+    }
+
 
 
     //--------------------------------------------------------------
@@ -319,15 +329,16 @@ namespace e3 {
     }
 
 
-    void ParameterPanel::showModule( Module* module )
+    void ParameterPanel::showModule( Instrument* instrument, Module* module )
     {
         ASSERT( module );
         if (module == nullptr) return;
 
-        if (modulePanel_->isVisible() == false) {
+        if (modulePanel_->isVisible() == false) 
+        {
             modulePanel_->setVisible( true );
             modulePanel_->toFront( true );
-            modulePanel_->update( module );
+            modulePanel_->update( instrument, module );
             instrumentPanel_->setVisible( false );
         }
     }

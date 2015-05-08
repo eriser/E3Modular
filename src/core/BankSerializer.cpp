@@ -67,8 +67,10 @@ namespace e3 {
         if (e != nullptr)
         {
             try {
-                e->deleteAllChildElementsWithTagName( "modules" );
-                writeInstrument( e, instrument );
+                writeInstrumentAttributes( e, instrument );
+                writeInstrumentModules( e, instrument );
+                writeInstrumentLinks( e, instrument );
+                writeInstrumentPresets( e, instrument );
             }
             catch (const std::exception& e) {       // parse error
                 TRACE( e.what() );
@@ -119,7 +121,17 @@ namespace e3 {
 
     void BankSerializer::readInstrument( XmlElement* e, Instrument* instrument )
     {
+        readInstrumentAttributes( e, instrument );
+        readInstrumentModules( e, instrument );
+        readInstrumentLinks( e, instrument );
+        readInstrumentPresets( e, instrument );
+    }
+
+
+    void BankSerializer::readInstrumentAttributes( XmlElement* e, Instrument* instrument )
+    {
         instrument->id_           = e->getIntAttribute( "id" );
+        instrument->presetId_     = e->getIntAttribute( "preset", -1 );
         instrument->name_         = e->getStringAttribute( "name", "Unnamed Instrument" ).toStdString();
         instrument->category_     = e->getStringAttribute( "category" ).toStdString();
         instrument->comment_      = e->getStringAttribute( "comment" ).toStdString();
@@ -129,16 +141,12 @@ namespace e3 {
         instrument->numVoices_    = (uint16_t)e->getIntAttribute( "voices", instrument->numVoices_ );
         instrument->numUnison_    = (uint16_t)e->getIntAttribute( "unison", instrument->numUnison_ );
         instrument->unisonSpread_ = (uint16_t)e->getIntAttribute( "spread", instrument->unisonSpread_ );
-
-        readModules( e, instrument );
-        readLinks( e, instrument );
     }
 
-    void BankSerializer::readModules( XmlElement* parent, Instrument* instrument )
+
+    void BankSerializer::readInstrumentModules( XmlElement* parent, Instrument* instrument )
     {
-        XmlElement* modules = parent->getChildByName( "modules" );
-        if (modules == nullptr)
-            return;
+        XmlElement* modules = getChildElement( parent, "modules" );
 
         forEachXmlChildElementWithTagName( *modules, e, "module" )
         {
@@ -159,11 +167,9 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readLinks( XmlElement* parent, Instrument* instrument )
+    void BankSerializer::readInstrumentLinks( XmlElement* parent, Instrument* instrument )
     {
-        XmlElement* links = parent->getChildByName( "links" );
-        if (links == nullptr)
-            return;
+        XmlElement* links = getChildElement( parent, "links" );
 
         forEachXmlChildElementWithTagName( *links, e, "link" )
         {
@@ -179,22 +185,55 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readParameters( XmlElement* parent, Module* module )
+    void BankSerializer::readInstrumentPresets( XmlElement* parent, Instrument* instrument )
     {
-        forEachXmlChildElementWithTagName( *parent, e, "param" )
-        {
-            int16_t id = (uint16_t)e->getIntAttribute( "id", -1 );
+        XmlElement* presetsXml = getChildElement( parent, "presets" );
 
-            try
+        forEachXmlChildElementWithTagName( *presetsXml, presetXml, "preset" )
+        {
+            int id = presetXml->getIntAttribute( "id" );
+            const Preset& preset = instrument->createNewPreset(id);
+            preset.setName( presetXml->getStringAttribute( "name" ).toStdString() );
+
+            forEachXmlChildElementWithTagName( *presetXml, paramXml, "param" )
             {
-                Parameter p = module->getParameter( id );
-                readParameter( e, p );
-                module->updateParameter( p );
-            }
-            catch (const std::out_of_range&) {
-                TRACE( "parameter with id %d does not exist for module with id %d", id, module->getId());
+                int paramId  = paramXml->getIntAttribute( "id", -1 );
+                int moduleId = paramXml->getIntAttribute( "module", -1 );
+                bool isModuleParameter = (moduleId >= 0);
+
+                if (isModuleParameter) 
+                {
+                    Module* module = instrument->getModule( moduleId );
+                    ASSERT( module );
+                    if (module) {
+                        const Parameter& param = module->getDefaultParameter( paramId );
+                        readParameter( paramXml, const_cast< Parameter& >(param) );
+                        preset.addModuleParameter( param );
+                    }
+                }
+                else {}
             }
         }
+    }
+
+
+    void BankSerializer::readParameters( XmlElement* parent, Module* module )
+    {
+        UNUSED( parent );
+        UNUSED( module );
+        //forEachXmlChildElementWithTagName( *parent, e, "param" )
+        //{
+        //    int id = e->getIntAttribute( "id", -1 );
+
+        //    try
+        //    {
+        //        Parameter& p = module->getParameter( id );
+        //        readParameter( e, p );
+        //    }
+        //    catch (const std::out_of_range&) {
+        //        TRACE( "parameter with id %d does not exist for module with id %d", id, module->getId());
+        //    }
+        //}
     }
 
 
@@ -212,7 +251,7 @@ namespace e3 {
 
         p.valueShaper_.setMin( e->getDoubleAttribute( "min", p.valueShaper_.getMin() ) );
         p.valueShaper_.setMax( e->getDoubleAttribute( "max", p.valueShaper_.getMax() ) );
-        p.valueShaper_.setSteps( (int16_t)e->getIntAttribute( "steps", p.valueShaper_.getSteps() ) );
+        p.valueShaper_.setNumSteps( (int16_t)e->getIntAttribute( "steps", p.valueShaper_.getNumSteps() ) );
         p.valueShaper_.setFactor( (int16_t)e->getIntAttribute( "factor", p.valueShaper_.getFactor() ) );
 
         p.midiShaper_.setControllerId( (int16_t)e->getIntAttribute( "cc", p.midiShaper_.getControllerId() ) );
@@ -227,28 +266,13 @@ namespace e3 {
     // BankSerializer write methods
     //--------------------------------------------------------------------------------
 
-    void BankSerializer::writeInstrument( XmlElement* const e, Instrument* instrument )
-    {
-        writeInstrumentAttributes( e, instrument );
-
-        XmlElement* modules = e->createNewChildElement( "modules" );
-        const ModuleList& moduleList = instrument->getModules();
-        for (ModuleList::const_iterator it = moduleList.begin(); it != moduleList.end(); it++)
-        {
-            XmlElement* const em = modules->createNewChildElement( "module" );
-            writeModule( em, *it );
-        }
-
-        writeInstrumentLinks( e, instrument );
-    }
-
-
-    void BankSerializer::writeInstrumentAttributes( XmlElement* const e, Instrument* instrument )
+    void BankSerializer::writeInstrumentAttributes( XmlElement* e, Instrument* instrument )
     {
         e->removeAllAttributes();
 
         e->setAttribute( "id", instrument->id_ );
         e->setAttribute( "name", instrument->name_ );
+        e->setAttribute( "preset", instrument->presetId_ );
         e->setAttribute( "category", instrument->category_ );
         e->setAttribute( "comment", instrument->comment_ );
         e->setAttribute( "voices", instrument->numVoices_ );
@@ -266,21 +290,46 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writeInstrumentLinks( XmlElement* const e, Instrument* instrument )
+    void BankSerializer::writeInstrumentModules( XmlElement* e, Instrument* instrument )
     {
-        e->deleteAllChildElementsWithTagName( "links" );
-        XmlElement* links = e->createNewChildElement( "links" );
+        XmlElement* modules = getAndClearChildElement( e, "modules" );
 
-        const LinkList& linkList = instrument->getLinks();
-        for (LinkList::const_iterator it = linkList.begin(); it != linkList.end(); it++)
+        const ModuleList& moduleList = instrument->getModules();
+        for (ModuleList::const_iterator it = moduleList.begin(); it != moduleList.end(); it++)
         {
-            XmlElement* const el = links->createNewChildElement( "link" );
-            writeLink( el, *it );
+            XmlElement* m = modules->createNewChildElement( "module" );
+            writeModule( m, *it );
         }
     }
 
 
-    void BankSerializer::writeModule( XmlElement* const e, const Module* module )
+    void BankSerializer::writeInstrumentLinks( XmlElement* e, Instrument* instrument )
+    {
+        XmlElement* links = getAndClearChildElement( e, "links" );
+
+        const LinkList& linkList = instrument->getLinks();
+        for (LinkList::const_iterator it = linkList.begin(); it != linkList.end(); it++)
+        {
+            XmlElement* l = links->createNewChildElement( "link" );
+            writeLink( l, *it );
+        }
+    }
+
+
+    void BankSerializer::writeInstrumentPresets( XmlElement* e, Instrument* instrument )
+    {
+        XmlElement* presetsXml = getAndClearChildElement( e, "presets" );
+
+        const PresetSet& presetSet = instrument->getPresets();
+        for (PresetSet::const_iterator it = presetSet.begin(); it != presetSet.end(); ++it)
+        {
+            XmlElement* l = presetsXml->createNewChildElement( "preset" );
+            writePreset( l, instrument, *it );
+        }
+    }
+
+
+    void BankSerializer::writeModule( XmlElement* e, Module* module )
     {
         e->setAttribute( "id", module->getId() );
         e->setAttribute( "label", module->getLabel() );
@@ -291,7 +340,33 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writeParameters( XmlElement* const e, const Module* module )
+    void BankSerializer::writePreset( XmlElement* e, Instrument* instrument, const Preset& preset )
+    {
+        e->setAttribute( "name", preset.getName() );
+        e->setAttribute( "id", preset.getId() );
+
+        const ParameterSet& moduleParameters = preset.getModuleParameters();
+        for (ParameterSet::const_iterator it = moduleParameters.begin(); it != moduleParameters.end(); it++)
+        {
+            const Parameter& param = *it;
+            ASSERT( param.controlType_ > ControlHidden );
+
+            Module* module = instrument->getModule( param.getOwnerId() );
+            ASSERT( module );
+            if (module != nullptr)
+            {
+                XmlElement* p = e->createNewChildElement( "param" );
+                p->setAttribute( "id", param.getId() );
+                p->setAttribute( "module", param.getOwnerId() );
+
+                const Parameter& defaultParam = module->getDefaultParameter( param.getId() );
+                writeParameter( p, param, defaultParam );
+            }
+        }
+    }
+
+
+    void BankSerializer::writeParameters( XmlElement* e, Module* module )
     {
         const ParameterMap& params = module->getParameters();
 
@@ -300,17 +375,17 @@ namespace e3 {
             const Parameter& param = it->second;
             if (param.controlType_ > ControlHidden)
             {
-                XmlElement* const ep = e->createNewChildElement( "param" );
-                ep->setAttribute( "id", param.id_ );
+                XmlElement* ep = e->createNewChildElement( "param" );
+                ep->setAttribute( "id", param.getId() );
 
-                const Parameter& defaultParam = module->getParameter( param.id_ );
+                const Parameter& defaultParam = module->getParameter( param.getId() );
                 writeParameter( ep, param, defaultParam );
             }
         }
     }
 
 
-    void BankSerializer::writeLink( XmlElement* const e, const Link& link )
+    void BankSerializer::writeLink( XmlElement* e, const Link& link )
     {
         e->setAttribute( "left_module", link.leftModule_ );
         e->setAttribute( "right_module", link.rightModule_ );
@@ -322,7 +397,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writeParameter( XmlElement* const e, const Parameter& param, const Parameter& defaultParam )
+    void BankSerializer::writeParameter( XmlElement* e, const Parameter& param, const Parameter& defaultParam )
     {
         e->setAttribute( "value", param.value_ );
 
@@ -349,8 +424,8 @@ namespace e3 {
             e->setAttribute( "min", value.getMin() );
         if (value.getMax() != defaultValue.getMax())
             e->setAttribute( "max", value.getMax() );
-        if (value.getSteps() != defaultValue.getSteps())
-            e->setAttribute( "steps", value.getSteps() );
+        if (value.getNumSteps() != defaultValue.getNumSteps())
+            e->setAttribute( "steps", value.getNumSteps() );
         if (value.getFactor() != defaultValue.getFactor())
             e->setAttribute( "log", value.getFactor() );
 
@@ -365,6 +440,26 @@ namespace e3 {
         if (midiValue.getSoftTakeover() != defaultMidiValue.getSoftTakeover())
             e->setAttribute( "ccsoft", midiValue.getSoftTakeover() );
     }
+
+
+    XmlElement* BankSerializer::getChildElement( XmlElement* e, const std::string& name )
+    {
+        XmlElement* c = e->getChildByName( StringRef(name) );
+
+        if (c == nullptr) {
+            c = e->createNewChildElement( StringRef(name) );
+        }
+        return c;
+    }
+
+
+    XmlElement* BankSerializer::getAndClearChildElement( XmlElement* e, const std::string& name )
+    {
+        XmlElement* c = getChildElement( e, name );
+        c->deleteAllChildElements();
+        return c;
+    }
+
 
 
     File BankSerializer::checkPath( const std::string& path )

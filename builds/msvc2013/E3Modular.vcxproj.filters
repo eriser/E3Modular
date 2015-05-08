@@ -45,9 +45,6 @@
     <ClInclude Include="..\..\src\modules\Delay.h">
       <Filter>src\modules</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\modules\Envelopes.h">
-      <Filter>src\modules</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\modules\MidiModules.h">
       <Filter>src\modules</Filter>
     </ClInclude>
@@ -159,6 +156,12 @@
     <ClInclude Include="..\..\src\gui\Widgets.h">
       <Filter>src\gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\core\Preset.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\modules\AdsrEnvelope.h">
+      <Filter>src\modules</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp">
@@ -195,9 +198,6 @@
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\modules\Delay.cpp">
-      <Filter>src\modules</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\modules\Envelopes.cpp">
       <Filter>src\modules</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\modules\MidiModules.cpp">
@@ -286,6 +286,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\gui\TableComponent.cpp">
       <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\modules\AdsrEnvelope.cpp">
+      <Filter>src\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Preset.cpp">
+      <Filter>src\core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

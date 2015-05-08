@@ -29,7 +29,7 @@ namespace e3 {
         cpuMeter_( new CpuMeter() )
     {
         Settings::getInstance().load();
-		setState( ProcessorNotInitialized );
+        setState( ProcessorNotInitialized );
     }
 
 
@@ -117,6 +117,7 @@ namespace e3 {
 
     void Processor::saveBank( const std::string& path )
     {
+        bank_->saveInstrument( instrument_ );
         bank_->save( path );
     }
 
@@ -152,8 +153,8 @@ namespace e3 {
         ASSERT( polyphony_ );
         ASSERT( instrument_->numVoices_ == polyphony_->getNumVoices() );
 
-		polyphony_->allNotesOff( true );
-		instrument_->resetModules();
+        polyphony_->allNotesOff( true );
+        instrument_->resetModules();
         initInstrument();
     }
 
@@ -161,6 +162,7 @@ namespace e3 {
     void Processor::initInstrument()
     {
         instrument_->initModules( getSampleRate(), instrument_->numVoices_, polyphony_ );
+        instrument_->initParameters();
         instrument_->connectModules();
         instrument_->updateModules();
 
@@ -179,7 +181,7 @@ namespace e3 {
         }
         catch (const std::exception& e) {
             TRACE( e.what() );
-			setState( ProcessorCrashed );
+            setState( ProcessorCrashed );
             return nullptr;
         }
         resume();
@@ -197,8 +199,8 @@ namespace e3 {
         }
         catch (const std::exception& e) 
         {
-			TRACE( e.what() );
-			setState( ProcessorCrashed );
+            TRACE( e.what() );
+            setState( ProcessorCrashed );
             return;
         }
         resume();
@@ -235,7 +237,7 @@ namespace e3 {
         catch (const std::exception& e) 
         {
             TRACE( e.what() );
-			setState( ProcessorCrashed );
+            setState( ProcessorCrashed );
             return;
         }
         resume();
@@ -304,46 +306,46 @@ namespace e3 {
     }
 
 
-	//------------------------------------------------------------------------------
-	// State
-	//------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------
+    // State
+    //------------------------------------------------------------------------------
 
-	void Processor::setState( ProcessorState state )
-	{
-		state_ = state;
-		polyphony_->monitorProcessorStateEvent( state_ );
-	}
-
-
-	bool Processor::suspend()
-	{
-		bool nested = isSuspended();
-
-		if( !nested )
-		{
-			suspendProcessing( true );
-			if( instrument_ ) {
-				instrument_->suspendModules();
-			}
-		}
-		setState( ProcessorSuspended );
-		return nested;
-	}
+    void Processor::setState( ProcessorState state )
+    {
+        state_ = state;
+        polyphony_->monitorProcessorStateEvent( state_ );
+    }
 
 
-	void Processor::resume( bool nested )
-	{
-		if( nested ) {
-			return;
-		}
-		if( isSuspended() ) {
-			suspendProcessing( false );
-			if( instrument_ ) {
-				instrument_->resumeModules();
-			}
-		}
-		setState( ProcessorReady );
-	}
+    bool Processor::suspend()
+    {
+        bool nested = isSuspended();
+
+        if( !nested )
+        {
+            suspendProcessing( true );
+            if( instrument_ ) {
+                instrument_->suspendModules();
+            }
+        }
+        setState( ProcessorSuspended );
+        return nested;
+    }
+
+
+    void Processor::resume( bool nested )
+    {
+        if( nested ) {
+            return;
+        }
+        if( isSuspended() ) {
+            suspendProcessing( false );
+            if( instrument_ ) {
+                instrument_->resumeModules();
+            }
+        }
+        setState( ProcessorReady );
+    }
 
 
 

@@ -2,6 +2,7 @@
 #pragma once
 
 #include <string>
+#include "core/Preset.h"
 
 
 namespace juce {
@@ -33,20 +34,28 @@ namespace e3 {
         static void saveInstrumentLinks( XmlElement* root, Instrument* instrument );
 
     protected:
-        static void readInstrument( XmlElement* element, Instrument* instrument );
-        static void readModules( XmlElement* parent, Instrument* instrument );
-        static void readLinks( XmlElement* parent, Instrument* instrument );
-        static void readParameters( XmlElement* parent, Module* module );
-        static void readParameter( XmlElement* parent, Parameter& p );
+        static void readInstrument( XmlElement* e, Instrument* instrument );
+        static void readInstrumentAttributes( XmlElement* e, Instrument* instrument );
+        static void readInstrumentModules( XmlElement* e, Instrument* instrument );
+        static void readInstrumentLinks( XmlElement* e, Instrument* instrument );
+        static void readInstrumentPresets( XmlElement* e, Instrument* instrument );
+        static void readParameters( XmlElement* e, Module* module );
+        static void readParameter( XmlElement* e, Parameter& p );
 
-        static void writeBank( XmlElement* const e, const Bank* const bank );
-        static void writeInstrument( XmlElement* const e, Instrument* instrument );
-        static void writeInstrumentAttributes( XmlElement* const e, Instrument* instrument );
-        static void BankSerializer::writeInstrumentLinks( XmlElement* const e, Instrument* instrument );
-        static void writeModule( XmlElement* const e, const Module* module );
-        static void writeParameters( XmlElement* const e, const Module* module );
-        static void writeParameter( XmlElement* const e, const Parameter& param, const Parameter& defaultParam );
-        static void writeLink( XmlElement* const e, const Link& link );
+        static void writeInstrumentAttributes( XmlElement* e, Instrument* instrument );
+        static void writeInstrumentModules( XmlElement* e, Instrument* instrument );
+        static void writeInstrumentLinks( XmlElement* e, Instrument* instrument );
+        static void writeInstrumentPresets( XmlElement* e, Instrument* instrument );
+
+        static void writeModule( XmlElement* e, Module* module );
+        static void writePreset( XmlElement* e, Instrument* instrument, const Preset& preset );
+
+        static void writeParameters( XmlElement* e, Module* module );
+        static void writeParameter( XmlElement* e, const Parameter& param, const Parameter& defaultParam );
+        static void writeLink( XmlElement* e, const Link& link );
+
+        static XmlElement* getChildElement( XmlElement* e, const std::string& name );
+        static XmlElement* getAndClearChildElement( XmlElement* e, const std::string& name );
 
         static File checkPath( const std::string& path );
         static void checkRoot( XmlElement* root );
