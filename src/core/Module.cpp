@@ -63,7 +63,6 @@ namespace e3 {
         ASSERT( sampleRate_ > 0 );
         ASSERT( numVoices_ > 0 );
 
-        updateParameters();
         updatePorts();
     }
 
@@ -88,33 +87,13 @@ namespace e3 {
 
     void Module::initParameters()
     {
-        for (ParameterMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
-        {
-            Parameter& param = it->second;
-            if (param.midiShaper_.getControllerId() >= 0) {
-                polyphony_->midiControllerSignal.Connect( this, &Module::onMidiController );
-            }
-        }
-        updateParameters();
-    }
-
-
-    void Module::updateParameters()
-    {
-        //if (numVoices_ > 0)
+        //for (ParameterMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
         //{
-        //    for (ParameterMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
-        //    {
-        //        Parameter& param = it->second;
-        //        setParameter( it->first, param.value_, 0, -1 );  
+        //    Parameter& param = it->second;
+        //    if (param.midiShaper_.getControllerId() >= 0) {
+        //        polyphony_->midiControllerSignal.Connect( this, &Module::onMidiController );
         //    }
         //}
-    }
-
-
-    void Module::updateParameter( const Parameter& parameter )
-    {
-        setParameter( parameter.getId(), parameter.value_, 0, -1 );
     }
 
 

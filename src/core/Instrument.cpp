@@ -35,7 +35,6 @@ namespace e3 {
     Module* Instrument::createAndAddModule( ModuleType type )
     {
         Module* module = ModuleFactory::create( type );
-        module->setDefaultParameters();
         modules_.push_back( module );
         module->id_ = createUniqueId( type );
 
@@ -75,7 +74,7 @@ namespace e3 {
             for (ParameterSet::iterator it = parameters.ownerFirst( id ); it != parameters.ownerLast( id ); ++it)
             {
                 const Parameter& p = *it;
-                m->updateParameter( p );
+                m->setParameter( p.getId(), p.value_, 0, -1 );
             }
         }
     }

@@ -287,7 +287,7 @@ namespace e3 {
     {
         ASSERT( slider == &slider_ );
         parameter_->value_ = slider->getValue();
-        module_->updateParameter( *parameter_ );
+        module_->setParameter( parameter_->getId(), parameter_->value_ );
     }
 
 

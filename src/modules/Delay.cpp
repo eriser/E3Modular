@@ -15,21 +15,6 @@ namespace e3 {
         addOutport( 0, "Out", &audioOutport_, PortTypeAudio );
 
         processFunction_ = static_cast<ProcessFunctionPointer>( &Delay::processAudio );
-
-        Parameter paramTime( ParamDelaytime, "Time", ControlSlider, 0.5 );
-        paramTime.unit_ = "sec";
-        paramTime.numberFormat_ = NumberFloat;
-        parameters_.add( paramTime );
-
-        Parameter paramRepeats( ParamFeedback, "Repeats", ControlSlider, 0.5 );
-        paramRepeats.unit_ = "sec";
-        paramRepeats.numberFormat_ = NumberFloat;
-        parameters_.add( paramRepeats );
-
-        Parameter paramGain( ParamGain, "Gain", ControlSlider, 0.5 );
-        paramGain.unit_ = "db";
-        paramGain.numberFormat_ = NumberDecibel;
-        parameters_.add( paramGain );
     }
 
 

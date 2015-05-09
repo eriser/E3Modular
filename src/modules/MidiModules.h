@@ -56,7 +56,6 @@ namespace e3 {
         std::string debugLabel_ = "MidiFrequency";
 
     protected:
-        void createParameters();
         void calcGlide(double freq, int voice);
         void setGlideTime(double time);
 

@@ -14,7 +14,7 @@ namespace e3 {
     
     //--------------------------------------------------------------------
     // class Parameter
-    // Stores the data of a parameter
+    // Parameters control the behaviour of Modules and Links
     //--------------------------------------------------------------------
 
     class Parameter
@@ -42,8 +42,6 @@ namespace e3 {
             return ownerId_ < other.ownerId_;
         }
 
-        //void setId( int id )            { id_ = id; }
-        //void setOwnerId( int id )       { ownerId_ = id; }
         int getId() const               { return id_; }
         int getOwnerId() const          { return ownerId_; }
 
@@ -74,32 +72,10 @@ namespace e3 {
     };
 
 
-    //-------------------------------------------
-    // class ParameterMap
-    //-------------------------------------------
-
-    class ParameterMap : public std::map< int, Parameter >
-    {
-    public:
-        // Adds a parameter to the map.
-        void add(const Parameter& p);
-
-        // Returns true if a Parameter with the given id exists in the map.
-        bool containsId(const int id) const;
-
-        // Sets all parameters in the map to their default value.
-        void setDefaultValues();
-    };
-
-
-    //class ParameterList : public std::vector < Parameter >
-    //{
-    //public:
-    //    Parameter& createNewParameter();
-    //    Parameter& getParameterById( int parameterId );
-    //    ParameterList getParametersForId( int moduleId, int linkId );
-    //};
-
+    //--------------------------------------------------------------------
+    // class ParameterSet
+    // A container for Parameters
+    //--------------------------------------------------------------------
 
     class ParameterSet : public std::set < Parameter >
     {

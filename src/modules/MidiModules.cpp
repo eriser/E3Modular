@@ -58,7 +58,6 @@ namespace e3 {
         (ProcessingType)(ProcessEvent | ProcessControl) )
     {
         addOutport( 0, "Freq", &freqOutport_, PortTypeEvent );
-        createParameters();
     }
 
 
@@ -69,9 +68,7 @@ namespace e3 {
         ProcessingType processingType )
         :
         Module( moduleType, label, voicingType, processingType )
-    {
-        createParameters();
-    }
+    {}
 
 
     ParameterSet& MidiFrequency::getDefaultParameters() const
@@ -96,24 +93,6 @@ namespace e3 {
         return set;
     }
     
-    
-    void MidiFrequency::createParameters()
-    {
-        Parameter paramBend( ParamBendRange, "BendRange", ControlBiSlider, 2 );
-        paramBend.valueShaper_ ={ -48, 48, 96 };
-        parameters_.add( paramBend );
-
-        Parameter paramTime( ParamGlideTime, "Portamento Time", ControlSlider, 0 );
-        paramTime.valueShaper_ ={ 0, 2000 };
-        paramTime.unit_ = "msec";
-        paramTime.numberFormat_ = NumberFloat;
-        parameters_.add( paramTime );
-
-        Parameter paramAuto( ParamGlideAuto, "Portamento Auto", ControlCheckbox, 0 );
-        paramBend.valueShaper_ ={ 0, 1 };
-        parameters_.add( paramAuto );
-    }
-
 
     void MidiFrequency::connectSignals()
     {

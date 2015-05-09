@@ -50,7 +50,10 @@ namespace e3 {
         {
             try {
                 Instrument* instrument = new Instrument();  // processor will be owner of the instrument
-                readInstrument( e, instrument );
+                readInstrumentAttributes( e, instrument );
+                readInstrumentModules( e, instrument );
+                readInstrumentLinks( e, instrument );
+                readInstrumentPresets( e, instrument );
                 return instrument;
             }
             catch (const std::exception& e) {               // parse error, skip instrument
@@ -119,15 +122,6 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readInstrument( XmlElement* e, Instrument* instrument )
-    {
-        readInstrumentAttributes( e, instrument );
-        readInstrumentModules( e, instrument );
-        readInstrumentLinks( e, instrument );
-        readInstrumentPresets( e, instrument );
-    }
-
-
     void BankSerializer::readInstrumentAttributes( XmlElement* e, Instrument* instrument )
     {
         instrument->id_           = e->getIntAttribute( "id" );
@@ -157,8 +151,6 @@ namespace e3 {
                 module->setId( e->getIntAttribute( "id" ) );
                 module->setLabel( e->getStringAttribute( "label", module->getLabel()).toStdString() );
                 module->setVoicingType( (VoicingType)e->getIntAttribute( "voicing", module->getVoicingType() ) );
-
-                readParameters( e, module );
             }
             catch (...) {
                 TRACE( "module of type %d could not be created", type );
@@ -214,26 +206,6 @@ namespace e3 {
                 else {}
             }
         }
-    }
-
-
-    void BankSerializer::readParameters( XmlElement* parent, Module* module )
-    {
-        UNUSED( parent );
-        UNUSED( module );
-        //forEachXmlChildElementWithTagName( *parent, e, "param" )
-        //{
-        //    int id = e->getIntAttribute( "id", -1 );
-
-        //    try
-        //    {
-        //        Parameter& p = module->getParameter( id );
-        //        readParameter( e, p );
-        //    }
-        //    catch (const std::out_of_range&) {
-        //        TRACE( "parameter with id %d does not exist for module with id %d", id, module->getId());
-        //    }
-        //}
     }
 
 
@@ -335,8 +307,6 @@ namespace e3 {
         e->setAttribute( "label", module->getLabel() );
         e->setAttribute( "type", module->moduleType_ );
         e->setAttribute( "poly", module->getVoicingType() );
-
-        writeParameters( e, module );
     }
 
 
@@ -361,25 +331,6 @@ namespace e3 {
 
                 const Parameter& defaultParam = module->getDefaultParameter( param.getId() );
                 writeParameter( p, param, defaultParam );
-            }
-        }
-    }
-
-
-    void BankSerializer::writeParameters( XmlElement* e, Module* module )
-    {
-        const ParameterMap& params = module->getParameters();
-
-        for (ParameterMap::const_iterator it = params.begin(); it != params.end(); it++)
-        {
-            const Parameter& param = it->second;
-            if (param.controlType_ > ControlHidden)
-            {
-                XmlElement* ep = e->createNewChildElement( "param" );
-                ep->setAttribute( "id", param.getId() );
-
-                const Parameter& defaultParam = module->getParameter( param.getId() );
-                writeParameter( ep, param, defaultParam );
             }
         }
     }

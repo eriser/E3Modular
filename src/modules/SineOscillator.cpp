@@ -22,20 +22,6 @@ namespace e3 {
         addOutport( 0, "Out", &audioOutport_, PortTypeAudio );
         addInport( 0, "Freq", &freqInport_ );
         addInport( 1, "Amp",  &ampInport_ );
-
-        //Parameter paramFreq( ParamFrequency, "Frequency", ControlHidden );
-        //parameters_.add( paramFreq );
-
-        //Parameter paramAmp( ParamAmplitude, "Amplitude", ControlHidden );
-        //parameters_.add( paramAmp );
-
-        Parameter paramTune( ParamTuning, "Tune", ControlBiSlider );
-        paramTune.valueShaper_ ={ -48, 48, 96 };
-        parameters_.add( paramTune );
-
-        Parameter paramFinetune( ParamFinetuning, "Finetune", ControlBiSlider );
-        paramFinetune.valueShaper_ ={ -1, 1, 200 };
-        parameters_.add( paramFinetune );
     }
 
 

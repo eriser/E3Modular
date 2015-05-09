@@ -94,17 +94,8 @@ namespace e3 {
 
         virtual ParameterSet& getDefaultParameters() const;
         virtual const Parameter& getDefaultParameter( int parameterId ) const;
-
         virtual void setParameter( int paramId, double value, double modulation = 0.f, int voice = -1 ) {}
-        Parameter& getParameter( int parameterId )             { return parameters_.at( parameterId ); }
-        const Parameter& getParameter( int parameterId ) const { return parameters_.at( parameterId ); }
 
-        ParameterMap& getParameters()                  { return parameters_; }
-        const ParameterMap& getParameters() const      { return parameters_; }
-        int getNumParameters() const                   { return parameters_.size(); }
-        void updateParameter( const Parameter& parameter );  
-        void setDefaultParameters()                    { parameters_.setDefaultValues(); }
-                                                       
         const InportList& getInports() const           { return inports_; }
         const OutportList& getOutports() const         { return outports_; }
         Inport* getInport( int portId ) const;         
@@ -128,7 +119,6 @@ namespace e3 {
         int id_ = -1;
         VoicingType voicingType_;
 
-        ParameterMap parameters_;
         InportList inports_;
         OutportList outports_;
 
@@ -150,7 +140,6 @@ namespace e3 {
         virtual void initParameters();
 
         virtual void updatePorts() {}
-        virtual void updateParameters();
 
         virtual void disconnectPorts();
         void connectPort( Module* target, const Link& link );
@@ -161,8 +150,8 @@ namespace e3 {
         VoiceAdapterType selectVoiceAdapter( VoicingType other ) const;
 
         double sampleRate_ = INITIAL_SAMPLERATE;
-        int numVoices_ = 0;
-        bool mono_ = false;
+        int numVoices_     = 0;
+        bool mono_         = false;
 
         Polyphony* polyphony_ = nullptr;
 

@@ -358,47 +358,6 @@ namespace e3 {
 
 
         //----------------------------------------------------------------------------------------
-        // MidiParameterValueTest
-        //----------------------------------------------------------------------------------------
-
-        //TEST(MidiParameterValueTest, Constructor)
-        //{
-        //    MidiParameterValue midiValue;
-        //    EXPECT_EQ(midiValue.controllerId_, -1);
-
-        //    ParameterShaper paramValue(17, 0, 17);
-        //    midiValue = MidiParameterValue(paramValue);
-        //    EXPECT_EQ(midiValue.getValue(), 17);
-        //}
-
-        //----------------------------------------------------------------------------------------
-        // ParameterMapTest
-        //----------------------------------------------------------------------------------------
-
-        class ParameterMapTest : public ::testing::Test
-        {
-        public:
-            ParameterMapTest() {
-                Parameter p;
-                p.id_ = id_;
-                map_.add( p );
-            }
-
-            ParameterMap map_;
-            uint16_t id_ = 17;
-        };
-
-        TEST_F( ParameterMapTest, InsertAndGet )
-        {
-            Parameter& p = map_.at( id_ );
-
-            EXPECT_EQ( id_, p.id_ );
-            EXPECT_THROW( map_.at( 0 ), std::out_of_range );
-        }
-
-
-
-        //----------------------------------------------------------------------------------------
         // LinkTest
         //----------------------------------------------------------------------------------------
 
@@ -608,15 +567,6 @@ namespace e3 {
             ParameterSet& set = t.getDefaultParameters();
             int size = set.size();
             EXPECT_EQ( size, t.getDefaultParameters().size() );
-        }
-
-        TEST_F( ModuleTest, ParameterMap_setDefaultValues )
-        {
-            ScopedPointer<Module> module = ModuleFactory::create( ModuleTypeAudioOutTerminal );
-            module->setDefaultParameters();
-
-            const Parameter& param = module->getParameter( 0 );
-            EXPECT_EQ( param.defaultValue_, param.value_ );
         }
 
         TEST_F( ModuleTest, Parameter_ConstructAndCopy )

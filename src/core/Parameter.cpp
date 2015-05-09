@@ -6,7 +6,6 @@
 
 namespace e3 {
 
-
     //----------------------------------------------------------------
     // class Parameter
     //----------------------------------------------------------------
@@ -28,71 +27,6 @@ namespace e3 {
         label_( label )
     {}
 
-    //----------------------------------------------------------------
-    // class ParameterMap
-    //----------------------------------------------------------------
-
-    void ParameterMap::add( const Parameter& p )
-    {
-        insert( std::make_pair( p.getId(), p ) );
-    }
-
-
-    bool ParameterMap::containsId( const int id ) const
-    {
-        return find( id ) != end();
-    }
-
-
-    void ParameterMap::setDefaultValues()
-    {
-        for (auto it = begin(); it != end(); it++)
-        {
-            Parameter& p = it->second;
-            p.value_ = p.defaultValue_;
-        }
-    }
-
-
-    //------------------------------------------------------
-    // class ParameterList
-    //------------------------------------------------------
-
-    //Parameter& ParameterList::createNewParameter()
-    //{
-    //    emplace_back( Parameter() );
-    //    return back();
-    //}
-
-
-
-
-    //Parameter& ParameterList::getParameterById( int parameterId )
-    //{
-    //    for (auto it = begin(); it != end(); it++)
-    //    {
-    //        Parameter& p = *it;
-    //        if (p.id_ == parameterId) {
-    //            return p;
-    //        }
-    //    }
-    //    THROW( std::out_of_range, "Parameter with id %d not found", parameterId );
-    //}
-
-
-    //ParameterList ParameterList::getParametersForId( int moduleId, int linkId )
-    //{
-    //    ParameterList result;
-
-    //    for (auto it = begin(); it != end(); ++it)
-    //    {
-    //        Parameter& p = *it;
-    //        if (moduleId > -1 && p.moduleId_ == moduleId || linkId > -1 && p.moduleId_ == linkId) {
-    //            result.push_back( p );
-    //        }
-    //    }
-    //    return result;
-    //}
 
 
     //------------------------------------------------------

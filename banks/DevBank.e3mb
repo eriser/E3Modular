@@ -11,33 +11,12 @@
       <module id="5" pos="558, 104"/>
     </panel>
     <modules>
-      <module id="0" label="AudioOut" type="0" poly="0">
-        <param id="0" value="0.34999999999999998"/>
-      </module>
-      <module id="1" label="MidiInput" type="3" poly="1">
-        <param id="0" value="2"/>
-        <param id="1" value="0"/>
-        <param id="2" value="0"/>
-      </module>
-      <module id="2" label="Sine" type="10" poly="1">
-        <param id="2" value="1"/>
-        <param id="3" value="1"/>
-      </module>
-      <module id="3" label="ADSR" type="11" poly="1">
-        <param id="2" value="0.10000000000000001"/>
-        <param id="3" value="1"/>
-        <param id="4" value="0.75"/>
-        <param id="5" value="1"/>
-      </module>
-      <module id="4" label="Sine" type="10" poly="1">
-        <param id="2" value="1"/>
-        <param id="3" value="1"/>
-      </module>
-      <module id="5" label="Delay" type="12" poly="1">
-        <param id="1" value="0.5"/>
-        <param id="2" value="0.5"/>
-        <param id="3" value="0.5"/>
-      </module>
+      <module id="0" label="AudioOut" type="0" poly="0"/>
+      <module id="1" label="MidiInput" type="3" poly="1"/>
+      <module id="2" label="Sine" type="10" poly="1"/>
+      <module id="3" label="ADSR" type="11" poly="1"/>
+      <module id="4" label="Sine" type="10" poly="1"/>
+      <module id="5" label="Delay" type="12" poly="1"/>
     </modules>
     <links>
       <link left_module="1" right_module="3" left_port="1" right_port="1" value="1" label="Gate"/>

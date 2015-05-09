@@ -34,12 +34,10 @@ namespace e3 {
         static void saveInstrumentLinks( XmlElement* root, Instrument* instrument );
 
     protected:
-        static void readInstrument( XmlElement* e, Instrument* instrument );
         static void readInstrumentAttributes( XmlElement* e, Instrument* instrument );
         static void readInstrumentModules( XmlElement* e, Instrument* instrument );
         static void readInstrumentLinks( XmlElement* e, Instrument* instrument );
         static void readInstrumentPresets( XmlElement* e, Instrument* instrument );
-        static void readParameters( XmlElement* e, Module* module );
         static void readParameter( XmlElement* e, Parameter& p );
 
         static void writeInstrumentAttributes( XmlElement* e, Instrument* instrument );
@@ -49,8 +47,6 @@ namespace e3 {
 
         static void writeModule( XmlElement* e, Module* module );
         static void writePreset( XmlElement* e, Instrument* instrument, const Preset& preset );
-
-        static void writeParameters( XmlElement* e, Module* module );
         static void writeParameter( XmlElement* e, const Parameter& param, const Parameter& defaultParam );
         static void writeLink( XmlElement* e, const Link& link );
 

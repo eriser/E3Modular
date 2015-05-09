@@ -17,36 +17,6 @@ namespace e3 {
         addOutport( 0, "Out", &audioOutport_, PortTypeAudio );
 
         processFunction_ = static_cast<ProcessFunctionPointer>(&AdsrEnvelope::processAudio);
-
-        //Parameter paramIn( ParamAudioIn, "In", ControlHidden ); // TODO: what is this good for?
-        //parameters_.add( paramIn );
-
-        //Parameter paramGate( ParamGate, "Gate", ControlHidden );
-        //parameters_.add( paramGate );
-
-        Parameter paramAttack( ParamAttack, "Attack", ControlSlider, 0.1 );
-        paramAttack.valueShaper_ ={ 0, 1.2, 96, 6 };
-        paramAttack.unit_ = "sec";
-        paramAttack.numberFormat_ = NumberFloat;
-        parameters_.add( paramAttack );
-
-        Parameter paramDecay( ParamDecay, "Decay", ControlSlider );
-        paramDecay.valueShaper_ ={ 0, 1, 100, 6 };
-        paramDecay.unit_ = "sec";
-        paramDecay.numberFormat_ = NumberFloat;
-        parameters_.add( paramDecay );
-
-        Parameter paramSustain( ParamSustain, "Sustain", ControlSlider, 0.75 );
-        paramSustain.valueShaper_ ={ 0, 1, 100, 6 };
-        paramSustain.unit_ = "db";
-        paramSustain.numberFormat_ = NumberDecibel;
-        parameters_.add( paramSustain );
-
-        Parameter paramRelease( ParamRelease, "Release", ControlSlider );
-        paramRelease.valueShaper_ ={ 0, 1, 100, 6 };
-        paramRelease.unit_ = "sec";
-        paramRelease.numberFormat_ = NumberFloat;
-        parameters_.add( paramRelease );
     }
 
 
