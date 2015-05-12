@@ -7,11 +7,12 @@
 
 namespace e3 {
 
+
     //-------------------------------------------------------
     // class ModulationBuffer
     //-------------------------------------------------------
 
-    void ModulationBuffer::init( int_fast32_t numVoices, LinkList& targets )
+    void ModulationBuffer::init( int_fast32_t numVoices, PortDataList& targets )
     {
         numVoices_ = numVoices;
 
@@ -20,8 +21,8 @@ namespace e3 {
 
         for (size_t i = 0; i < targets.size(); i++)
         {
-            Link& link = targets[i];
-            setValue( i, link.value_, -1 );
+            PortData& data = targets[i];
+            setValue( i, data.value_, -1 );
         }
     }
 
@@ -39,26 +40,25 @@ namespace e3 {
             voice = std::min<int>( (int)(numVoices_ - 1), voice );
             data_[targetIndex * numVoices_ + voice] = value;
         }
-
     }
 
 
-    void ModulationBuffer::onGate( uint32_t targetIndex, Link& link, double gate, int voice )
+    void ModulationBuffer::onGate( uint32_t targetIndex, PortData& data, double gate, int voice )
     {
-        if (link.veloSens_)
+        if (data.veloSens_)
         {
-            double value = link.valueShaper_.exponential( link.value_ );
-            value       += gate * link.veloSens_;
+            double value = data.valueShaper_.exponential( data.value_ );
+            value       += gate * data.veloSens_;
 
             setValue( targetIndex, value, voice );
         }
     }
 
 
-    void ModulationBuffer::onController( uint32_t targetIndex, Link& link, int16_t controllerId, double value )
+    void ModulationBuffer::onController( uint32_t targetIndex, PortData& data, int16_t controllerId, double value )
     {
         UNUSED( targetIndex );
-        UNUSED( link );
+        UNUSED( data );
         UNUSED( controllerId );
         UNUSED( value );
         //if (link->scaleController(controllerId, value))
@@ -85,75 +85,36 @@ namespace e3 {
     // class Outport
     //-------------------------------------------------------
 
-    void Outport::connect( Module* target, const Link& link, VoiceAdapterType voiceAdapter ) 
+    void Outport::connect( Module* target, const PortData& data, VoiceAdapterType voiceAdapter ) 
     {
         ASSERT( target ); 
         if (target == nullptr) return;
 
-        Inport* inport = target->getInport( link.rightPort_ );
+        Inport* inport = target->getInport( data.rightPort_ );
         ASSERT( inport != nullptr );
         if (inport == nullptr) return;
 
         if (getType() & PortTypeAudio)
         {
-            addAudioTarget( link, voiceAdapter );
+            addAudioTarget( data, voiceAdapter );
             audioOutBuffer_.resize( numAudioConnections_ );
             audioOutBuffer_[numAudioConnections_ - 1] = inport->connectAudio();
         }
         else if (getType() & PortTypeEvent) 
         {
-            addEventTarget( link, voiceAdapter );
+            addEventTarget( data, voiceAdapter );
 
-            inport->connectEvent( link.rightPort_ );
+            inport->connectEvent( data.rightPort_ );
             eventInports_.resize( numEventConnections_ );
             eventInports_.at( numEventConnections_ - 1 ) = inport;
         }
     }
 
    
-    void Outport::disconnect( Module* target, const Link& link )
-    {
-        ASSERT( target );
-        if (target == nullptr) return;
-
-        int16_t portId = audioLinks_.getIndex( link );
-        if (portId >= 0)
-        {
-            removeAudioTarget( link );
-        
-            Inport* inport = target->getInport( portId );
-            ASSERT( inport );
-            ASSERT( getType() & PortTypeAudio );
-
-            if (inport != nullptr) {
-                inport->disconnectAudio();
-            }
-            audioOutBuffer_.remove( portId );   
-
-            return;
-        }
-
-        portId = eventLinks_.getIndex( link );
-        ASSERT( portId >= 0 );
-        if (portId >= 0)
-        {
-            Inport* inport = target->getInport( portId );
-            ASSERT( inport );
-            ASSERT( getType() & PortTypeEvent );
-
-            if (inport != nullptr) {
-                inport->disconnectEvent();
-            }
-            removeEventTarget( link );
-            eventInports_.erase( eventInports_.begin() + portId );   
-        }
-    }
-    
-    
     void Outport::disconnectAll()
     {
-        audioLinks_.clear();
-        eventLinks_.clear();
+        audioData_.clear();
+        eventData_.clear();
         audioAdapterBuffer_.clear();
         eventAdapterBuffer_.clear();
         audioModulationBuffer_.clear();
@@ -196,41 +157,25 @@ namespace e3 {
     }
     
 
-    void Outport::addAudioTarget( const Link& link, VoiceAdapterType adapter )
+    void Outport::addAudioTarget( const PortData& data, VoiceAdapterType adapter )
     {
-        numAudioConnections_ = audioLinks_.add( link );
+        audioData_.push_back( data );
+        numAudioConnections_ = audioData_.size();
 
         audioAdapterBuffer_.resize( numAudioConnections_ );
         audioAdapterBuffer_[numAudioConnections_ - 1] = adapter;
-        audioModulationBuffer_.init( numVoices_, audioLinks_ );
+        audioModulationBuffer_.init( numVoices_, audioData_ );
     }
 
 
-    void Outport::addEventTarget( const Link& link, VoiceAdapterType adapter )
+    void Outport::addEventTarget( const PortData& data, VoiceAdapterType adapter )
     {
-        numEventConnections_ = eventLinks_.add( link );
+        eventData_.push_back( data );
+        numEventConnections_ = eventData_.size();
 
         eventAdapterBuffer_.resize( numEventConnections_ );
         eventAdapterBuffer_[numEventConnections_ - 1] = adapter;
-        eventModulationBuffer_.init( numVoices_, eventLinks_ );
-    }
-
-
-    void Outport::removeAudioTarget( const Link& link )
-    {
-        numAudioConnections_ = audioLinks_.remove( link );
-
-        audioAdapterBuffer_.resize( numAudioConnections_ );
-        audioModulationBuffer_.init( numVoices_, audioLinks_ );
-    }
-
-
-    void Outport::removeEventTarget( const Link& link )
-    {
-        numEventConnections_ = eventLinks_.remove( link );
-
-        eventAdapterBuffer_.resize( numEventConnections_ );
-        eventModulationBuffer_.init( numVoices_, eventLinks_ );
+        eventModulationBuffer_.init( numVoices_, eventData_ );
     }
 
 
@@ -238,18 +183,35 @@ namespace e3 {
     {
         Port::setNumVoices( numVoices );
 
-        audioModulationBuffer_.init( numVoices_, audioLinks_ );
-        eventModulationBuffer_.init( numVoices_, eventLinks_ );
+        audioModulationBuffer_.init( numVoices_, audioData_ );
+        eventModulationBuffer_.init( numVoices_, eventData_ );
+    }
+
+
+    bool Outport::setParameter( const Parameter& parameter )
+    {
+        ASSERT( parameter.target_ == ParameterLink );
+
+        for (size_t i = 0; i < audioData_.size(); i++)
+        {
+            const PortData& data = audioData_[i];
+            if (data.linkId_ == parameter.getId())
+            {
+                audioModulationBuffer_.setValue( i, parameter.value_ );
+                return true;
+            }
+        }
+        return false;
     }
 
 
     void Outport::onGate(double gate, int voice)
     {
         for (int_fast32_t i = 0; i < numAudioConnections_; i++) {
-            audioModulationBuffer_.onGate( i, audioLinks_[i], gate, voice );
+            audioModulationBuffer_.onGate( i, audioData_[i], gate, voice );
         }
         for (int_fast32_t i = 0; i < numEventConnections_; i++) {
-            eventModulationBuffer_.onGate( i, eventLinks_[i], gate, voice );
+            eventModulationBuffer_.onGate( i, eventData_[i], gate, voice );
         }
     }
 
@@ -257,10 +219,10 @@ namespace e3 {
     void Outport::onController(int16_t controllerId, double value)
     {
         for (int_fast32_t i = 0; i < numAudioConnections_; i++) {
-            audioModulationBuffer_.onController( i, audioLinks_[i], controllerId, value );
+            audioModulationBuffer_.onController( i, audioData_[i], controllerId, value );
         }
         for (int_fast32_t i = 0; i < numEventConnections_; i++) {
-            eventModulationBuffer_.onController( i, eventLinks_[i], controllerId, value );
+            eventModulationBuffer_.onController( i, eventData_[i], controllerId, value );
         }
     }
 

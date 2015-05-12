@@ -20,6 +20,7 @@ namespace e3 {
 
         void addModuleParameter( const Parameter& p ) const;
         void addLinkParameter( const Parameter& p ) const;
+        void removeLinkParameter( int linkId, int moduleId ) const;
 
         void addModuleParameterSet( const ParameterSet& set ) const;
         void addLinkParameterSet( const ParameterSet& set ) const;
@@ -51,11 +52,12 @@ namespace e3 {
     {
     public:
         const Preset& get( int id );
-        //const const_iterator find( int id ) const;
+        void remove( int id );
         const Preset& createNewPreset(int id = -1);
         bool contains( int id ) const;
 
     protected:
+        const_iterator find( int id ) const;
         int createUniqueId();
     };
 

@@ -207,10 +207,17 @@ namespace e3 {
         removeAllParameters();
 
         Rectangle<int> r( 0, 50, 200, 25 );
-        ParameterSet& parameters = instrument->getPreset().getModuleParameters();
+        const Preset& preset = instrument->getPreset();
+        addParameters( preset.getModuleParameters(), module, r );
+        addParameters( preset.getLinkParameters(), module, r );
+    }
+
+
+    void ModuleParameterPanel::addParameters( ParameterSet& parameters, Module* module, Rectangle<int>& r )
+    {
         int id = module->getId();
 
-        for (ParameterSet::iterator it = parameters.ownerFirst( id ); it != parameters.ownerLast( id ); ++it)
+        for (ParameterSet::iterator it = parameters.moduleFirst( id ); it != parameters.moduleLast( id ); ++it)
         {
             const Parameter& p = *it;
             ParameterStrip* strip = new ParameterStrip( r, module, &p );
@@ -287,7 +294,7 @@ namespace e3 {
     {
         ASSERT( slider == &slider_ );
         parameter_->value_ = slider->getValue();
-        module_->setParameter( parameter_->getId(), parameter_->value_ );
+        module_->setParameter( *parameter_ );
     }
 
 

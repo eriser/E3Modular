@@ -90,7 +90,7 @@ namespace e3 {
         void saveBank( const std::string& path = "" );
         void loadInstrument( int id = -1, bool saveCurrent = true );
 
-        Link* addLink( const Link& link );
+        bool addLink( Link& link );
         void removeLink( const Link& link );
 
         Module* addModule( int moduleType );

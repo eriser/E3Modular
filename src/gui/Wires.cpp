@@ -328,22 +328,20 @@ namespace e3 {
     {
         if (state_ == PortActionDocking)
         {
-            Link* link = nullptr;
             if (dockingLink_.isValid())
             {
-                link = panel_->getProcessor()->addLink( dockingLink_ );
-                ASSERT( link && *link == dockingLink_ );
-            }
+                bool result              = panel_->getProcessor()->addLink( dockingLink_ );
 
-            PortComponent* leftPort  = panel_->getPort( dockingLink_, PortTypeOutport );
-            PortComponent* rightPort = panel_->getPort( dockingLink_, PortTypeInport );
+                PortComponent* leftPort  = panel_->getPort( dockingLink_, PortTypeOutport );
+                PortComponent* rightPort = panel_->getPort( dockingLink_, PortTypeInport );
 
-            if (link && leftPort && rightPort)
-            {
-                addWire( dockingWire_.first_, rightPort->getDockingPosition(), *link );
+                if (result && leftPort && rightPort)
+                {
+                    addWire( dockingWire_.first_, rightPort->getDockingPosition(), dockingLink_ );
 
-                leftPort->setConnectedState(); 
-                rightPort->setConnectedState();
+                    leftPort->setConnectedState();
+                    rightPort->setConnectedState();
+                }
             }
             else if (lastVisitedPort_ != nullptr) {
                 lastVisitedPort_->unsetDockingState();

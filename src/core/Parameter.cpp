@@ -10,17 +10,12 @@ namespace e3 {
     // class Parameter
     //----------------------------------------------------------------
 
-    Parameter::Parameter( int id, const std::string& label, ControlType controlType, double defaultValue ) :
+    Parameter::Parameter( int id, int moduleId, 
+                          const std::string& label, 
+                          ControlType controlType, 
+                          double defaultValue ) :
         id_( id ),
-        value_( defaultValue ),
-        defaultValue_( defaultValue ),
-        controlType_( controlType ),
-        label_( label )
-    {}
-
-    Parameter::Parameter( int id, int ownerId, const std::string& label, ControlType controlType, double defaultValue ) :
-        id_( id ),
-        ownerId_( ownerId ),
+        moduleId_( moduleId ),
         value_( defaultValue ),
         defaultValue_( defaultValue ),
         controlType_( controlType ),
@@ -45,24 +40,38 @@ namespace e3 {
     }
 
 
-    const Parameter& ParameterSet::get( int parameterId, int ownerId )
+    const Parameter& ParameterSet::get( int parameterId, int moduleId )
     {
+        
         for (iterator it = begin(); it != end(); ++it)
         {
             const Parameter& parameter = *it;
-            if (parameter.id_ == parameterId && parameter.ownerId_ == ownerId) {
+            if (parameter.id_ == parameterId && parameter.moduleId_ == moduleId) {
                 return parameter;
             }
         }
-        THROW( std::out_of_range, "No Parameter found with id=%d and ownerId=%d", parameterId, ownerId );
+        THROW( std::out_of_range, "No Parameter found with id=%d and moduleId=%d", parameterId, moduleId );
     }
 
 
-    void ParameterSet::eraseAllByOwner( int ownerId )
+    void ParameterSet::removeAllByModule( int moduleId )
     {
-        for (iterator it = ownerFirst( ownerId ); it != ownerLast( ownerId ); )
+        for (iterator it = moduleFirst( moduleId ); it != moduleLast( moduleId ); )
         {
             erase( it++ );
+        }
+    }
+
+
+    void ParameterSet::remove( int id, int moduleId )
+    {
+        for (iterator it = begin(); it != end(); )
+        {
+            const Parameter& p = *it;
+            if (p.getId() == id && p.getModuleId() == moduleId) {
+                erase( it++ );
+            }
+            else ++it;
         }
     }
 

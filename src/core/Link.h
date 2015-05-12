@@ -3,36 +3,61 @@
 
 #include <vector>
 #include <string>
+#include <set>
 #include <sstream>
-#include "core/Parameter.h"
 
 
 namespace e3 {
 
     //-------------------------------------------
     // class Link
-    // Represents a connection between ports.
+    // Stores the moduleId and portId of a
+    // connection between module ports.
     //-------------------------------------------
 
-    class Link : public Parameter
+    class Link  
     {
+        friend class LinkSet;
+
     public:
+        Link() {}
+        Link( int id, int leftModule, int leftPort, int rightModule, int rightPort ) :
+            linkId_( id ),
+            leftModule_( leftModule ),
+            leftPort_( leftPort ),
+            rightModule_( rightModule ),
+            rightPort_( rightPort )
+        {}
+
         bool operator==(const Link& other) const
         {
             return
-                other.leftModule_  == leftModule_ &&
+                other.leftModule_ == leftModule_ &&
                 other.rightModule_ == rightModule_ &&
-                other.leftPort_    == leftPort_ &&
-                other.rightPort_   == rightPort_;
+                other.leftPort_ == leftPort_ &&
+                other.rightPort_ == rightPort_;
         }
         bool operator==(const Link* other) const   { return operator==(*other); }
         bool operator!=(const Link& other) const   { return !(*this == other); }
         bool operator!=(const Link* other) const   { return !(this == other); }
 
+        bool operator<(const Link& other) const
+        {
+            if (other.rightModule_ != rightModule_) return rightModule_ < other.rightModule_;
+            if (other.rightPort_ != rightPort_)   return rightPort_ < other.rightPort_;
+            if (other.leftModule_ != leftModule_)  return leftModule_ < other.leftModule_;
+            if (other.leftPort_ != leftPort_)    return leftPort_ < other.leftPort_;
+
+            return false;
+        }
+
+        void setId( int id )  { linkId_ = id; }
+        int getId() const     { return linkId_; }
+
 
         bool isLeftValid() const
         {
-            return ( leftModule_ >= 0 && leftPort_ >= 0 );
+            return (leftModule_ >= 0 && leftPort_ >= 0);
         }
 
 
@@ -77,98 +102,63 @@ namespace e3 {
         std::string toString() const
         {
             std::ostringstream os;
-            os << "Link: (" << label_ << ") ";
             os << "leftModule:" << leftModule_ << " rightModule:" << rightModule_;
             os << " leftPort:" << leftPort_ << " rightPort:" << rightPort_;
             return os.str();
         }
 
 
-        int leftModule_  = -1;  // source module
-        int leftPort_    = -1;  // outport of source module
-        int rightModule_ = -1;  // target module
-        int rightPort_   = -1;  // inport of target module
+        int linkId_      = -1;
+        mutable int leftModule_  = -1;  // source module
+        mutable int leftPort_    = -1;  // outport of source module
+        mutable int rightModule_ = -1;  // target module
+        mutable int rightPort_   = -1;  // inport of target module
     };
 
 
     //----------------------------------------------------------------
     // class LinkList
-    // A container for Links
+    // A vector container for Links
     //----------------------------------------------------------------
 
-    template <class T>
-    class LinkListTemplate : public std::vector< T >
+    typedef std::vector<Link> LinkList;
+
+    //class LinkList : public std::vector < Link >
+    //{
+    //public:
+    //    size_t add( const Link& link );
+    //    size_t remove( const Link& link );
+    //    size_t getIndex( const Link& link ) const;
+    //    bool contains( const Link& link ) const;
+
+    //private:
+    //    const_iterator find( const Link& link ) const;
+    //};
+
+
+    //-------------------------------------------------------------------
+    // class LinkSet
+    // A unique container for Links
+    //-------------------------------------------------------------------
+
+    class LinkSet : public std::set < Link >
     {
     public:
-        T& get(const T& link)
-        {
-            const_iterator pos = find(link);
-            if (pos == end()) {
-                THROW(std::out_of_range, "Link not found");
-            }
-            return const_cast<T&>(*pos);
-        }
+        const Link& get( const Link& link ) const;
+        const Link& get( int id ) const;
 
+        size_t add( Link& link );
+        size_t remove( const Link& link );
+        size_t remove( int id );
 
-        size_t add(const T& link)
-        {
-            bool linkExists = contains(link);
-            ASSERT(linkExists == false);
-
-            if (linkExists == false)  {
-                push_back(link);
-            }
-            return size();
-        }
-
-
-        void replace(const T& link)
-        {
-            iterator pos = std::find( begin(), end(), link );
-            ASSERT(pos != end());
-
-            if (pos != end()) {
-                *pos = link;
-            }
-        }
-
-
-        size_t remove(const T& link)
-        {
-            const_iterator pos = find(link);
-            ASSERT(pos != end());
-
-            if (pos != end()) {
-                erase(pos);
-            }
-            return size();
-        }
-
-
-        int16_t getIndex(const T& link)
-        {
-            const_iterator pos = find(link);
-
-            return pos == end() ? -1 : (int16_t)(pos - begin());
-        }
-
-
-        bool contains(const T& link)
-        {
-            const_iterator pos = find(link);
-            return pos != end();
-        }
-
+        bool contains( const Link& link );
+        int createUniqueId();
 
     private:
-        const_iterator find(const T& link) const
-        {
-            return std::find(begin(), end(), link);
-        }
+        const_iterator find( const Link& link ) const;
+        const_iterator find( int id ) const;
     };
 
-    typedef LinkListTemplate<Link> LinkList;
-    typedef LinkListTemplate<Link*> LinkPointerList;
 
 } // namespace e3
 

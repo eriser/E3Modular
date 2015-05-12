@@ -26,7 +26,7 @@ namespace e3 {
         void suspendModules();
         void resumeModules();
 
-        void initParameters();
+        void loadPreset();
         const PresetSet& getPresets() const                      { return presetSet_; }
         const Preset& getPreset();
         const Preset& Instrument::createNewPreset(int id = -1)   { return presetSet_.createNewPreset( id ); }
@@ -37,10 +37,11 @@ namespace e3 {
 
         Module* createAndAddModule( ModuleType type );
         void deleteModule( Module* module );
+        //void disconnectModules( const Link& link );
 
-        Link* addLink( const Link& link );
+        void addLink( Link& link, bool addParameter = true );
         void removeLink( const Link& link );
-        LinkList& getLinks()                       { return links_; }
+        LinkSet& getLinks()                        { return links_; }
         void getLinksForModule( int moduleId, PortType portType, LinkList& list );
 
         void setNumVoices( int numVoices )         { numVoices_    = numVoices; }
@@ -70,9 +71,10 @@ namespace e3 {
         bool hasAudioOutTerminal();
         int createUniqueId( ModuleType type );
         void createDefaultPreset();
+        std::string createParameterLabel( const Link& link );
 
         ModuleList modules_;
-        LinkList links_;
+        LinkSet links_;
         PresetSet presetSet_;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( Instrument )

@@ -49,11 +49,11 @@ namespace e3 {
         if (e != nullptr)
         {
             try {
-                Instrument* instrument = new Instrument();  // processor will be owner of the instrument
+                Instrument* instrument = new Instrument();  // processor will be owner of the instrument and delete it
                 readInstrumentAttributes( e, instrument );
                 readInstrumentModules( e, instrument );
-                readInstrumentLinks( e, instrument );
                 readInstrumentPresets( e, instrument );
+                readInstrumentLinks( e, instrument );
                 return instrument;
             }
             catch (const std::exception& e) {               // parse error, skip instrument
@@ -166,12 +166,12 @@ namespace e3 {
         forEachXmlChildElementWithTagName( *links, e, "link" )
         {
             Link link;
-            link.leftModule_  = (uint16_t)e->getIntAttribute( "left_module" );
-            link.rightModule_ = (uint16_t)e->getIntAttribute( "right_module" );
-            link.leftPort_    = (uint16_t)e->getIntAttribute( "left_port" );
-            link.rightPort_   = (uint16_t)e->getIntAttribute( "right_port" );
+            link.setId( e->getIntAttribute( "id" ));
+            link.leftModule_  = e->getIntAttribute( "left_module" );
+            link.rightModule_ = e->getIntAttribute( "right_module" );
+            link.leftPort_    = e->getIntAttribute( "left_port" );
+            link.rightPort_   = e->getIntAttribute( "right_port" );
 
-            readParameter( e, link );
             instrument->addLink( link );
         }
     }
@@ -203,7 +203,11 @@ namespace e3 {
                         preset.addModuleParameter( param );
                     }
                 }
-                else {}
+                else {
+                    Parameter param( paramId, moduleId );
+                    readParameter( paramXml, const_cast< Parameter& >(param) );
+                    preset.addLinkParameter( param );
+                }
             }
         }
     }
@@ -279,8 +283,8 @@ namespace e3 {
     {
         XmlElement* links = getAndClearChildElement( e, "links" );
 
-        const LinkList& linkList = instrument->getLinks();
-        for (LinkList::const_iterator it = linkList.begin(); it != linkList.end(); it++)
+        const LinkSet& linkSet = instrument->getLinks();
+        for (LinkSet::const_iterator it = linkSet.begin(); it != linkSet.end(); it++)
         {
             XmlElement* l = links->createNewChildElement( "link" );
             writeLink( l, *it );
@@ -321,30 +325,40 @@ namespace e3 {
             const Parameter& param = *it;
             ASSERT( param.controlType_ > ControlHidden );
 
-            Module* module = instrument->getModule( param.getOwnerId() );
+            Module* module = instrument->getModule( param.getModuleId() );
             ASSERT( module );
             if (module != nullptr)
             {
                 XmlElement* p = e->createNewChildElement( "param" );
                 p->setAttribute( "id", param.getId() );
-                p->setAttribute( "module", param.getOwnerId() );
+                p->setAttribute( "module", param.getModuleId() );
 
                 const Parameter& defaultParam = module->getDefaultParameter( param.getId() );
                 writeParameter( p, param, defaultParam );
             }
+        }
+
+        const ParameterSet& linkParameters = preset.getLinkParameters();
+        for (ParameterSet::const_iterator it = linkParameters.begin(); it != linkParameters.end(); it++)
+        {
+            const Parameter& param = *it;
+
+            XmlElement* p = e->createNewChildElement( "param" );
+            p->setAttribute( "id", param.getId() );
+
+            Parameter defaultParam( param.getId(), param.getModuleId() );
+            writeParameter( p, param, defaultParam );
         }
     }
 
 
     void BankSerializer::writeLink( XmlElement* e, const Link& link )
     {
+        e->setAttribute( "id", link.getId() );
         e->setAttribute( "left_module", link.leftModule_ );
         e->setAttribute( "right_module", link.rightModule_ );
         e->setAttribute( "left_port", link.leftPort_ );
         e->setAttribute( "right_port", link.rightPort_ );
-
-        Parameter defaultParam;
-        writeParameter( e, link, defaultParam );
     }
 
 

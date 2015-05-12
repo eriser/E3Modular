@@ -95,6 +95,7 @@ namespace e3 {
         virtual ParameterSet& getDefaultParameters() const;
         virtual const Parameter& getDefaultParameter( int parameterId ) const;
         virtual void setParameter( int paramId, double value, double modulation = 0.f, int voice = -1 ) {}
+        virtual void setParameter( const Parameter& parameter );
 
         const InportList& getInports() const           { return inports_; }
         const OutportList& getOutports() const         { return outports_; }
@@ -137,12 +138,11 @@ namespace e3 {
         virtual void disconnectSignals() {}
 
         virtual void initData();
-        virtual void initParameters();
 
         virtual void updatePorts() {}
-
         virtual void disconnectPorts();
-        void connectPort( Module* target, const Link& link );
+        void connect( Module* target, const PortData& data );
+        void disconnect( Module* target, const Link& link );
 
         void addInport( int portId, const std::string& label, Inport* port );
         void addOutport( int portId, const std::string& label, Outport* port, PortType portType );

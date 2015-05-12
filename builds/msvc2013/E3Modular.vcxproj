@@ -523,6 +523,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\core\Bank.cpp" />
     <ClCompile Include="..\..\src\core\BankSerializer.cpp" />
     <ClCompile Include="..\..\src\core\CpuMeter.cpp" />
+    <ClCompile Include="..\..\src\core\Link.cpp" />
     <ClCompile Include="..\..\src\core\Module.cpp" />
     <ClCompile Include="..\..\src\core\Preset.cpp" />
     <ClCompile Include="..\..\src\core\Processor.cpp" />

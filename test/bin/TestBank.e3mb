@@ -1,26 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <bank name="test" instrument="0">
-  <instrument name="instrument_0" id="0" category="default" comment="das einzig wahre" voices="32">
+  <instrument name="instrument_0" id="0" category="default" comment="" voices="32">
     <modules>
-      <module id="0" label="AudioOut" type="0" poly="0">
-        <param id="0" value="0.5"/>
-      </module>
-      <module id="1" label="MidiInput" type="3" poly="1">
-        <param id="0" value="2"/>
-        <param id="1" value="0"/>
-        <param id="2" value="0"/>
-      </module>
-      <module id="2" label="Sine" type="10" poly="1">
-        <param id="2" value="0"/>
-        <param id="3" value="0"/>
-      </module>
-      <module id="3" label="ADSR" type="11" poly="1">
-        <param id="2" value="0.018897600000000001"/>
-        <param id="3" value="0.20472399999999999"/>
-        <param id="4" value="0.59055100000000005"/>
-        <param id="5" value="2.7999999999999998"/>
-      </module>
+      <module id="0" label="AudioOut" type="0" poly="0"/>
+      <module id="1" label="MidiInput" type="3" poly="1"/>
+      <module id="2" label="Sine" type="10" poly="1"/>
+      <module id="3" label="ADSR" type="11" poly="1"/>
     </modules>
     <links>
       <link left_module="3" right_module="0" left_port="0" right_port="0"/>
@@ -34,6 +20,18 @@
       <module id="2" pos="330, 187" collapsed="0"/>
       <module id="3" pos="486, 293" collapsed="0"/>
     </panel>
+    <presets>
+      <preset name="Unnamed" id="0">
+        <param id="0" module="0" value="0.77000000000000002"/>
+        <param id="0" module="1" value="2"/>
+        <param id="1" module="1" value="0"/>
+        <param id="2" module="1" value="0"/>
+        <param id="2" module="2" value="0"/>
+        <param id="3" module="2" value="0"/>
+        <param id="2" module="3" value="0.66249999999999998"/>
+        <param id="3" module="3" value="0.20472399999999999"/>
+      </preset>
+    </presets>
   </instrument>
   <instrument name="instrument_1" id="1" category="default" comment="klingt gut" voices="1"/>
   <instrument name="instrument_2" id="2" category="default" comment="klingt noch besser" voices="1"/>

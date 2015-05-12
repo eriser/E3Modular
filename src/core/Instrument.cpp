@@ -61,19 +61,19 @@ namespace e3 {
     }
 
 
-    void Instrument::initParameters()
+    void Instrument::loadPreset()
     {
         const Preset& preset     = getPreset();
         ParameterSet& parameters = preset.getModuleParameters();
 
-        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
+        for (ModuleList::iterator mit = modules_.begin(); mit != modules_.end(); mit++)
         {
-            Module* m = *it;
+            Module* m = *mit;
             int id    = m->getId();
 
-            for (ParameterSet::iterator it = parameters.ownerFirst( id ); it != parameters.ownerLast( id ); ++it)
+            for (ParameterSet::iterator pit = parameters.moduleFirst( id ); pit != parameters.moduleLast( id ); ++pit)
             {
-                const Parameter& p = *it;
+                const Parameter& p = *pit;
                 m->setParameter( p.getId(), p.value_, 0, -1 );
             }
         }
@@ -106,36 +106,6 @@ namespace e3 {
     }
 
 
-    Link* Instrument::addLink( const Link& link )
-    {
-        links_.add( link );
-        return &links_.back();
-    }
-
-
-    void Instrument::removeLink( const Link& link )
-    {
-        links_.remove( link );
-    }
-
-
-    void Instrument::getLinksForModule( int moduleId, PortType portType, LinkList& list)
-    {
-        list.clear();
-
-        for (LinkList::iterator it = links_.begin(); it != links_.end(); ++it)
-        {
-            Link& link = *it;
-            if ((portType == PortTypeInport || portType == PortTypeUndefined) && link.rightModule_ == moduleId) {
-                list.add( link );
-            }
-            else if ((portType == PortTypeOutport || portType == PortTypeUndefined) && link.leftModule_ == moduleId) {
-                list.add( link );
-            }
-        }
-    }
-
-
     void Instrument::initModules( double sampleRate, int numVoices, Polyphony* polyphony )
     {
         for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
@@ -158,23 +128,35 @@ namespace e3 {
 
     void Instrument::connectModules()
     {
-        for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
-        {
-            Module* target = (*it);
-            LinkList list;
-            getLinksForModule(target->getId(), PortTypeInport, list);
+        ParameterSet& linkParameters = getPreset().getLinkParameters();
 
-            for (LinkList::iterator it = list.begin(); it != list.end(); ++it)
+        for (LinkSet::const_iterator it = links_.begin(); it != links_.end(); ++it)
+        {
+            const Link& link = *it;
+
+            Module* source = getModule( link.leftModule_ );
+            Module* target = getModule( link.rightModule_ );
+            ASSERT( source );
+            ASSERT( target );
+            if (source && target) 
             {
-                const Link& link = *it;
-                Module* source = getModule( link.leftModule_ );
-                ASSERT( source );
-                if (source) {
-                    source->connectPort( target, link );
-                }
+                const Parameter& parameter = linkParameters.get( link.getId(), source->getId() );
+                source->connect( target, PortData( link, parameter ) );
             }
         }
     }
+
+
+    //void Instrument::disconnectModules( const Link& link )
+    //{
+    //    Module* source = getModule( link.leftModule_ );
+    //    Module* target = getModule( link.rightModule_ );
+    //    ASSERT( source );
+    //    ASSERT( target );
+    //    if (source && target) {
+    //        source->disconnect( target, link );
+    //    }
+    //}
 
 
     void Instrument::updateModules()
@@ -215,6 +197,42 @@ namespace e3 {
     }
 
 
+    void Instrument::addLink( Link& link, bool addParameter )
+    {
+        links_.add( link );
+
+        if (addParameter) {
+            std::string label = createParameterLabel( link );
+            Parameter parameter( link.getId(), link.leftModule_, label, ControlSlider );
+            getPreset().addLinkParameter( parameter );
+        }
+    }
+
+
+    void Instrument::removeLink( const Link& link )
+    {
+        getPreset().removeLinkParameter( link.getId(), link.leftModule_ );
+        links_.remove( link );
+    }
+
+
+    void Instrument::getLinksForModule( int moduleId, PortType portType, LinkList& list )
+    {
+        list.clear();
+
+        for (LinkSet::iterator it = links_.begin(); it != links_.end(); ++it)
+        {
+            const Link& link = *it;
+            if ((portType == PortTypeInport || portType == PortTypeUndefined) && link.rightModule_ == moduleId) {
+                list.push_back( link );
+            }
+            else if ((portType == PortTypeOutport || portType == PortTypeUndefined) && link.leftModule_ == moduleId) {
+                list.push_back( link );
+            }
+        }
+    }
+
+
     int Instrument::createUniqueId( ModuleType type )
     {
         if (type == ModuleTypeAudioOutTerminal) {
@@ -249,5 +267,22 @@ namespace e3 {
     {
         return (getModule( ModuleTypeAudioOutTerminal ) != nullptr);
     }
+
+
+    std::string Instrument::createParameterLabel( const Link& link )
+    {
+        Module* source = getModule( link.leftModule_ );
+        Module* target = getModule( link.rightModule_ );
+        ASSERT( source );
+        ASSERT( target );
+        if (source && target)
+        {
+            std::ostringstream os;
+            os << source->label_ << "->" << target->label_;
+            return os.str();
+        }
+        return "";
+    }
+
 
 }  // namespace e3

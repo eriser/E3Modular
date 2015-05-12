@@ -85,18 +85,6 @@ namespace e3 {
     }
 
 
-    void Module::initParameters()
-    {
-        //for (ParameterMap::iterator it = parameters_.begin(); it != parameters_.end(); it++)
-        //{
-        //    Parameter& param = it->second;
-        //    if (param.midiShaper_.getControllerId() >= 0) {
-        //        polyphony_->midiControllerSignal.Connect( this, &Module::onMidiController );
-        //    }
-        //}
-    }
-
-
     void Module::onMidiController( int, int )  {}
 
 
@@ -149,22 +137,28 @@ namespace e3 {
     }
 
 
-    void Module::connectPort( Module* target, const Link& link )
+    void Module::connect( Module* target, const PortData& data )
     {
-        ASSERT( target );
+        Outport* outport = getOutport( data.leftPort_ );
+        ASSERT( outport );
 
-        if (target)
+        if (outport)
         {
-            Outport* outport = getOutport( link.leftPort_ );
-            ASSERT( outport );
-
-            if (outport)
-            {
-                VoiceAdapterType adapter = selectVoiceAdapter( target->voicingType_ );
-                outport->connect( target, link, adapter );
-            }
+            VoiceAdapterType adapter = selectVoiceAdapter( target->voicingType_ );
+            outport->connect( target, data, adapter );
         }
     }
+
+
+    //void Module::disconnect( Module* target, const Link& link )
+    //{
+    //    Outport* outport = getOutport( link.leftPort_ );
+    //    ASSERT( outport );
+
+    //    if (outport) {
+    //        outport->disconnect( target, link );
+    //    }
+    //}
 
 
     VoiceAdapterType Module::selectVoiceAdapter( VoicingType otherVoicingType ) const
@@ -185,6 +179,24 @@ namespace e3 {
     {
         ParameterSet& set = getDefaultParameters();
         return set.get( parameterId, id_ );
+    }
+
+
+    void Module::setParameter( const Parameter& parameter )
+    {
+        if (parameter.target_ == ParameterModule) {
+            setParameter( parameter.getId(), parameter.value_ );
+        }
+        else if (parameter.target_ == ParameterLink)
+        {
+            for (OutportList::const_iterator it = outports_.begin(); it != outports_.end(); ++it)
+            {
+                Outport* outport = *it;
+                if (outport->setParameter( parameter )) {
+                    break;
+                }
+            }
+        }
     }
 
 

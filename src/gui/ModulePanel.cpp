@@ -61,9 +61,9 @@ namespace e3 {
     }
 
 
-    void ModulePanel::createWires( LinkList& links )
+    void ModulePanel::createWires( LinkSet& links )
     {
-        for (LinkList::iterator it = links.begin(); it != links.end(); ++it)
+        for (LinkSet::iterator it = links.begin(); it != links.end(); ++it)
         {
             const Link& link       = *it;
             PortComponent* inport  = getPort( link, PortTypeInport );

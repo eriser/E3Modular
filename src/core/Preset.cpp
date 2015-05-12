@@ -11,13 +11,22 @@ namespace e3 {
 
     void Preset::addModuleParameter( const Parameter& p ) const   
     { 
+        p.target_ = ParameterModule;
         moduleParameters_.insert( p ); 
     }
 
 
     void Preset::addLinkParameter( const Parameter& p ) const     
     { 
+        p.target_ = ParameterLink;
         linkParameters_.insert( p ); 
+    }
+
+
+    void Preset::removeLinkParameter( int linkId, int moduleId ) const
+    {
+        ASSERT( linkParameters_.size() > 0 );
+        linkParameters_.remove( linkId, moduleId );
     }
 
 
@@ -39,27 +48,41 @@ namespace e3 {
 
     const Preset& PresetSet::get( int id )
     {
-        for (iterator it = begin(); it != end(); ++it)
-        {
-            const Preset& preset = *it;
-            if (preset.id_ == id) {
-                return preset;
-            }
+        const_iterator pos = find( id );
+        if (pos != end()) {
+            return *pos;
         }
-        THROW( std::out_of_range, "No Preset found with id=%d", id );
+        else THROW( std::out_of_range, "No Preset found with id=%d", id );
+    }
+
+
+    void PresetSet::remove( int id )
+    {
+        const_iterator pos = find( id );
+        ASSERT( pos != end() );
+        if (pos != end()) {
+            erase( pos );
+        }
     }
 
 
     bool PresetSet::contains( int id ) const
     {
-        for (const_iterator it = begin(); it != end(); ++it)
+        const_iterator pos = find( id );
+        return pos != end();
+    }
+
+
+    PresetSet::const_iterator PresetSet::find( int id ) const
+    {
+        for (iterator it = begin(); it != end(); ++it)
         {
             const Preset& preset = *it;
             if (preset.id_ == id) {
-                return true;
+                return it;
             }
         }
-        return false;
+        return end();
     }
 
 
@@ -72,6 +95,7 @@ namespace e3 {
             if (preset.id_ != count) {
                 return count;
             }
+            count++;
         }
         return size();
     }

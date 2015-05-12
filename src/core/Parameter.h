@@ -11,6 +11,13 @@
 
 
 namespace e3 {
+
+    enum ParameterTarget 
+    {
+        ParameterUndefined,
+        ParameterModule,
+        ParameterLink
+    };
     
     //--------------------------------------------------------------------
     // class Parameter
@@ -23,14 +30,14 @@ namespace e3 {
 
     public:
         Parameter() {}
-        Parameter( int id, const std::string& label, ControlType controlType, double defaultValue = 1 ); // TODO: remove
-        Parameter( int id, int ownerId, const std::string& label="", ControlType controlType=ControlHidden, double defaultValue = 1 );
+        Parameter( int id, int moduleId, 
+                   const std::string& label = "", 
+                   ControlType controlType = ControlHidden, 
+                   double defaultValue = 1 );
 
         bool operator==(const Parameter& other) const
         {
-            return
-                other.id_ == id_ &&
-                other.ownerId_ == ownerId_;
+            return other.id_ == id_ && other.moduleId_ == moduleId_;
         }
         bool operator==(const Parameter* other) const   { return operator==(*other); }
         bool operator!=(const Parameter& other) const   { return !(*this == other); }
@@ -38,14 +45,20 @@ namespace e3 {
 
         bool operator<(const Parameter& other) const
         {
-            if (other.ownerId_ == ownerId_) return id_ < other.id_;
-            return ownerId_ < other.ownerId_;
+            if (other.moduleId_ == moduleId_) return id_ < other.id_;
+            return moduleId_ < other.moduleId_;
         }
 
-        int getId() const               { return id_; }
-        int getOwnerId() const          { return ownerId_; }
+        int getId() const                { return id_; }
+        int getModuleId() const          { return moduleId_; }
 
+    protected:
+        int id_       = 0;
+        int moduleId_ = -1;
+
+    public:
         ControlType controlType_           = ControlHidden;
+        mutable ParameterTarget target_    = ParameterUndefined;
         mutable NumberFormat numberFormat_ = NumberFloat;
         mutable double defaultValue_       = 1;
         mutable double value_              = defaultValue_;
@@ -58,17 +71,13 @@ namespace e3 {
         mutable ParameterShaper valueShaper_;
         mutable MidiParameterShaper midiShaper_;
 
-        bool isValid() const            { return id_ > -1 && ownerId_ > -1; }
+        bool isValid() const            { return id_ > -1 && moduleId_ > -1; }
         
         double getMin() const           { return valueShaper_.getMin(); }
         double getMax() const           { return valueShaper_.getMax(); }
 
         int getNumSteps() const         { return valueShaper_.getNumSteps(); }
         double getInterval() const      { return valueShaper_.getInterval(); }
-
-    protected:
-        int id_      = 0;
-        int ownerId_ = -1;
     };
 
 
@@ -81,11 +90,12 @@ namespace e3 {
     {
     public:
         void add(const Parameter& p);
-        const Parameter& get( int parameterId, int ownerId );
-        void eraseAllByOwner( int ownerId );
+        const Parameter& get( int parameterId, int moduleId );
+        void removeAllByModule( int moduleId );
+        void remove( int id, int moduleId );
 
-        iterator ownerFirst( int ownerId )    { return lower_bound( Parameter( 0, ownerId ) ); }
-        iterator ownerLast( int ownerId )     { return lower_bound( Parameter( 0, ownerId+1 ) ); }
+        iterator moduleFirst( int moduleId )    { return lower_bound( Parameter( 0, moduleId ) ); }
+        iterator moduleLast( int moduleId )     { return lower_bound( Parameter( 0, moduleId+1 ) ); }
     };
 
 } // namespace e3

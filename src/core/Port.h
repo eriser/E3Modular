@@ -7,6 +7,7 @@
 #include <e3_Buffer.h>
 #include "core/GlobalHeader.h"
 #include "core/Link.h"
+#include "core/Parameter.h"
 
 
 namespace e3 {
@@ -51,17 +52,31 @@ namespace e3 {
 
 
     //------------------------------------------
+    // class PortData
+    //------------------------------------------
+
+    class PortData : public Link, public Parameter
+    {
+    public:
+        PortData() {}
+        PortData( const Link& link, const Parameter& parameter ) : Link( link ), Parameter( parameter ) {}
+    };
+
+    typedef std::vector<PortData> PortDataList;
+
+
+    //------------------------------------------
     // class ModulationBuffer
     //------------------------------------------
 
     class ModulationBuffer : public Buffer < double >
     {
     public:
-        void init( int_fast32_t numVoices, LinkList& targets );
-        void setValue( uint32_t targetIndex, double value, int voice );
+        void init( int_fast32_t numVoices, PortDataList& data );
+        void setValue( uint32_t targetIndex, double value, int voice = -1 );
 
-        void onGate( uint32_t targetIndex, Link& link, double gate, int voice );
-        void onController( uint32_t targetIndex, Link& link, int16_t controllerId, double value );
+        void onGate( uint32_t targetIndex, PortData& data, double gate, int voice );
+        void onController( uint32_t targetIndex, PortData& data, int16_t controllerId, double value );
 
     protected:
         uint_fast32_t numVoices_;
@@ -142,11 +157,11 @@ namespace e3 {
     public:
         Outport() : Port( PortTypeOutport ) {}
 
-        void connect( Module* target, const Link& link, VoiceAdapterType voiceAdapter );
-        void disconnect( Module* target, const Link& link );
+        void connect( Module* target, const PortData& data, VoiceAdapterType voiceAdapter );
         void disconnectAll() override;
 
         void setNumVoices( int numVoices ) override;
+        bool setParameter( const Parameter& parameter );
 
         void __stdcall putAudio( double value, int_fast32_t voice = 0 ) throw();
         void putEvent( double value, int_fast32_t voice );
@@ -155,18 +170,16 @@ namespace e3 {
         void onController( int16_t controllerId, double value );
 
     protected:
-        void addAudioTarget( const Link& link, VoiceAdapterType adapter );
-        void addEventTarget( const Link& link, VoiceAdapterType adapter );
-        void removeAudioTarget( const Link& link );
-        void removeEventTarget( const Link& link );
+        void addAudioTarget( const PortData& data, VoiceAdapterType adapter );
+        void addEventTarget( const PortData& data, VoiceAdapterType adapter );
 
     protected:
-        LinkList audioLinks_;
+        PortDataList audioData_;
         Buffer< double* > audioOutBuffer_;
         Buffer< VoiceAdapterType > audioAdapterBuffer_;
         ModulationBuffer audioModulationBuffer_;
 
-        LinkList eventLinks_;
+        PortDataList eventData_;
         InportList eventInports_;
         Buffer< VoiceAdapterType > eventAdapterBuffer_;
         ModulationBuffer eventModulationBuffer_;
@@ -205,8 +218,11 @@ namespace e3 {
 
         for (int_fast32_t target = 0; target < numAudioConnections_; target++)
         {
-            double  val = value * audioModulationBuffer_[modulationIndex];  // apply modulation
+            double mod = audioModulationBuffer_[modulationIndex];
             modulationIndex += numVoices_;
+            if (mod != 1) {
+                value *= mod;  // apply modulation
+            }
 
             double* inportPointer = audioOutBuffer_[target];	            // get pointer to target
 
@@ -215,15 +231,15 @@ namespace e3 {
             switch (adapter)
             {
             case AdapterNone:
-                *(inportPointer + voice) += val; 	                         // add value to existing value, per voice
+                *(inportPointer + voice) += value; 	                         // add value to existing value, per voice
                 break;
             case AdapterMonoToPoly:
                 for (int32_t i = 0; i < numVoices_; i++) {                  // add value to all voices of target
-                    *(inportPointer + i) += val;
+                    *(inportPointer + i) += value;
                 }
                 break;
             case AdapterPolyToMono:
-                *inportPointer += val; 	                              // add value only to voice 0
+                *inportPointer += value; 	                                // add value only to voice 0
                 break;
             }
         }

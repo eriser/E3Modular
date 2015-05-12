@@ -65,7 +65,7 @@ namespace e3 {
 
     protected:
         ModuleComponent* createModuleComponent( Module* module, int x, int y );
-        void createWires( LinkList& links );
+        void createWires( LinkSet& links );
 
         void showPopupMenu( Point<int> pos );
         PopupMenu createPopupMenu();

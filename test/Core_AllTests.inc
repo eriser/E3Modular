@@ -166,8 +166,8 @@ namespace e3 {
             for (auto it = set_.begin(); it != set_.end(); ++it)
             {
                 const Parameter& next = *it;
-                EXPECT_GE( next.id_, prev.id_ );
-                EXPECT_GE( next.ownerId_, prev.ownerId_ );
+                EXPECT_GE( next.getId(), prev.getId() );
+                EXPECT_GE( next.getModuleId(), prev.getModuleId() );
             }
         }
 
@@ -187,25 +187,25 @@ namespace e3 {
         TEST_F( ParameterSetTest, ownerFirstLast )
         {
             int count = 0;
-            for (ParameterSet::iterator it = set_.ownerFirst( 1 ); it != set_.ownerLast( 1 ); ++it)
+            for (ParameterSet::iterator it = set_.moduleFirst( 1 ); it != set_.moduleLast( 1 ); ++it)
             {
                 const Parameter& p = *it;
-                EXPECT_EQ( 1, p.ownerId_ );
+                EXPECT_EQ( 1, p.getModuleId() );
                 count++;
             }
             EXPECT_EQ( 3, count );
 
-            for (ParameterSet::iterator it = set_.ownerFirst( 17 ); it != set_.ownerLast( 17 ); ++it)
+            for (ParameterSet::iterator it = set_.moduleFirst( 17 ); it != set_.moduleLast( 17 ); ++it)
             {
                 EXPECT_TRUE( false );
             }
         }
 
-        TEST_F( ParameterSetTest, eraseAllByOwner )
+        TEST_F( ParameterSetTest, removeAllByModule )
         {
-            set_.eraseAllByOwner( 0 );
+            set_.removeAllByModule( 0 );
             EXPECT_EQ( 6, set_.size() );
-            set_.eraseAllByOwner( 17 );
+            set_.removeAllByModule( 17 );
             EXPECT_EQ( 6, set_.size() );
         }
 
@@ -394,55 +394,145 @@ namespace e3 {
 
 
         //----------------------------------------------------------------------------------------
-        // LinkListTest
+        // LinkSetTest
         //----------------------------------------------------------------------------------------
-        class LinkListTest : public ::testing::Test
+        class LinkSetTest : public ::testing::Test
         {
         public:
-            LinkListTest()
+            LinkSetTest()
             {
-                link_.leftModule_ = link_.rightModule_ = link_.rightPort_ = link_.leftPort_ = 3;
-
                 Link l;
-                for (int i = 1; i <= 4; i++) {
-                    l.leftModule_ = l.rightModule_ = l.rightPort_ = l.leftPort_ = i;
-                    list_.push_back( l );
+                for (int i = 0; i <= 3; i++) {
+                    Link link( i, i, i, i, i );
+                    set_.add( link );
                 }
             }
-            LinkList list_;
-            Link link_;
+            LinkSet set_;
         };
 
-        TEST_F( LinkListTest, get )
+        TEST_F( LinkSetTest, getByReference )
         {
-            Link l1 = list_.get( link_ );
-            EXPECT_EQ( link_, l1 );
+            Link l1( 3, 3, 3, 3, 3 );
+            const Link& l2 = set_.get( l1 );
+            EXPECT_EQ( l1, l2 );
+        }
+
+        TEST_F( LinkSetTest, getById )
+        {
+            Link link;
+            for (size_t i = 0; i < set_.size(); i++)  
+            {
+                EXPECT_NO_THROW( link = set_.get( i ) );
+                EXPECT_EQ( i, link.getId() );
+            }
+        }
+
+        TEST_F( LinkSetTest, add )
+        {
+            size_t size = set_.size();
+            Link link( -1, 4, 3, 2, 1 );
+            size_t newSize = set_.add( link );
+            EXPECT_EQ( size + 1, newSize );
+            EXPECT_THROW( set_.add( link ), e3::Assertion );
+        }
+
+        TEST_F( LinkSetTest, contains )
+        {
+            Link link( 3, 3, 3, 3, 3 );
+            EXPECT_TRUE( set_.contains( link ) );
+        }
+
+        TEST_F( LinkSetTest, removeByReference )
+        {
+            size_t size = set_.size();
+
+            const Link& link = set_.get( 2 );
+            EXPECT_EQ( 2, link.getId() );
+
+            int newSize = set_.remove( link );
+            EXPECT_EQ( size - 1, newSize );
+            EXPECT_EQ( size - 1, set_.size() );
+            EXPECT_FALSE( set_.contains( link ) );
+            EXPECT_THROW( set_.get( link ), std::out_of_range );
         }
 
 
-        TEST_F( LinkListTest, contains )
+        TEST_F( LinkSetTest, removeById )
         {
-            EXPECT_TRUE( list_.contains( link_ ) );
+            const Link& link = set_.get( 1 );
+            size_t size = set_.size();
+
+            size_t newSize = set_.remove( 1 );
+            EXPECT_EQ( size - 1, newSize );
+            EXPECT_EQ( size - 1, set_.size() );
+            EXPECT_FALSE( set_.contains( link ) );
+            EXPECT_THROW( set_.get( link ), std::out_of_range );
         }
 
-        TEST_F( LinkListTest, update )
+
+        TEST_F( LinkSetTest, idsAreUnique )
         {
-            link_.id_ = 117;
-            list_.replace( link_ );
-            EXPECT_TRUE( list_.contains( link_ ) );
+            set_.remove( 2 );
+            int newId = set_.createUniqueId();
+            EXPECT_EQ( 2, newId );
+
+            Link link( newId, 1, 2, 3, 4 );
+            set_.add( link );
+
+            newId = set_.createUniqueId();
+            EXPECT_EQ( set_.size(), newId );
         }
 
-        TEST_F( LinkListTest, remove )
+
+        //----------------------------------------------------------------------------------------
+        // PresetSetTest
+        //----------------------------------------------------------------------------------------
+        class TestablePresetSet : public PresetSet
         {
-            list_.remove( link_ );
-            EXPECT_FALSE( list_.contains( link_ ) );
+        public:
+            using PresetSet::createUniqueId;
+        };
+
+        class PresetSetTest : public ::testing::Test
+        {
+        public:
+            PresetSetTest()
+            {
+                for (int i = 0; i <= 3; i++) {
+                    set_.createNewPreset();
+                }
+            }
+            TestablePresetSet set_;
+        };
+
+
+        TEST_F( PresetSetTest, initialization )
+        {
+            EXPECT_EQ( 4, set_.size() );
         }
 
-        TEST_F( LinkListTest, getIndex )
+        TEST_F( PresetSetTest, contains )
         {
-            EXPECT_EQ( 2, list_.getIndex( link_ ) );
+            Preset p( 2 );
+            EXPECT_TRUE( set_.contains( p.getId() ) );
         }
 
+        TEST_F( PresetSetTest, remove )
+        {
+            size_t size = set_.size();
+            set_.remove( 2 );
+            EXPECT_EQ( size - 1, set_.size() );
+        }
+
+        TEST_F( PresetSetTest, createUniqueId )
+        {
+            int id = set_.createUniqueId();
+            EXPECT_EQ( id, set_.size() );
+
+            set_.remove( 1 );
+            id = set_.createUniqueId();
+            EXPECT_EQ( 1, id );
+        }
 
 
         //----------------------------------------------------------------------------------------
@@ -454,6 +544,12 @@ namespace e3 {
             ModuleTypeMidiGate,
             ModuleTypeMidiFrequency,
             ModuleTypeMidiInput,
+            ModuleTypeSineOscillator,
+            ModuleTypeAdsrEnvelope,
+            ModuleTypeDelay,
+        };
+
+        static ModuleType testAudioModuleTypes[] = {
             ModuleTypeSineOscillator,
             ModuleTypeAdsrEnvelope,
             ModuleTypeDelay,
@@ -488,7 +584,7 @@ namespace e3 {
         {
         public:
             using Module::init;
-            using Module::connectPort;
+            using Module::connect;
             using Module::update;
             using Module::disconnectPorts;
         };
@@ -497,7 +593,7 @@ namespace e3 {
         {
         public:
             using Module::init;
-            using Module::connectPort;
+            using Module::connect;
             using Module::update;
             using Module::disconnectPorts;
         };
@@ -508,6 +604,7 @@ namespace e3 {
             ModuleTest() 
             {
                 polyphony_.setNumVoices( 1 );
+                srand( static_cast<unsigned int>(time( nullptr )) );
             }
 
             void testInitialization( ModuleType moduleType )
@@ -519,12 +616,7 @@ namespace e3 {
                 EXPECT_EQ( expected[1], module->getVoicingType() );
                 EXPECT_EQ( expected[2], module->getNumInports() );
                 EXPECT_EQ( expected[3], module->getNumOutports() );
-                EXPECT_EQ( expected[4], module->getNumParameters() );
             }
-
-            ScopedPointer<TestableSineOscil> sine_;
-            ScopedPointer<TestableAudioOutTerminal> audioOutTerminal_;
-            Polyphony polyphony_;
 
             void connect()
             {
@@ -538,17 +630,20 @@ namespace e3 {
                 sine_->init( 44100, 1, &polyphony_ );
                 audioOutTerminal_->init( 44100, 1, &polyphony_ );
 
-                Link link;
-                link.value_ = 1;    // modulation value
-                link.leftModule_ = 1;
-                link.rightModule_ = 0;
-                link.leftPort_ = 0;
-                link.rightPort_ = 0;
-                sine_->connectPort( audioOutTerminal_, link );
+                PortData data;
+                data.leftModule_ = 1;
+                data.rightModule_ = 0;
+                data.leftPort_ = 0;
+                data.rightPort_ = 0;
+                sine_->connect( audioOutTerminal_, data );
 
                 sine_->update();
                 audioOutTerminal_->update();
             }
+
+            ScopedPointer<TestableSineOscil> sine_;
+            ScopedPointer<TestableAudioOutTerminal> audioOutTerminal_;
+            Polyphony polyphony_;
         };
 
         TEST_F( ModuleTest, ModuleInitialization )
@@ -572,14 +667,15 @@ namespace e3 {
         TEST_F( ModuleTest, Parameter_ConstructAndCopy )
         {
             Parameter p1, p2;
-            EXPECT_EQ( p1.id_, 0 );
+            EXPECT_EQ( p1.getId(), 0 );
             EXPECT_EQ( p1.defaultValue_, 1 );
 
-            p1.id_ = 177;
+            p1 = Parameter( 177, -1 );
             p1.defaultValue_ = -33;
             p2 = p1;
 
-            EXPECT_EQ( p1.id_, p2.id_ );
+            EXPECT_EQ( p1.getId(), p2.getId() );
+            EXPECT_EQ( p1, p2 );
             EXPECT_EQ( p1.defaultValue_, p2.defaultValue_ );
         }
 
@@ -609,6 +705,7 @@ namespace e3 {
             EXPECT_FALSE( port->getNumConnections() > 0 );
         }
 
+
         TEST_F( ModuleTest, sendThroughPorts )
         {
             connect();
@@ -621,7 +718,6 @@ namespace e3 {
         }
 
 
-
         //----------------------------------------------------------------------------------------
         // InstrumentTest
         //----------------------------------------------------------------------------------------
@@ -630,7 +726,6 @@ namespace e3 {
         {
         public:
             TestableInstrument() : Instrument() {}
-            //TestableInstrument(const Instrument& other) : Instrument(other) {}
 
             using Instrument::getModule;
             using Instrument::createUniqueId;
@@ -651,10 +746,10 @@ namespace e3 {
 
             bool testModuleIdsAreUnique( const Instrument& instrument )
             {
-                std::set<int16_t> testSet, uniqueSet;
+                std::set<int> testSet, uniqueSet;
 
                 for (int16_t i = 0; i < 5; i++) {
-                    testSet.insert( (int16_t)(floor( i / 2.0 ) * 2) );
+                    testSet.insert( (int)(floor( i / 2.0 ) * 2) );
                 }
                 EXPECT_EQ( 3, testSet.size() );  // test if set stores unique values
 
@@ -663,6 +758,14 @@ namespace e3 {
                     uniqueSet.insert( (*it)->getId() );
                 }
                 return instrument.getNumModules() == uniqueSet.size();
+            }
+
+            ModuleType getRandomAudioModuleType()
+            {
+                ModuleType types[] = { ModuleTypeSineOscillator, ModuleTypeAdsrEnvelope, ModuleTypeDelay };
+                int r = rand() % ARRAY_SIZE( types ) ;
+                ModuleType type( static_cast<ModuleType>(types[r]) );
+                return type;
             }
 
             TestableInstrument instrument_;
@@ -712,6 +815,103 @@ namespace e3 {
         TEST_F( InstrumentTest, hasAudioOutTerminal )
         {
             EXPECT_TRUE( instrument_.hasAudioOutTerminal() );
+        }
+
+
+        TEST_F( InstrumentTest, addAndRemoveLink )
+        {
+            const Preset& preset = instrument_.getPreset();
+            ParameterSet& parameters = preset.getLinkParameters();
+            LinkSet& links = instrument_.getLinks();
+
+            for (size_t i = 0; i < 100; i++) {
+                Link link( -1, i, i, i, i );
+                instrument_.addLink( link );
+                EXPECT_EQ( i+1, links.size() );
+                EXPECT_EQ( i+1, parameters.size() );
+            }
+
+            size_t size = parameters.size();
+            srand( static_cast<unsigned int>(time( nullptr )) );
+            for (size_t i = 0; i < 100; i++)
+            {
+                int r = rand() % 100;
+                try {
+                    const Link& link = links.get( r );
+                    instrument_.removeLink( link );
+                    EXPECT_EQ( --size, parameters.size() );
+                }
+                catch (...) {}
+            }
+        }
+
+        TEST_F( InstrumentTest, sendOverPortsManySources )
+        {
+            instrument_.deleteModules();
+            Polyphony polyphony;
+
+            Module* audioOut = instrument_.createAndAddModule( ModuleTypeAudioOutTerminal );
+
+            for (int i = 0; i < 100; i++)
+            {
+                ModuleType type = getRandomAudioModuleType();
+                Module* module = instrument_.createAndAddModule( type );
+            }
+            instrument_.initModules( 44100, 1, &polyphony );
+
+            for (int i = 1; i < 101; i++) {
+                Link link( -1, i, 0, audioOut->getId(), 0 );
+                instrument_.addLink( link );
+            }
+            instrument_.connectModules();
+
+            for (int i = 1; i < instrument_.getNumModules(); i++)
+            {
+                Module* module = instrument_.getModule( i );
+                ASSERT_NE( nullptr, module );
+                Outport* outport = module->getOutport( 0 );
+                outport->putAudio( 1 );
+            }
+            Inport* inport = audioOut->getInport( 0 );
+            double value   = *inport->getAudioBuffer();
+            EXPECT_EQ( 100, value );
+        }
+
+        TEST_F( InstrumentTest, sendOverPortsManyTargets )
+        {
+            instrument_.deleteModules();
+            Polyphony polyphony;
+
+            Module* sine = instrument_.createAndAddModule( ModuleTypeSineOscillator );
+
+            // create 100 AdsrEnvelopes
+            for (int i = 0; i < 100; i++)  {
+                Module* module = instrument_.createAndAddModule( ModuleTypeAdsrEnvelope );
+            }
+            instrument_.initModules( 44100, 1, &polyphony );
+
+            // create 100 links from sine to the AdsrEnvelopes
+            for (int i = 2; i < 102; i++)  {
+                Link link( -1, sine->getId(), 0, i, 0 );
+                instrument_.addLink( link );
+            }
+            instrument_.connectModules();
+
+            // send some signals through the connections
+            Outport* sineOutport = sine->getOutport( 0 );
+            for (int i = 0; i < 1173; i++) {
+                sineOutport->putAudio( 1 );
+            }
+
+            // check the signals
+            for (int i = 2; i < instrument_.getNumModules(); i++)
+            {
+                Module* module = instrument_.getModule( i );
+                ASSERT_NE( nullptr, module );
+                Inport* inport = module->getInport( 0 );
+                double value   = *inport->getAudioBuffer();
+                EXPECT_EQ( 1173, value );
+            }
         }
 
 
@@ -847,14 +1047,15 @@ namespace e3 {
                 EXPECT_EQ( ModuleTypeSineOscillator, sine->moduleType_ );
                 EXPECT_EQ( ModuleTypeAdsrEnvelope, adsr->moduleType_ );
 
-                const LinkList& links = instrument->getLinks();
+                const LinkSet& links = instrument->getLinks();
+                const Link& link = links.get( 0 );
                 ASSERT_EQ( links.size(), 4 );
-                EXPECT_EQ( links[0].leftModule_, 3 );
-                EXPECT_EQ( links[0].rightModule_, 0 );
-                EXPECT_EQ( links[0].leftPort_, 0 );
-                EXPECT_EQ( links[0].rightPort_, 0 );
+                EXPECT_EQ( link.leftModule_, 3 );
+                EXPECT_EQ( link.rightModule_, 0 );
+                EXPECT_EQ( link.leftPort_, 0 );
+                EXPECT_EQ( link.rightPort_, 0 );
 
-                Module* m = instrument->getModule( links[0].leftModule_ );
+                Module* m = instrument->getModule( link.leftModule_ );
                 EXPECT_NE( nullptr, m );
                 EXPECT_EQ( adsr, m );
                 EXPECT_EQ( 3, m->getId() );

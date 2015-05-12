@@ -65,6 +65,7 @@ namespace e3
         void labelTextChanged( Label *labelThatHasChanged ) override;
 
     protected:
+        void addParameters( ParameterSet& parameters, Module* module, Rectangle<int>& r );
         void removeAllParameters();
 
         ParameterPanel* owner_;

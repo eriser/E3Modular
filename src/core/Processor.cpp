@@ -162,7 +162,7 @@ namespace e3 {
     void Processor::initInstrument()
     {
         instrument_->initModules( getSampleRate(), instrument_->numVoices_, polyphony_ );
-        instrument_->initParameters();
+        instrument_->loadPreset();
         instrument_->connectModules();
         instrument_->updateModules();
 
@@ -170,22 +170,21 @@ namespace e3 {
     }
 
 
-    Link* Processor::addLink( const Link& link )
+    bool Processor::addLink( Link& link )
     {
-        Link* result = nullptr;
         suspend();
         try {
-            result = instrument_->addLink( link );
+            instrument_->addLink( link );
             bank_->saveInstrumentLinks( instrument_ );
             resetAndInitInstrument();
         }
         catch (const std::exception& e) {
             TRACE( e.what() );
             setState( ProcessorCrashed );
-            return nullptr;
+            return false;
         }
         resume();
-        return result;
+        return true;
     }
 
 
