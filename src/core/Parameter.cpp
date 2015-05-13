@@ -32,7 +32,7 @@ namespace e3 {
 
             return *result.first;
         }
-        THROW( std::runtime_error, "Parameter is not valid and can not be inserted." );
+        THROW( Assertion, "Parameter is not valid and can not be inserted." );
     }
 
 
@@ -42,7 +42,7 @@ namespace e3 {
         ControlType controlType,
         double defaultValue)
     {
-        Parameter p( id, moduleId, Parameter::TargetTypeLink, controlType );
+        Parameter p( id, moduleId, Parameter::TargetTypeModule, controlType );
         p.label_ = label;
         p.defaultValue_ = defaultValue;
 

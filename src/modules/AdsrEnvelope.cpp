@@ -25,22 +25,22 @@ namespace e3 {
         static ParameterSet set;
         set.clear();
 
-        Parameter paramAttack = set.addModuleParameter( ParamAttack, id_, "Attack", ControlSlider, 0.1 );
+        const Parameter& paramAttack = set.addModuleParameter( ParamAttack, id_, "Attack", ControlSlider, 0.1 );
         paramAttack.valueShaper_ ={ 0, 1.2, 96, 6 };
         paramAttack.unit_ = "sec";
         paramAttack.numberFormat_ = NumberFloat;
 
-        Parameter paramDecay = set.addModuleParameter( ParamDecay, id_, "Decay", ControlSlider );
+        const Parameter& paramDecay = set.addModuleParameter( ParamDecay, id_, "Decay", ControlSlider );
         paramDecay.valueShaper_ ={ 0, 1, 100, 6 };
         paramDecay.unit_ = "sec";
         paramDecay.numberFormat_ = NumberFloat;
 
-        Parameter paramSustain = set.addModuleParameter( ParamSustain, id_, "Sustain", ControlSlider, 0.75 );
+        const Parameter& paramSustain = set.addModuleParameter( ParamSustain, id_, "Sustain", ControlSlider, 0.75 );
         paramSustain.valueShaper_ ={ 0, 1, 100, 6 };
         paramSustain.unit_ = "db";
         paramSustain.numberFormat_ = NumberDecibel;
 
-        Parameter paramRelease = set.addModuleParameter( ParamRelease, id_, "Release", ControlSlider );
+        const Parameter& paramRelease = set.addModuleParameter( ParamRelease, id_, "Release", ControlSlider );
         paramRelease.valueShaper_ ={ 0, 1, 100, 6 };
         paramRelease.unit_ = "sec";
         paramRelease.numberFormat_ = NumberFloat;

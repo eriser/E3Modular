@@ -134,10 +134,50 @@ namespace e3 {
 
         TEST( ParameterTest, eqOperator )
         {
-            Parameter p1( 17, 18, "test1", ControlSlider );
-            Parameter p2( 17, 18, "test2", ControlBiSlider );
-            EXPECT_EQ( p1, p2 );
+            ParameterSet set;
+            Parameter p1 = set.addModuleParameter( 17, 18, "test1", ControlSlider );
+            EXPECT_THROW(Parameter p2 = set.addModuleParameter( 17, 18, "test2", ControlBiSlider ), e3::Assertion);
+            Parameter p3 = set.addModuleParameter( 16, 18, "test3", ControlSlider );
+            Parameter p4 = set.addLinkParameter( 15, 18 );
+
+            EXPECT_NE( p1, p3 );
+            EXPECT_NE( p1, p4 );
         }
+
+        TEST( ParameterTest, ltOperator )
+        {
+            ParameterSet set;
+            Parameter p1 = set.addLinkParameter( 1, 1 );
+            Parameter p2 = set.addLinkParameter( 2, 1 );
+            Parameter p3 = set.addLinkParameter( 1, 2 );
+            Parameter p4 = set.addLinkParameter( 2, 2 );
+
+            EXPECT_LT( p1, p2 );
+            EXPECT_LT( p1, p3 );
+            EXPECT_LT( p1, p4 );
+        }
+
+        TEST( ParameterTest, isValid )
+        {
+            ParameterSet set;
+            Parameter p1 = set.addModuleParameter( 17, 18, "test1", ControlSlider );
+            Parameter p2 = set.addLinkParameter( 18, 18 );
+
+            EXPECT_EQ( 2, set.size() );
+            EXPECT_TRUE( p1.isValid() );
+            EXPECT_TRUE( p2.isValid() );
+        }
+
+        TEST( ParameterTest, targetType )
+        {
+            ParameterSet set;
+            Parameter p1 = set.addModuleParameter( 17, 18, "test1", ControlSlider );
+            Parameter p2 = set.addLinkParameter( 18, 18 );
+
+            EXPECT_TRUE( p1.isModuleType() );
+            EXPECT_TRUE( p2.isLinkType() );
+        }
+
 
         //-----------------------------------------------------------------------------
         // ParameterSetTest
@@ -148,13 +188,14 @@ namespace e3 {
         public:
             ParameterSetTest() 
             {
-                Parameter arr[] = { 
-                    Parameter( 0, 2 ), Parameter( 1, 2 ),  Parameter( 2, 2 ),
-                    Parameter( 0, 1 ), Parameter( 1, 1 ),  Parameter( 2, 1 ),
-                    Parameter( 0, 0 ), Parameter( 1, 0 ),  Parameter( 2, 0 )
+                std::pair<int, int> arr[] = { 
+                    { 0, 2 }, { 1, 2 }, { 2, 2 },
+                    { 0, 1 }, { 1, 1 }, { 2, 1 },
+                    { 0, 0 }, { 1, 0 }, { 2, 0 }
                 };
-                for (int i = 0; i < ARRAY_SIZE( arr ); i++) {
-                    auto result = set_.insert( arr[i] );
+                for (int i = 0; i < ARRAY_SIZE( arr ); i++) 
+                {
+                    set_.addLinkParameter( arr[i].first, arr[i].second );
                 }
             }
             ParameterSet set_;
@@ -174,13 +215,13 @@ namespace e3 {
         TEST_F( ParameterSetTest, add )
         {
             Parameter p1( 0, 3 );
-            EXPECT_NO_THROW( set_.add( Parameter( 0, 3 ) ) );
-            EXPECT_NO_THROW( set_.add( Parameter( 17, 138 ) ) );
+            EXPECT_NO_THROW( set_.addLinkParameter( 0, 3 ) );
+            EXPECT_NO_THROW( set_.addLinkParameter( 17, 138 ) );
 
-            EXPECT_THROW( set_.add( Parameter( 0, 3 ) ), Assertion );
-            EXPECT_THROW( set_.add( Parameter( 0, -1 ) ), Assertion );
-            EXPECT_THROW( set_.add( Parameter( -1, -1 ) ), Assertion );
-            EXPECT_THROW( set_.add( Parameter( -1, 0 ) ), Assertion );
+            EXPECT_THROW( set_.addLinkParameter( 0, 3 ), Assertion );
+            EXPECT_THROW( set_.addLinkParameter( 0, -1 ), Assertion );
+            EXPECT_THROW( set_.addLinkParameter( -1, -1 ), Assertion );
+            EXPECT_THROW( set_.addLinkParameter( -1, 0 ), Assertion );
         }
 
 
@@ -667,7 +708,7 @@ namespace e3 {
         TEST_F( ModuleTest, Parameter_ConstructAndCopy )
         {
             Parameter p1, p2;
-            EXPECT_EQ( p1.getId(), 0 );
+            EXPECT_EQ( p1.getId(), -1 );
             EXPECT_EQ( p1.defaultValue_, 1 );
 
             p1 = Parameter( 177, -1 );
@@ -820,13 +861,16 @@ namespace e3 {
 
         TEST_F( InstrumentTest, addAndRemoveLink )
         {
-            const Preset& preset = instrument_.getPreset();
+            const Preset& preset     = instrument_.getPreset();
             ParameterSet& parameters = preset.getLinkParameters();
-            LinkSet& links = instrument_.getLinks();
+            LinkSet& links           = instrument_.getLinks();
 
             for (size_t i = 0; i < 100; i++) {
                 Link link( -1, i, i, i, i );
-                instrument_.addLink( link );
+                try {
+                    instrument_.addLink( link );
+                }
+                catch (const Assertion&) {}
                 EXPECT_EQ( i+1, links.size() );
                 EXPECT_EQ( i+1, parameters.size() );
             }

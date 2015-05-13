@@ -58,7 +58,7 @@ namespace e3 {
     class PortData : public Link, public Parameter
     {
     public:
-        //PortData() {}
+        PortData() {}
         PortData( const Link& link, const Parameter& parameter ) : Link( link ), Parameter( parameter ) {}
     };
 

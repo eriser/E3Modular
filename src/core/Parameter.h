@@ -30,19 +30,20 @@ namespace e3 {
         };
 
     public:
+        Parameter() {}
         Parameter( int id, int moduleId, 
                    TargetType targetType=TargetTypeUndefined, 
                    ControlType controlType=ControlHidden );
 
         bool operator==(const Parameter& other) const
         {
-            return other.id_ == id_ && other.moduleId_ == moduleId_;
+            return other.id_ == id_ && other.moduleId_ == moduleId_ && other.targetType_ == targetType_;
         }
         bool operator==(const Parameter* other) const   { return operator==(*other); }
         bool operator!=(const Parameter& other) const   { return !(*this == other); }
         bool operator!=(const Parameter* other) const   { return !(this == other); }
 
-        bool operator<(const Parameter& other) const
+        bool operator<(const Parameter& other) const        // sort: 1. moduleId_, 2. id_
         {
             if (other.moduleId_ == moduleId_) return id_ < other.id_;
             return moduleId_ < other.moduleId_;

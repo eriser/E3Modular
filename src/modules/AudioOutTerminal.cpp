@@ -21,7 +21,7 @@ namespace e3 {
         static ParameterSet set;
         set.clear();
 
-        Parameter paramVolume = set.addModuleParameter( ParamVolume, id_, "Volume", ControlSlider, 0.35 );
+        const Parameter& paramVolume = set.addModuleParameter( ParamVolume, id_, "Volume", ControlSlider, 0.35 );
         paramVolume.numberFormat_ = NumberDecibel;
         paramVolume.unit_ = "db";
 

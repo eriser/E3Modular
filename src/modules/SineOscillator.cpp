@@ -30,10 +30,10 @@ namespace e3 {
         static ParameterSet set;
         set.clear();
 
-        Parameter paramTune = set.addModuleParameter( ParamTuning, id_, "Tune", ControlBiSlider, 0 );
+        const Parameter& paramTune = set.addModuleParameter( ParamTuning, id_, "Tune", ControlBiSlider, 0 );
         paramTune.valueShaper_ = { -48, 48, 96 };
 
-        Parameter paramFinetune = set.addModuleParameter( ParamFinetuning, id_, "Finetune", ControlBiSlider, 0 );
+        const Parameter& paramFinetune = set.addModuleParameter( ParamFinetuning, id_, "Finetune", ControlBiSlider, 0 );
         paramFinetune.valueShaper_ = { -1, 1, 200 };
 
         return set;

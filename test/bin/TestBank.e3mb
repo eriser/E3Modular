@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <bank name="test" instrument="0">
-  <instrument name="instrument_0" id="0" category="default" comment="" voices="32">
+  <instrument name="instrument_0" id="0" preset="0" category="default" comment="" voices="32">
     <modules>
       <module id="0" label="AudioOut" type="0" poly="0"/>
       <module id="1" label="MidiInput" type="3" poly="1"/>
@@ -9,10 +9,10 @@
       <module id="3" label="ADSR" type="11" poly="1"/>
     </modules>
     <links>
-      <link left_module="3" right_module="0" left_port="0" right_port="0"/>
-      <link left_module="1" right_module="2" left_port="0" right_port="0" label="MidiPitch-&gt;Freq"/>
-      <link left_module="1" right_module="3" left_port="1" right_port="1" label="Gate"/>
-      <link left_module="2" right_module="3" left_port="0" right_port="0" label="Sine-&gt;In"/>
+      <link id="0" left_module="3" right_module="0" left_port="0" right_port="0"/>
+      <link id="1" left_module="1" right_module="2" left_port="0" right_port="0"/>
+      <link id="2" left_module="1" right_module="3" left_port="1" right_port="1"/>
+      <link id="3" left_module="2" right_module="3" left_port="0" right_port="0"/>
     </links>
     <panel>
       <module id="0" pos="628, 296" collapsed="0"/>
@@ -30,6 +30,10 @@
         <param id="3" module="2" value="0"/>
         <param id="2" module="3" value="0.66249999999999998"/>
         <param id="3" module="3" value="0.20472399999999999"/>
+        <param link="0" value="0.76000000000000001" control="1" label="ADSR-&gt;AudioOut"/>
+        <param link="1" value="1" control="1" label="MidiInput-&gt;Sine"/>
+        <param link="2" value="1" control="1" label="MidiInput-&gt;ADSR"/>
+        <param link="3" value="0.65000000000000002" control="1" label="Sine-&gt;Sine"/>
       </preset>
     </presets>
   </instrument>

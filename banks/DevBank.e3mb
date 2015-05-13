@@ -34,11 +34,11 @@
         <param module="1" id="2" value="0"/>
         <param module="2" id="2" value="0"/>
         <param module="2" id="3" value="0"/>
-        <param module="3" id="2" value="0.66249999999999998"/>
+        <param module="3" id="2" value="0"/>
         <param module="3" id="3" value="0.20472399999999999"/>
         <param module="3" id="4" value="0.59055100000000005"/>
         <param module="3" id="5" value="1"/>
-        <param module="4" id="2" value="0.57999999999999996"/>
+        <param module="4" id="2" value="-48"/>
         <param module="4" id="3" value="0"/>
         <param module="5" id="1" value="1"/>
         <param module="5" id="2" value="0.67000000000000004"/>
@@ -48,7 +48,7 @@
         <param link="5" value="1" control="1" label="MidiInput-&gt;Sine"/>
         <param link="4" value="1" control="1" label="Sine-&gt;ADSR"/>
         <param link="0" value="0.76000000000000001" control="1" label="ADSR-&gt;AudioOut"/>
-        <param link="2" value="0.52000000000000002" control="1" label="Sine-&gt;Sine"/>
+        <param link="2" value="0.65000000000000002" control="1" label="Sine-&gt;Sine"/>
       </preset>
     </presets>
   </instrument>
