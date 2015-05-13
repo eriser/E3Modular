@@ -23,20 +23,17 @@ namespace e3 {
         static ParameterSet set;
         set.clear();
 
-        Parameter paramTime( ParamDelaytime, id_, "Time", ControlSlider, 0.5 );
+        Parameter paramTime = set.addModuleParameter( ParamDelaytime, id_, "Time", ControlSlider, 0.5 );
         paramTime.unit_ = "sec";
         paramTime.numberFormat_ = NumberFloat;
-        set.add( paramTime );
 
-        Parameter paramRepeats( ParamFeedback, id_, "Repeats", ControlSlider, 0.5 );
+        Parameter paramRepeats = set.addModuleParameter( ParamFeedback, id_, "Repeats", ControlSlider, 0.5 );
         paramRepeats.unit_ = "sec";
         paramRepeats.numberFormat_ = NumberFloat;
-        set.add( paramRepeats );
 
-        Parameter paramGain( ParamGain, id_, "Gain", ControlSlider, 0.5 );
+        Parameter paramGain = set.addModuleParameter( ParamGain, id_, "Gain", ControlSlider, 0.5 );
         paramGain.unit_ = "db";
         paramGain.numberFormat_ = NumberDecibel;
-        set.add( paramGain );
 
         return set;
     }

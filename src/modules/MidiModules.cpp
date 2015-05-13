@@ -76,19 +76,16 @@ namespace e3 {
         static ParameterSet set;
         set.clear();
 
-        Parameter paramBend( ParamBendRange, id_, "BendRange", ControlBiSlider, 2 );
+        Parameter paramBend = set.addModuleParameter( ParamBendRange, id_, "BendRange", ControlBiSlider, 2 );
         paramBend.valueShaper_ ={ -48, 48, 96 };
-        set.add( paramBend );
 
-        Parameter paramTime( ParamGlideTime, id_, "Portamento Time", ControlSlider, 0 );
+        Parameter paramTime = set.addModuleParameter( ParamGlideTime, id_, "Portamento Time", ControlSlider, 0 );
         paramTime.valueShaper_ ={ 0, 2000 };
         paramTime.unit_ = "msec";
         paramTime.numberFormat_ = NumberFloat;
-        set.add( paramTime );
 
-        Parameter paramAuto( ParamGlideAuto, id_, "Portamento Auto", ControlCheckbox, 0 );
+        Parameter paramAuto = set.addModuleParameter( ParamGlideAuto, id_, "Portamento Auto", ControlCheckbox, 0 );
         paramBend.valueShaper_ ={ 0, 1 };
-        set.add( paramAuto );
 
         return set;
     }

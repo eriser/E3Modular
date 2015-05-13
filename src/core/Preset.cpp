@@ -9,37 +9,44 @@ namespace e3 {
     // class Preset
     //-----------------------------------------------------
 
-    void Preset::addModuleParameter( const Parameter& p ) const   
-    { 
-        p.target_ = ParameterModule;
-        moduleParameters_.insert( p ); 
-    }
+    //void Preset::addModuleParameter( const Parameter& p ) const   
+    //{ 
+    //    p.targetType_ = TargetTypeModule;
+    //    moduleParameters_.insert( p ); 
+    //}
 
 
-    void Preset::addLinkParameter( const Parameter& p ) const     
-    { 
-        p.target_ = ParameterLink;
-        linkParameters_.insert( p ); 
-    }
+    //void Preset::addLinkParameter( const Parameter& p ) const     
+    //{ 
+    //    p.targetType_ = TargetTypeLink;
+    //    linkParameters_.insert( p ); 
+    //}
 
 
-    void Preset::removeLinkParameter( int linkId, int moduleId ) const
+    //void Preset::removeLinkParameter( int linkId, int moduleId ) const
+    //{
+    //    ASSERT( linkParameters_.size() > 0 );
+    //    linkParameters_.remove( linkId, moduleId );
+    //}
+
+
+    void Preset::addParameterSet( const ParameterSet& set ) const
     {
-        ASSERT( linkParameters_.size() > 0 );
-        linkParameters_.remove( linkId, moduleId );
+        for (ParameterSet::const_iterator it = set.begin(); it != set.end(); ++it)
+        {
+            const Parameter& parameter = *it;
+            ASSERT( parameter.isValid() );
+            if (parameter.isValid()) 
+            {
+                if (parameter.isModuleType())
+                    moduleParameters_.insert( parameter );
+                else if (parameter.isLinkType())
+                    linkParameters_.insert( parameter );
+            }
+        }
+        //moduleParameters_.insert( set.begin(), set.end() ); 
     }
 
-
-    void Preset::addModuleParameterSet( const ParameterSet& set ) const
-    {
-        moduleParameters_.insert( set.begin(), set.end() ); 
-    }
-
-
-    void Preset::addLinkParameterSet( const ParameterSet& set ) const
-    { 
-        linkParameters_.insert( set.begin(), set.end() ); 
-    }
 
 
     //-----------------------------------------------------
@@ -101,10 +108,10 @@ namespace e3 {
     }
 
     
-    const Preset& PresetSet::createNewPreset(int id)
+    const Preset& PresetSet::addPreset(int id, const std::string& name)
     {
         id = (id < 0) ? createUniqueId() : id;
-        auto result = emplace( Preset(id) );
+        auto result = emplace( Preset( id, name ) );
         if (result.second) {
             return *result.first;
         }

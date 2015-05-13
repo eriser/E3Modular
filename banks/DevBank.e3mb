@@ -7,7 +7,7 @@
       <module id="1" pos="169, 249"/>
       <module id="2" pos="330, 187"/>
       <module id="3" pos="460, 251"/>
-      <module id="4" pos="334, 338"/>
+      <module id="4" pos="334, 339"/>
       <module id="5" pos="558, 104"/>
     </panel>
     <modules>
@@ -28,33 +28,36 @@
     </links>
     <presets>
       <preset name="Unnamed" id="0">
-        <param id="0" module="0" value="0.77000000000000002"/>
-        <param id="0" module="1" value="2"/>
-        <param id="1" module="1" value="0"/>
-        <param id="2" module="1" value="0"/>
-        <param id="2" module="2" value="0"/>
-        <param id="3" module="2" value="0"/>
-        <param id="2" module="3" value="0.16249999999999998"/>
-        <param id="3" module="3" value="0.20472399999999999"/>
-        <param id="4" module="3" value="0.59055100000000005"/>
-        <param id="5" module="3" value="1"/>
-        <param id="2" module="4" value="0"/>
-        <param id="3" module="4" value="0"/>
-        <param id="1" module="5" value="1"/>
-        <param id="2" module="5" value="0.67000000000000004"/>
-        <param id="3" module="5" value="0.5"/>
-        <param id="0" value="0.44" control="1" label="ADSR-&gt;AudioOut"/>
-        <param id="1" value="1" control="1" label="MidiInput-&gt;Sine"/>
-        <param id="2" value="1" control="1" label="Sine-&gt;Sine"/>
-        <param id="3" value="1" control="1" label="MidiInput-&gt;ADSR"/>
-        <param id="4" value="1" control="1" label="Sine-&gt;ADSR"/>
-        <param id="5" value="1" control="1" label="MidiInput-&gt;Sine"/>
+        <param module="0" id="0" value="0.77000000000000002"/>
+        <param module="1" id="0" value="2"/>
+        <param module="1" id="1" value="0"/>
+        <param module="1" id="2" value="0"/>
+        <param module="2" id="2" value="0"/>
+        <param module="2" id="3" value="0"/>
+        <param module="3" id="2" value="0.66249999999999998"/>
+        <param module="3" id="3" value="0.20472399999999999"/>
+        <param module="3" id="4" value="0.59055100000000005"/>
+        <param module="3" id="5" value="1"/>
+        <param module="4" id="2" value="0.57999999999999996"/>
+        <param module="4" id="3" value="0"/>
+        <param module="5" id="1" value="1"/>
+        <param module="5" id="2" value="0.67000000000000004"/>
+        <param module="5" id="3" value="0.5"/>
+        <param link="1" value="1" control="1" label="MidiInput-&gt;Sine"/>
+        <param link="3" value="1" control="1" label="MidiInput-&gt;ADSR"/>
+        <param link="5" value="1" control="1" label="MidiInput-&gt;Sine"/>
+        <param link="4" value="1" control="1" label="Sine-&gt;ADSR"/>
+        <param link="0" value="0.76000000000000001" control="1" label="ADSR-&gt;AudioOut"/>
+        <param link="2" value="0.52000000000000002" control="1" label="Sine-&gt;Sine"/>
       </preset>
     </presets>
   </instrument>
-  <instrument name="instrument_1" id="1" category="default" comment="klingt gut" voices="1">
+  <instrument id="1" name="instrument_1" preset="0" category="default" comment="klingt gut" voices="1">
     <modules/>
     <links/>
+    <presets>
+      <preset name="Default Preset" id="0"/>
+    </presets>
   </instrument>
   <instrument name="instrument_2" id="2" category="default" comment="klingt noch besser" voices="1"/>
   <instrument name="instrument_3" id="3" category="default" comment="klingt vielleicht am besten" voices="1"/>

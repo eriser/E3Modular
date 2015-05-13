@@ -26,6 +26,7 @@ namespace e3 {
 
     void ModulePanel::createModules( Processor* processor, XmlElement* instrumentXml )
     {
+        selection_->deselectAll();
         removeAllChildren();
         modules_.clear();
         wires_->deleteAll();

@@ -190,7 +190,7 @@ namespace e3 {
 
     bool Outport::setParameter( const Parameter& parameter )
     {
-        ASSERT( parameter.target_ == ParameterLink );
+        ASSERT( parameter.isValid() && parameter.isLinkType() );
 
         for (size_t i = 0; i < audioData_.size(); i++)
         {

@@ -52,8 +52,8 @@ namespace e3 {
                 Instrument* instrument = new Instrument();  // processor will be owner of the instrument and delete it
                 readInstrumentAttributes( e, instrument );
                 readInstrumentModules( e, instrument );
-                readInstrumentPresets( e, instrument );
                 readInstrumentLinks( e, instrument );
+                readInstrumentPresets( e, instrument );
                 return instrument;
             }
             catch (const std::exception& e) {               // parse error, skip instrument
@@ -172,7 +172,7 @@ namespace e3 {
             link.leftPort_    = e->getIntAttribute( "left_port" );
             link.rightPort_   = e->getIntAttribute( "right_port" );
 
-            instrument->addLink( link );
+            instrument->addLink( link, false );
         }
     }
 
@@ -183,44 +183,50 @@ namespace e3 {
 
         forEachXmlChildElementWithTagName( *presetsXml, presetXml, "preset" )
         {
-            int id = presetXml->getIntAttribute( "id" );
-            const Preset& preset = instrument->createNewPreset(id);
-            preset.setName( presetXml->getStringAttribute( "name" ).toStdString() );
+            int id                         = presetXml->getIntAttribute( "id" );
+            std::string name               = presetXml->getStringAttribute( "name" ).toStdString();
+            const Preset& preset           = instrument->addPreset( id, name );
+            ParameterSet& moduleParameters = preset.getModuleParameters();
+            ParameterSet& linkParameters   = preset.getLinkParameters();
 
             forEachXmlChildElementWithTagName( *presetXml, paramXml, "param" )
             {
                 int paramId  = paramXml->getIntAttribute( "id", -1 );
                 int moduleId = paramXml->getIntAttribute( "module", -1 );
-                bool isModuleParameter = (moduleId >= 0);
+                int linkId   = paramXml->getIntAttribute( "link", -1 );
 
-                if (isModuleParameter) 
+                if (moduleId >= 0 )
                 {
                     Module* module = instrument->getModule( moduleId );
                     ASSERT( module );
-                    if (module) {
+                    if (module) 
+                    {
                         const Parameter& param = module->getDefaultParameter( paramId );
-                        readParameter( paramXml, const_cast< Parameter& >(param) );
-                        preset.addModuleParameter( param );
+                        readParameter( paramXml, param );
+                        moduleParameters.add( param );
                     }
                 }
-                else {
-                    Parameter param( paramId, moduleId );
-                    readParameter( paramXml, const_cast< Parameter& >(param) );
-                    preset.addLinkParameter( param );
+                else if (linkId >= 0) 
+                {
+                    const LinkSet& links   = instrument->getLinks();
+                    const Link& link       = links.get( linkId );
+                    moduleId               = link.leftModule_;
+                    const Parameter& param = linkParameters.addLinkParameter( linkId, moduleId );
+                    
+                    readParameter( paramXml, param );
                 }
             }
         }
     }
 
 
-    void BankSerializer::readParameter( XmlElement* e, Parameter& p )
+    void BankSerializer::readParameter( XmlElement* e, const Parameter& p )
     {
         p.value_        = e->getDoubleAttribute( "value", p.value_ );
         p.defaultValue_ = e->getDoubleAttribute( "default", p.defaultValue_ );
         p.veloSens_     = e->getDoubleAttribute( "vsens", p.veloSens_ );
         p.keyTrack_     = e->getDoubleAttribute( "ktrack", p.keyTrack_ );
         p.resolution_   = e->getDoubleAttribute( "res", p.resolution_ );
-        p.controlType_  = (ControlType)e->getIntAttribute( "control", p.controlType_ );
         p.label_        = e->getStringAttribute( "label", p.label_ ).toStdString();
         p.unit_         = e->getStringAttribute( "unit", p.unit_ ).toStdString();
         p.numberFormat_ = (NumberFormat)e->getIntAttribute( "fmt", p.numberFormat_ );
@@ -330,8 +336,8 @@ namespace e3 {
             if (module != nullptr)
             {
                 XmlElement* p = e->createNewChildElement( "param" );
-                p->setAttribute( "id", param.getId() );
                 p->setAttribute( "module", param.getModuleId() );
+                p->setAttribute( "id", param.getId() );
 
                 const Parameter& defaultParam = module->getDefaultParameter( param.getId() );
                 writeParameter( p, param, defaultParam );
@@ -344,7 +350,7 @@ namespace e3 {
             const Parameter& param = *it;
 
             XmlElement* p = e->createNewChildElement( "param" );
-            p->setAttribute( "id", param.getId() );
+            p->setAttribute( "link", param.getId() );
 
             Parameter defaultParam( param.getId(), param.getModuleId() );
             writeParameter( p, param, defaultParam );

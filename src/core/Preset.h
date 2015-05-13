@@ -2,6 +2,7 @@
 #pragma once
 
 #include <set>
+#include <string>
 #include "core/Parameter.h"
 
 
@@ -16,14 +17,16 @@ namespace e3 {
         friend class PresetSet;
 
     public:
-        Preset( int id=-1 ) : id_( id ) {}
+        Preset( int id=-1, const std::string& name="" ) :
+            id_( id ),
+            name_( name )
+        {}
 
-        void addModuleParameter( const Parameter& p ) const;
-        void addLinkParameter( const Parameter& p ) const;
-        void removeLinkParameter( int linkId, int moduleId ) const;
+        //void addModuleParameter( const Parameter& p ) const;
+        //void addLinkParameter( const Parameter& p ) const;
+        //void removeLinkParameter( int linkId, int moduleId ) const;
 
-        void addModuleParameterSet( const ParameterSet& set ) const;
-        void addLinkParameterSet( const ParameterSet& set ) const;
+        void addParameterSet( const ParameterSet& set ) const;
 
         ParameterSet& getModuleParameters() const             { return moduleParameters_; }
         ParameterSet& getLinkParameters() const               { return linkParameters_; }
@@ -53,7 +56,7 @@ namespace e3 {
     public:
         const Preset& get( int id );
         void remove( int id );
-        const Preset& createNewPreset(int id = -1);
+        const Preset& addPreset(int id, const std::string& name="");
         bool contains( int id ) const;
 
     protected:

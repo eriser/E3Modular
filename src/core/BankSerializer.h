@@ -38,7 +38,7 @@ namespace e3 {
         static void readInstrumentModules( XmlElement* e, Instrument* instrument );
         static void readInstrumentLinks( XmlElement* e, Instrument* instrument );
         static void readInstrumentPresets( XmlElement* e, Instrument* instrument );
-        static void readParameter( XmlElement* e, Parameter& p );
+        static void readParameter( XmlElement* e, const Parameter& p );
 
         static void writeInstrumentAttributes( XmlElement* e, Instrument* instrument );
         static void writeInstrumentModules( XmlElement* e, Instrument* instrument );

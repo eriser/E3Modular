@@ -12,13 +12,6 @@
 
 namespace e3 {
 
-    enum ParameterTarget 
-    {
-        ParameterUndefined,
-        ParameterModule,
-        ParameterLink
-    };
-    
     //--------------------------------------------------------------------
     // class Parameter
     // Parameters control the behaviour of Modules and Links
@@ -28,12 +21,18 @@ namespace e3 {
     {
         friend class ParameterSet;
 
+    protected:
+        enum TargetType
+        {
+            TargetTypeUndefined,
+            TargetTypeModule,
+            TargetTypeLink
+        };
+
     public:
-        Parameter() {}
         Parameter( int id, int moduleId, 
-                   const std::string& label = "", 
-                   ControlType controlType = ControlHidden, 
-                   double defaultValue = 1 );
+                   TargetType targetType=TargetTypeUndefined, 
+                   ControlType controlType=ControlHidden );
 
         bool operator==(const Parameter& other) const
         {
@@ -49,16 +48,19 @@ namespace e3 {
             return moduleId_ < other.moduleId_;
         }
 
-        int getId() const                { return id_; }
-        int getModuleId() const          { return moduleId_; }
+        int getId() const           { return id_; }
+        int getModuleId() const     { return moduleId_; }
+
+        bool isModuleType() const   { return targetType_ == TargetTypeModule; }
+        bool isLinkType()   const   { return targetType_ == TargetTypeLink; }
 
     protected:
-        int id_       = 0;
+        int id_       = -1;
         int moduleId_ = -1;
 
     public:
+        TargetType targetType_             = TargetTypeUndefined;
         ControlType controlType_           = ControlHidden;
-        mutable ParameterTarget target_    = ParameterUndefined;
         mutable NumberFormat numberFormat_ = NumberFloat;
         mutable double defaultValue_       = 1;
         mutable double value_              = defaultValue_;
@@ -71,7 +73,7 @@ namespace e3 {
         mutable ParameterShaper valueShaper_;
         mutable MidiParameterShaper midiShaper_;
 
-        bool isValid() const            { return id_ > -1 && moduleId_ > -1; }
+        bool isValid() const            { return id_ > -1 && moduleId_ > -1 && targetType_ != TargetTypeUndefined; }
         
         double getMin() const           { return valueShaper_.getMin(); }
         double getMax() const           { return valueShaper_.getMax(); }
@@ -89,8 +91,15 @@ namespace e3 {
     class ParameterSet : public std::set < Parameter >
     {
     public:
-        void add(const Parameter& p);
-        const Parameter& get( int parameterId, int moduleId );
+        const Parameter& add( const Parameter& parameter );
+        const Parameter& addModuleParameter(
+            int id, int moduleId,
+            const std::string& label,
+            ControlType controlType,
+            double defaultValue=1);
+        const Parameter& addLinkParameter( int id, int moduleId );
+
+        const Parameter& get( int id, int moduleId );
         void removeAllByModule( int moduleId );
         void remove( int id, int moduleId );
 

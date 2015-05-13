@@ -10,16 +10,11 @@ namespace e3 {
     // class Parameter
     //----------------------------------------------------------------
 
-    Parameter::Parameter( int id, int moduleId, 
-                          const std::string& label, 
-                          ControlType controlType, 
-                          double defaultValue ) :
+    Parameter::Parameter( int id, int moduleId, TargetType targetType, ControlType controlType ) :
         id_( id ),
         moduleId_( moduleId ),
-        value_( defaultValue ),
-        defaultValue_( defaultValue ),
-        controlType_( controlType ),
-        label_( label )
+        targetType_( targetType ),
+        controlType_( controlType )
     {}
 
 
@@ -28,29 +23,50 @@ namespace e3 {
     // class ParameterSet
     //------------------------------------------------------
 
-    void ParameterSet::add( const Parameter& p )
+    const Parameter& ParameterSet::add( const Parameter& parameter )
     {
-        bool valid = p.isValid();
-        ASSERT( valid );
-        if (valid) 
+        if (parameter.isValid()) 
         {
-            auto result = insert( p );
+            auto result = insert( parameter );
             ASSERT( result.second );
+
+            return *result.first;
         }
+        THROW( std::runtime_error, "Parameter is not valid and can not be inserted." );
     }
 
 
-    const Parameter& ParameterSet::get( int parameterId, int moduleId )
+    const Parameter& ParameterSet::addModuleParameter(
+        int id, int moduleId,
+        const std::string& label,
+        ControlType controlType,
+        double defaultValue)
     {
-        
+        Parameter p( id, moduleId, Parameter::TargetTypeLink, controlType );
+        p.label_ = label;
+        p.defaultValue_ = defaultValue;
+
+        return add( p );
+    }
+
+
+    const Parameter& ParameterSet::addLinkParameter( int id, int moduleId )
+    {
+        Parameter p( id, moduleId, Parameter::TargetTypeLink, ControlSlider );
+        return add( p );
+    }
+
+
+    const Parameter& ParameterSet::get( int id, int moduleId )
+    {
         for (iterator it = begin(); it != end(); ++it)
         {
             const Parameter& parameter = *it;
-            if (parameter.id_ == parameterId && parameter.moduleId_ == moduleId) {
+            if (parameter.id_ == id && parameter.moduleId_ == moduleId) {
                 return parameter;
             }
         }
-        THROW( std::out_of_range, "No Parameter found with id=%d and moduleId=%d", parameterId, moduleId );
+        THROW( std::out_of_range, "No Parameter found with id=%d and moduleId=%d", id, moduleId );
     }
 
 

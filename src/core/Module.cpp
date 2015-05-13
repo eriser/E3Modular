@@ -184,10 +184,10 @@ namespace e3 {
 
     void Module::setParameter( const Parameter& parameter )
     {
-        if (parameter.target_ == ParameterModule) {
+        if (parameter.isModuleType()) {
             setParameter( parameter.getId(), parameter.value_ );
         }
-        else if (parameter.target_ == ParameterLink)
+        else if (parameter.isLinkType())
         {
             for (OutportList::const_iterator it = outports_.begin(); it != outports_.end(); ++it)
             {

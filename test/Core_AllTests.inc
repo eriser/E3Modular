@@ -499,7 +499,7 @@ namespace e3 {
             PresetSetTest()
             {
                 for (int i = 0; i <= 3; i++) {
-                    set_.createNewPreset();
+                    set_.addPreset( i );
                 }
             }
             TestablePresetSet set_;

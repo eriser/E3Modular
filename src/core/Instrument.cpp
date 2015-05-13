@@ -84,24 +84,28 @@ namespace e3 {
     {
         if (presetSet_.empty()) {
             createDefaultPreset();
+            presetId_ = 0;
         }
-
-        bool contains = presetSet_.contains( presetId_ );
-        presetId_ = contains ? presetId_ : 0;
-
         return presetSet_.get( presetId_ );
     }
 
 
+    const Preset& Instrument::addPreset( int id, const std::string& name )   
+    { 
+        return presetSet_.addPreset( id, name ); 
+    }
+
+
+
     void Instrument::createDefaultPreset()
     {
-        const Preset& preset = presetSet_.createNewPreset();
+        const Preset& preset = presetSet_.addPreset(0, "Default Preset");
 
         for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
             Module* m = *it;
             const ParameterSet& parameters = m->getDefaultParameters();
-            preset.addModuleParameterSet( parameters );
+            preset.addParameterSet( parameters );
         }
     }
 
@@ -202,16 +206,15 @@ namespace e3 {
         links_.add( link );
 
         if (addParameter) {
-            std::string label = createParameterLabel( link );
-            Parameter parameter( link.getId(), link.leftModule_, label, ControlSlider );
-            getPreset().addLinkParameter( parameter );
+            const Parameter& p = getPreset().getLinkParameters().addLinkParameter( link.getId(), link.leftModule_ );
+            p.label_ = createParameterLabel( link );
         }
     }
 
 
     void Instrument::removeLink( const Link& link )
     {
-        getPreset().removeLinkParameter( link.getId(), link.leftModule_ );
+        getPreset().getLinkParameters().remove( link.getId(), link.leftModule_ );
         links_.remove( link );
     }
 

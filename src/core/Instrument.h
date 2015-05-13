@@ -29,7 +29,7 @@ namespace e3 {
         void loadPreset();
         const PresetSet& getPresets() const                      { return presetSet_; }
         const Preset& getPreset();
-        const Preset& Instrument::createNewPreset(int id = -1)   { return presetSet_.createNewPreset( id ); }
+        const Preset& addPreset( int id, const std::string& name="" );
 
         Module* getModule( int moduleId ) const;
         const ModuleList& getModules() const    { return modules_; }
