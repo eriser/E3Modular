@@ -51,8 +51,6 @@ namespace e3 {
         void setRetrigger( bool retrigger )        { retrigger_    = retrigger; }
         void setLegato( bool legato )              { legato_       = legato; }
 
-        bool checkSentinel( Module* module );
-
         int id_           = -1;
         int presetId_     = 0;
         int numVoices_    = 1;

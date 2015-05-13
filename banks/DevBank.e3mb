@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <bank name="test" instrument="0">
-  <instrument id="0" name="wonne und freude" preset="0" category="Einfach" comment="traumhaft" voices="50">
+  <instrument id="0" name="wonne und freude" preset="0" category="Einfach" comment="traumhaft" voices="50" unison="3" spread="5">
     <panel>
       <module id="0" pos="621, 249"/>
-      <module id="1" pos="169, 249"/>
+      <module id="1" pos="171, 249"/>
       <module id="2" pos="330, 187"/>
-      <module id="3" pos="460, 251"/>
+      <module id="3" pos="462, 250"/>
       <module id="4" pos="334, 339"/>
       <module id="5" pos="558, 104"/>
     </panel>
@@ -30,15 +30,15 @@
       <preset name="Unnamed" id="0">
         <param module="0" id="0" value="0.77000000000000002"/>
         <param module="1" id="0" value="2"/>
-        <param module="1" id="1" value="0"/>
+        <param module="1" id="1" value="300"/>
         <param module="1" id="2" value="0"/>
         <param module="2" id="2" value="0"/>
         <param module="2" id="3" value="0"/>
         <param module="3" id="2" value="0"/>
-        <param module="3" id="3" value="0.20472399999999999"/>
-        <param module="3" id="4" value="0.59055100000000005"/>
-        <param module="3" id="5" value="1"/>
-        <param module="4" id="2" value="-48"/>
+        <param module="3" id="3" value="0.70000000000000007"/>
+        <param module="3" id="4" value="0.089999999999999997"/>
+        <param module="3" id="5" value="4.6000000000000005"/>
+        <param module="4" id="2" value="20"/>
         <param module="4" id="3" value="0"/>
         <param module="5" id="1" value="1"/>
         <param module="5" id="2" value="0.67000000000000004"/>

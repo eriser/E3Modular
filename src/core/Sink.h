@@ -22,6 +22,7 @@ namespace e3 {
     protected:
         void reset();
         bool contains(Module* module);
+        bool checkOutputEnvelope( Module* module );
 
         double zero_                 = 0;
         double* audioOutPointer_    = &zero_;

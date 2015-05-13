@@ -1,5 +1,5 @@
 
-#include "core/Polyphony.h"
+#include <cmath>
 #include "modules/AdsrEnvelope.h"
 
 
@@ -26,22 +26,22 @@ namespace e3 {
         set.clear();
 
         const Parameter& paramAttack = set.addModuleParameter( ParamAttack, id_, "Attack", ControlSlider, 0.1 );
-        paramAttack.valueShaper_ ={ 0, 1.2, 96, 6 };
+        paramAttack.valueShaper_ = { 0, 10, 100, 6 };
         paramAttack.unit_ = "sec";
         paramAttack.numberFormat_ = NumberFloat;
 
         const Parameter& paramDecay = set.addModuleParameter( ParamDecay, id_, "Decay", ControlSlider );
-        paramDecay.valueShaper_ ={ 0, 1, 100, 6 };
+        paramDecay.valueShaper_ = { 0, 10, 100, 6 };
         paramDecay.unit_ = "sec";
         paramDecay.numberFormat_ = NumberFloat;
 
         const Parameter& paramSustain = set.addModuleParameter( ParamSustain, id_, "Sustain", ControlSlider, 0.75 );
-        paramSustain.valueShaper_ ={ 0, 1, 100, 6 };
+        paramSustain.valueShaper_ = { 0, 1, 100, 6 };
         paramSustain.unit_ = "db";
         paramSustain.numberFormat_ = NumberDecibel;
 
         const Parameter& paramRelease = set.addModuleParameter( ParamRelease, id_, "Release", ControlSlider );
-        paramRelease.valueShaper_ ={ 0, 1, 100, 6 };
+        paramRelease.valueShaper_ =  { 0, 20, 100, 6 };
         paramRelease.unit_ = "sec";
         paramRelease.numberFormat_ = NumberFloat;
 
@@ -53,16 +53,9 @@ namespace e3 {
     {
         Module::initData();
 
-        value_        = valueBuffer_.resize( numVoices_, 0 );
-        target_       = targetBuffer_.resize( numVoices_, 0 );
-        delta_        = deltaBuffer_.resize( numVoices_, 0 );
-        state_        = stateBuffer_.resize( numVoices_, 0 );
-        velocity_     = velocityBuffer_.resize( numVoices_, 0 );
-
-        attackRate_   = attackRateBuffer_.resize( numVoices_, 0 );
-        decayRate_    = decayRateBuffer_.resize( numVoices_, 0 );
-        sustainLevel_ = sustainLevelBuffer_.resize( numVoices_, 0 );
-        releaseRate_  = releaseRateBuffer_.resize( numVoices_, 0 );
+        value_    = valueBuffer_.resize( numVoices_, 0 );
+        state_    = stateBuffer_.resize( numVoices_, 0 );
+        velocity_ = velocityBuffer_.resize( numVoices_, 0 );
 
         audioInportPointer_ = audioInport_.getAudioBuffer();
     }
@@ -70,14 +63,11 @@ namespace e3 {
 
     void AdsrEnvelope::setSampleRate( double sampleRate )
     {
-        double oldRate = sampleRate_;
         Module::setSampleRate( sampleRate );
 
-        for (uint16_t i=0; i < numVoices_; i++) {
-            attackRate_[i]  = oldRate * attackRate_[i] / sampleRate_;
-            decayRate_[i]   = oldRate * decayRate_[i] / sampleRate_;
-            releaseRate_[i] = oldRate * releaseRate_[i] / sampleRate_;
-        }
+        calculateAttackTime();
+        calculateDecayTime();
+        calculateReleaseTime();
     }
 
 
@@ -94,155 +84,52 @@ namespace e3 {
                 value > 0 ? keyOn( velo, voice ) : keyOff( voice );
                 break;
             }
-        case ParamAttack:  setAttackRate( value, voice ); break;
-        case ParamDecay:   setDecayRate( value, voice ); break;
-        case ParamSustain: setSustainLevel( value, voice ); break;
-        case ParamRelease: setReleaseRate( value, voice ); break;
-        }
-    }
-
-
-    void AdsrEnvelope::setAttackRate( double time, int voice )
-    {
-        double rate = calcRate( time * 0.71 );
-
-        if (voice > -1) {
-            attackRate_[voice] = rate;
-        }
-        else for (int i = 0; i < numVoices_; i++) {
-            attackRate_[i] = rate;
-
-            if (target_[i] == 2) {
-                delta_[i] = attackRate_[i];
-            }
-        }
-    }
-
-
-    void AdsrEnvelope::setDecayRate( double time, int voice )
-    {
-        double rate = calcRate( time * 0.089 );
-
-        if (voice > -1) {
-            decayRate_[voice] = rate;
-        }
-        else for (int i = 0; i < numVoices_; i++) {
-            decayRate_[i] = rate;
-        }
-    }
-
-
-    void AdsrEnvelope::setSustainLevel( double level, int voice )
-    {
-        if (voice > -1) {
-            sustainLevel_[voice] = level;
-        }
-        else for (int i=0; i < numVoices_; i++) {
-            sustainLevel_[i] = level;
-        }
-    }
-
-
-    void AdsrEnvelope::setReleaseRate( double time, int voice )
-    {
-        double rate = calcRate( time*0.106f );
-
-        if (voice > -1) {
-            releaseRate_[voice] = rate;
-        }
-        else for (int i = 0; i < numVoices_; i++) {
-            releaseRate_[i] = rate;
-
-            if (target_[i] == 0) {
-                delta_[i] = releaseRate_[i];
-            }
+        case ParamAttack:  attackTime_   = value; calculateAttackTime(); break;
+        case ParamDecay:   decayTime_    = value; calculateDecayTime(); break;
+        case ParamSustain: sustainLevel_ = value; calculateDecayTime(); break;
+        case ParamRelease: releaseTime_  = value; calculateReleaseTime(); break;
         }
     }
 
 
     void AdsrEnvelope::keyOn( double amplitude, int voice )
     {
-        value_[voice]    = 0.0f;
-        target_[voice]   = 1.f;
+        value_[voice]    = 0;
         state_[voice]    = StateAttack;
-
-        delta_[voice]    = attackRate_[voice];
         velocity_[voice] = amplitude;
     }
 
 
     void AdsrEnvelope::keyOff( int voice )
     {
-        target_[voice] = 0.0f;
-        state_[voice]  = StateRelease;
-        delta_[voice]  = releaseRate_[voice];
+        state_[voice] = (value_[voice] > 0) ? StateRelease : StateDone;
     }
 
 
-    double AdsrEnvelope::calcRate( double time )
+    void AdsrEnvelope::calculateAttackTime()
     {
-        time        = std::max<double>( 0.0001, time );
-        double rate = 1 / ((double)sampleRate_ * time * 2);
+        double numSamples = sampleRate_ * attackTime_;
 
-        return rate;
+        attackCoeff_      = exp( -log( (1.0 + attackTCO_) / attackTCO_ ) / numSamples );
+        attackOffset_     = (1.0 + attackTCO_) * (1.0 - attackCoeff_);
     }
 
 
-    void AdsrEnvelope::processAudio() throw()
+    void AdsrEnvelope::calculateDecayTime()
     {
-        int_fast32_t maxVoices = std::min<int_fast32_t>( numVoices_, polyphony_->numSounding_ );
+        double numSamples = sampleRate_ * decayTime_;
 
-        for (int_fast32_t i = 0; i < maxVoices; i++)
-        {
-            int_fast32_t v         = polyphony_->soundingVoices_[i];
-            double input           = audioInportPointer_[v];
-            audioInportPointer_[v] = 0;
-
-            value_[v] += delta_[v] * (target_[v] - value_[v]);
-
-            audioOutport_.putAudio( input * value_[v] * velocity_[v], v );
-        }
+        decayCoeff_       = exp( -log( (1.0 + decayTCO_) / decayTCO_ ) / numSamples );
+        decayOffset_      = (sustainLevel_ - decayTCO_) * (1.0 - decayCoeff_);
     }
 
 
-    void AdsrEnvelope::processControl() throw()
+    void AdsrEnvelope::calculateReleaseTime()
     {
-        int_fast32_t maxVoices = std::min<int_fast32_t>( numVoices_, polyphony_->numSounding_ );
+        double numSamples = sampleRate_ * releaseTime_;
 
-        for (int_fast32_t i = 0; i < maxVoices; i++)
-        {
-            int_fast32_t v = polyphony_->soundingVoices_[i];
-
-            __assume(state_[v] <= 4);
-            switch (state_[v])
-            {
-            case StateAttack:
-                if (value_[v] >= target_[v])
-                {
-                    delta_[v]  = decayRate_[v];
-                    target_[v] = sustainLevel_[v];
-                    state_[v]  = StateDecay;
-                }
-                break;
-            case StateDecay:
-                if (value_[v] <= sustainLevel_[v])
-                {
-                    delta_[v] = 0.f;
-                    state_[v] = StateSustain;
-                }
-                break;
-            case StateRelease:
-                if (value_[v] <= 0.0001f)
-                {
-                    state_[v] = StateDone;
-
-                    if (sentinel_) {
-                        polyphony_->endVoice( v );
-                    }
-                }
-                break;
-            }
-        }
+        releaseCoeff_     = exp( -log( (1.0 + releaseTCO_) / releaseTCO_ ) / numSamples );
+        releaseOffset_    = -releaseTCO_ * (1.0 - releaseCoeff_);
     }
 
 } // namespace e3

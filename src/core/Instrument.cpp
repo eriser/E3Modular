@@ -1,7 +1,6 @@
 
 
 #include "core/Polyphony.h"
-#include "modules/AdsrEnvelope.h"
 #include "modules/ModuleFactory.h"
 #include "core/Instrument.h"
 
@@ -251,18 +250,6 @@ namespace e3 {
         }
         ASSERT( id <= maxId );
         return id;
-    }
-
-
-    bool Instrument::checkSentinel( Module* module )
-    {
-        if (module->moduleType_ == ModuleTypeAdsrEnvelope)
-        {
-            AdsrEnvelope* adsr = dynamic_cast<AdsrEnvelope*>(module);
-            adsr->setSentinel( true );
-            return true;
-        }
-        return false;
     }
 
 

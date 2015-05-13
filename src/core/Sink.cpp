@@ -4,6 +4,7 @@
 #include "core/Module.h"
 #include "core/Instrument.h"
 #include "modules/AudioOutTerminal.h"
+#include "modules/AdsrEnvelope.h"
 #include "core/Sink.h"
 
 
@@ -30,7 +31,7 @@ namespace e3 {
         if (nullptr == audioOut)    // nothing to do
             return;
 
-        bool sentinel  = false;
+        bool hasOutputEnvelope  = false;
         Module* module = audioOut;
 
         std::queue< Module* > queue;
@@ -40,8 +41,8 @@ namespace e3 {
         {
             module = queue.front();
 
-            if (sentinel == false) {
-                sentinel = instrument->checkSentinel(module);
+            if (hasOutputEnvelope == false) {
+                hasOutputEnvelope = checkOutputEnvelope( module );
             }
 
             if (module->processingType_ & (ProcessAudio | ProcessEvent))
@@ -85,6 +86,21 @@ namespace e3 {
     {
         controlRateDivisor_ = (uint16_t)(sampleRate / INITIAL_CONTROLRATE);
     }
+
+
+    bool Sink::checkOutputEnvelope( Module* module )
+    {
+        if (module->moduleType_ == ModuleTypeAdsrEnvelope)
+        {
+            AdsrEnvelope* adsr = dynamic_cast<AdsrEnvelope*>(module);
+            adsr->makeOutputEnvelope( true );
+            return true;
+        }
+        return false;
+    }
+
+
+
 
 
 } // namespace e3
