@@ -47,23 +47,27 @@ namespace e3 {
         setColour( Label::textWhenEditingColourId, colourMap["darkText"] );
         setColour( Label::outlineWhenEditingColourId, colourMap["contentBackground2"] );
 
-        setColour( TextEditor::backgroundColourId, colourMap["textEditorBackgroundColourId"] );
-        setColour( TextEditor::textColourId, colourMap["textEditorTextColourId"] );
-        setColour( TextEditor::highlightColourId, colourMap["textEditorHighlightColourId"] );
-        setColour( TextEditorFocusedColourId, colourMap["textEditorFocusedColourId"] );
-        setColour( TextEditor::highlightedTextColourId, colourMap["textEditorHighlightedTextColourId"] );
-        setColour( TextEditor::outlineColourId, colourMap["textEditorOutlineColourId"] );
-        setColour( TextEditor::focusedOutlineColourId, colourMap["textEditorFocusedOutlineColourId"] );
-        setColour( TextEditor::shadowColourId, colourMap["textEditorShadowColourId"] );
+        setColour( TextEditor::backgroundColourId, colourMap["textEditorBackground"] );
+        setColour( TextEditor::textColourId, colourMap["textEditorText"] );
+        setColour( TextEditor::highlightColourId, colourMap["textEditorHighlight"] );
+        setColour( TextEditorFocusedColourId, colourMap["textEditorFocused"] );
+        setColour( TextEditor::highlightedTextColourId, colourMap["textEditorHighlighted"] );
+        setColour( TextEditor::outlineColourId, colourMap["textEditorOutline"] );
+        setColour( TextEditor::focusedOutlineColourId, colourMap["textEditorFocusedOutline"] );
+        setColour( TextEditor::shadowColourId, colourMap["textEditorShadow"] );
 
         setColour( TextButton::buttonColourId, colourMap["buttonOffBackground"] );
         setColour( TextButton::buttonOnColourId, colourMap["buttonOnBackground"] );
         setColour( TextButton::textColourOffId, colourMap["buttonOffText"] );
         setColour( TextButton::textColourOnId, colourMap["buttonOnText"] );
 
-        setColour( ToggleButton::textColourId, colourMap["toggleButtonTextColourId"] );
-        setColour( ToggleButtonBackgroundColourId, colourMap["toggleButtonBackgroundColourId"] );
-        setColour( ToggleButtonTickColourId, colourMap["toggleButtonTickColourId"] );
+        setColour( ToggleButton::textColourId, colourMap["toggleButtonText"] );
+        setColour( ToggleButtonBackgroundColourId, colourMap["toggleButtonBackground"] );
+        setColour( ToggleButtonTickColourId, colourMap["toggleButtonTick"] );
+
+        setColour( ComboBox::backgroundColourId, colourMap["comboBoxBackground"] );
+        setColour( ComboBox::outlineColourId, colourMap["comboBoxOutline"] );
+        setColour( ComboBox::arrowColourId, colourMap["comboBoxArrow"] );
 
         //setColour(TabbedComponent::backgroundColourId, colourMap["contentBackground2"]);
         setColour( TabbedComponent::backgroundColourId, Colours::transparentBlack );
@@ -79,15 +83,15 @@ namespace e3 {
         setColour( ListBox::outlineColourId, Colours::transparentBlack );
         setColour( ListBox::textColourId, colourMap["lightText"] );
 
-        setColour( Slider::backgroundColourId, colourMap["sliderBackgroundColourId"]);
-        setColour( Slider::thumbColourId, colourMap["sliderThumbColourId"] );
-        setColour( Slider::trackColourId, colourMap["sliderTrackColourId"] );
-        setColour( Slider::rotarySliderFillColourId, colourMap["sliderRotarySliderFillColourId"] );
-        setColour( Slider::rotarySliderOutlineColourId, colourMap["sliderRotarySliderOutlineColourId"] );
-        setColour( Slider::textBoxTextColourId, colourMap["sliderTextBoxTextColourId"] );
-        setColour( Slider::textBoxBackgroundColourId, colourMap["sliderTextBoxBackgroundColourId"] );
-        setColour( Slider::textBoxHighlightColourId, colourMap["sliderTextBoxHighlightColourId"] );
-        setColour( Slider::textBoxOutlineColourId, colourMap["sliderTextBoxOutlineColourId"] );
+        setColour( Slider::backgroundColourId, colourMap["sliderBackground"]);
+        setColour( Slider::thumbColourId, colourMap["sliderThumb"] );
+        setColour( Slider::trackColourId, colourMap["sliderTrack"] );
+        setColour( Slider::rotarySliderFillColourId, colourMap["sliderRotarySliderFill"] );
+        setColour( Slider::rotarySliderOutlineColourId, colourMap["sliderRotarySliderOutline"] );
+        setColour( Slider::textBoxTextColourId, colourMap["sliderTextBoxText"] );
+        setColour( Slider::textBoxBackgroundColourId, colourMap["sliderTextBoxBackground"] );
+        setColour( Slider::textBoxHighlightColourId, colourMap["sliderTextBoxHighlight"] );
+        setColour( Slider::textBoxOutlineColourId, colourMap["sliderTextBoxOutline"] );
 
         // custom colours
         setColour( BackgroundColourId, colourMap["background"] );

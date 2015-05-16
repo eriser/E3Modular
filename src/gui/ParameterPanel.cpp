@@ -35,6 +35,8 @@ namespace e3 {
         voicesLabel_.setText( "Voices:", dontSendNotification );
         unisonLabel_.setText( "Unison:", dontSendNotification );
         spreadLabel_.setText( "Spread:", dontSendNotification );
+        presetLabel_.setText( "Preset", dontSendNotification );
+        instrumentLabel_.setText( "Instrument", dontSendNotification );
 
         nameEditor_.setName( "name" );
         categoryEditor_.setName( "category" );
@@ -58,7 +60,8 @@ namespace e3 {
         legatoButton_.setButtonText( "Mono/Legato" );
 
         Label* labels[]          = { &nameLabel_, &categoryLabel_, &commentLabel_, 
-                                     &voicesLabel_, &unisonLabel_, &spreadLabel_ };
+                                     &voicesLabel_, &unisonLabel_, &spreadLabel_, 
+                                     &presetLabel_, &instrumentLabel_ };
         Label* editors[]         = { &nameEditor_, &categoryEditor_, &commentEditor_,
                                      &voicesEditor_, &unisonEditor_, &spreadEditor_ };
         ToggleButton* buttons[]  = { &holdButton_, &retriggerButton_, &legatoButton_ };
@@ -86,6 +89,11 @@ namespace e3 {
             buttons[i]->addListener( this );
             addAndMakeVisible( buttons[i] );
         }
+
+        addAndMakeVisible( &presetLabel_ );
+        addAndMakeVisible( &instrumentLabel_ );
+        addAndMakeVisible( &presetBox_ );
+        addAndMakeVisible( &instrumentBox_ );
     }
 
 
@@ -103,6 +111,11 @@ namespace e3 {
         commentLabel_.setBounds( l, t + 90, w, 20 );
         commentEditor_.setBounds( l, t + 110, w, 20 );
 
+        presetLabel_.setBounds( l, t + 160, w, 20 );
+        presetBox_.setBounds( l, t + 180, w, 20 );
+        instrumentLabel_.setBounds( l, t + 205, w, 20 );
+        instrumentBox_.setBounds( l, t + 225, w, 20 );
+            
         t = getHeight() - 150;
         holdButton_.setBounds(      l, t, w, 20 );
         retriggerButton_.setBounds( l, t + 30, w, 20 );
@@ -283,6 +296,12 @@ namespace e3 {
             break;
         }
         case ControlCheckbox:
+            button_.setToggleState( parameter_->value_ > 0, dontSendNotification );
+            //button_.setButtonText( parameter->label_ );
+            label_.setBounds( 140, 0, 80, 20 );
+            button_.setBounds( 110, 0, 20, 20 );
+            button_.addListener( this );
+            addAndMakeVisible( &button_ );
             break;
         case ControlNumEdit:
             break;
@@ -297,6 +316,13 @@ namespace e3 {
         module_->setParameter( *parameter_ );
     }
 
+
+    void ParameterStrip::buttonClicked( Button* button )
+    {
+        ASSERT( button == &button_ );
+        parameter_->value_ = button->getToggleState();
+        module_->setParameter( *parameter_ );
+    }
 
 
     //--------------------------------------------------------------

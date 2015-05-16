@@ -50,6 +50,11 @@ namespace e3
         ToggleButton retriggerButton_;
         ToggleButton legatoButton_;
 
+        Label presetLabel_;
+        Label instrumentLabel_;
+        ComboBox presetBox_;
+        ComboBox instrumentBox_;
+
         ParameterPanel* owner_;
     };
     
@@ -79,12 +84,13 @@ namespace e3
     // class ParameterStrip
     //--------------------------------------------------------------------------------------
 
-    class ParameterStrip : public Component, public Slider::Listener
+    class ParameterStrip : public Component, public Slider::Listener, public Button::Listener
     {
     public:
         ParameterStrip( const Rectangle<int>& bounds, Module* module, const Parameter* parameter );
 
-        void sliderValueChanged( Slider* slider );
+        void sliderValueChanged( Slider* slider ) override;
+        void buttonClicked( Button* button ) override;
 
         //void mouseDown( const MouseEvent& e ) override;
 
@@ -100,6 +106,7 @@ namespace e3
         const Parameter* parameter_;
         Label label_;
         Slider slider_;
+        ToggleButton button_;
     };
 
     

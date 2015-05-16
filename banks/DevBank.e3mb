@@ -4,7 +4,7 @@
   <instrument id="0" name="wonne und freude" preset="0" category="Einfach" comment="traumhaft" voices="50" unison="3" spread="5">
     <panel>
       <module id="0" pos="621, 249"/>
-      <module id="1" pos="171, 249"/>
+      <module id="1" pos="169, 249"/>
       <module id="2" pos="330, 187"/>
       <module id="3" pos="462, 250"/>
       <module id="4" pos="334, 339"/>
@@ -30,8 +30,8 @@
       <preset name="Unnamed" id="0">
         <param module="0" id="0" value="0.77000000000000002"/>
         <param module="1" id="0" value="2"/>
-        <param module="1" id="1" value="300"/>
-        <param module="1" id="2" value="0"/>
+        <param module="1" id="1" value="520"/>
+        <param module="1" id="2" value="1"/>
         <param module="2" id="2" value="0"/>
         <param module="2" id="3" value="0"/>
         <param module="3" id="2" value="0"/>
