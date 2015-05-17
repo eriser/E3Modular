@@ -5,11 +5,9 @@
 
 namespace e3 {
 
-    EditableTableCell::EditableTableCell(TableComponent* owner, const std::string& text, int row, int column) :
-        Label("EditableTableCell", text),
-        owner_(owner),
-        row_(row),
-        column_(column)
+    EditableTableCell::EditableTableCell(TableComponent* owner) :
+        Label("EditableTableCell", ""),
+        owner_(owner)
     {
         setEditable(false, false, true);
     }
@@ -23,6 +21,15 @@ namespace e3 {
         else {
             Label::paint(g);
         }
+    }
+
+
+    void EditableTableCell::setRowAndColumn( int row, int column )
+    {
+        row_ = row;
+        column_ = column;
+        std::string text = owner_->getText( row_, column_ );
+        setText( text, dontSendNotification );
     }
 
 

@@ -11,9 +11,10 @@ namespace e3 {
     class EditableTableCell : public Label
     {
     public:
-        EditableTableCell(TableComponent* owner, const std::string& text, int row, int column);
+        EditableTableCell(TableComponent* owner);
 
         void paint(Graphics& g) override;
+        void setRowAndColumn( int row, int column );
 
         void mouseDown(const MouseEvent& e) override;
         void mouseDoubleClick(const MouseEvent& e) override;

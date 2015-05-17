@@ -2,6 +2,8 @@
 
 #include <set>
 #include <thread>
+#include <string>
+#include <sstream>
 
 #include <e3_CommonMacros.h>
 #include <core/Settings.h>
@@ -1009,10 +1011,10 @@ namespace e3 {
             EXPECT_THROW( TestableBankSerializer::checkPath( file.getFullPathName().toStdString() ), std::invalid_argument );
 
             file = File::getCurrentWorkingDirectory().getChildFile( testBank_incompatible_xml_filename );
-            EXPECT_THROW( TestableBankSerializer::readBank( file.getFullPathName().toStdString() ), std::runtime_error );
+            EXPECT_THROW( TestableBankSerializer::loadBank( file.getFullPathName().toStdString() ), std::runtime_error );
 
             file = File::getCurrentWorkingDirectory().getChildFile( testBank_invalid_xml_filename );
-            EXPECT_THROW( TestableBankSerializer::readBank( file.getFullPathName().toStdString() ), std::runtime_error );
+            EXPECT_THROW( TestableBankSerializer::loadBank( file.getFullPathName().toStdString() ), std::runtime_error );
         }
 
         //---------------------------------------------------
@@ -1041,8 +1043,19 @@ namespace e3 {
 
             void checkBank( Bank& bank )
             {
+                ASSERT_NE( nullptr, bank.getXml() );
                 EXPECT_EQ( "test", bank.getName() );
-                EXPECT_NE( nullptr, bank.getXml() );
+                EXPECT_EQ( 51, bank.getNumInstruments() );
+
+                XmlElement* xml = bank.getXml();
+                int index = 0;
+                forEachXmlChildElementWithTagName( *xml, e, "instrument" ) 
+                {
+                    std::ostringstream os;
+                    os << "instrument_" << index++;
+                    std::string name = e->getStringAttribute( "name" ).toStdString();
+                    EXPECT_EQ( os.str(), name );
+                }
             }
 
             void checkInstrument( Instrument* i )

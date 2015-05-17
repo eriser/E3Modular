@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <bank name="test" instrument="0">
-  <instrument id="0" name="wonne und freude" preset="0" category="Einfach" comment="traumhaft" voices="50" unison="3" spread="5">
+  <instrument id="0" name="instrument_0" preset="0" category="c" comment="traumhaft" voices="50" unison="3" spread="5">
     <panel>
       <module id="0" pos="621, 249"/>
       <module id="1" pos="169, 249"/>
@@ -52,19 +52,54 @@
       </preset>
     </presets>
   </instrument>
-  <instrument id="1" name="instrument_1" preset="0" category="default" comment="klingt gut" voices="1">
-    <modules/>
-    <links/>
-    <presets>
-      <preset name="Default Preset" id="0"/>
-    </presets>
-  </instrument>
-  <instrument name="instrument_2" id="2" category="default" comment="klingt noch besser" voices="1"/>
-  <instrument name="instrument_3" id="3" category="default" comment="klingt vielleicht am besten" voices="1"/>
-  <instrument name="instrument_4" id="4" category="default" comment="echter Mist" voices="1"/>
-  <instrument name="instrument_5" id="5" category="default" comment="unechter Mist" voices="1"/>
-  <instrument name="das sechste instrument" id="6" category="Kompliziert" comment="sagenhaft" voices="1">
-    <modules/>
-    <links/>
-  </instrument>
+  <instrument id="1"  name="instrument_1"  category="51" />
+  <instrument id="2"  name="instrument_2"  category="50" />
+  <instrument id="3"  name="instrument_3"  category="49" />
+  <instrument id="4"  name="instrument_4"  category="48" />
+  <instrument id="5"  name="instrument_5"  category="47" />
+  <instrument id="6"  name="instrument_6"  category="46" />
+  <instrument id="7"  name="instrument_7"  category="45" />
+  <instrument id="8"  name="instrument_8"  category="44" />
+  <instrument id="9"  name="instrument_9"  category="43" />
+  <instrument id="10" name="instrument_10" category="42" />
+  <instrument id="11" name="instrument_11" category="41" />
+  <instrument id="12" name="instrument_12" category="40" />
+  <instrument id="13" name="instrument_13" category="39" />
+  <instrument id="14" name="instrument_14" category="38" />
+  <instrument id="15" name="instrument_15" category="37" />
+  <instrument id="16" name="instrument_16" category="36" />
+  <instrument id="17" name="instrument_17" category="35" />
+  <instrument id="18" name="instrument_18" category="34" />
+  <instrument id="19" name="instrument_19" category="33" />
+  <instrument id="20" name="instrument_20" category="32" />
+  <instrument id="21" name="instrument_21" category="31" />
+  <instrument id="22" name="instrument_22" category="30" />
+  <instrument id="23" name="instrument_23" category="29" />
+  <instrument id="24" name="instrument_24" category="28" />
+  <instrument id="25" name="instrument_25" category="27" />
+  <instrument id="26" name="instrument_26" category="26" />
+  <instrument id="27" name="instrument_27" category="25" />
+  <instrument id="28" name="instrument_28" category="24" />
+  <instrument id="29" name="instrument_29" category="23" />
+  <instrument id="30" name="instrument_30" category="22" />
+  <instrument id="31" name="instrument_31" category="21" />
+  <instrument id="32" name="instrument_32" category="20" />
+  <instrument id="33" name="instrument_33" category="19" />
+  <instrument id="34" name="instrument_34" category="18" />
+  <instrument id="35" name="instrument_35" category="17" />
+  <instrument id="36" name="instrument_36" category="16" />
+  <instrument id="37" name="instrument_37" category="15" />
+  <instrument id="38" name="instrument_38" category="14" />
+  <instrument id="39" name="instrument_39" category="13" />
+  <instrument id="40" name="instrument_40" category="12" />
+  <instrument id="41" name="instrument_41" category="11" />
+  <instrument id="42" name="instrument_42" category="10" />
+  <instrument id="43" name="instrument_43" category="9" />
+  <instrument id="44" name="instrument_44" category="8" />
+  <instrument id="45" name="instrument_45" category="7" />
+  <instrument id="46" name="instrument_46" category="6" />
+  <instrument id="47" name="instrument_47" category="5" />
+  <instrument id="48" name="instrument_48" category="4" />
+  <instrument id="49" name="instrument_49" category="3" />
+  <instrument id="50" name="instrument_50" category="2" />
 </bank>

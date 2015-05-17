@@ -1,6 +1,9 @@
 
 #include <string>
+
 #include <e3_Exception.h>
+#include <e3_Trace.h>
+
 #include "gui/Style.h"
 #include "gui/AudioEditor.h"
 #include "gui/EditableTableCell.h"
@@ -40,9 +43,9 @@ namespace e3 {
     }
 
 
-    void TableComponent::addColumn( const std::string& name, int id )
+    void TableComponent::addColumn( const std::string& name, int id, int width )
     {
-        table_.getHeader().addColumn( name, id, 200, 50 );
+        table_.getHeader().addColumn( name, id, width, std::min<int>(width, 50) );
     }
 
 
@@ -120,6 +123,19 @@ namespace e3 {
     }
 
 
+    void TableComponent::returnKeyPressed( int lastRowSelected )
+    {
+        setActiveItem( lastRowSelected );
+    }
+
+
+    void TableComponent::setActiveItem( int rowNumber )
+    {
+        activeItem_ = data_->getChildElement( rowNumber );
+        repaint();
+    }
+
+
     XmlElement* TableComponent::getActiveItem() const
     {
         return activeItem_;
@@ -130,6 +146,64 @@ namespace e3 {
     {
         XmlElement* e = data_->getChildElement( rowNumber );
         return e == activeItem_ && activeItem_ != nullptr;
+    }
+
+
+    var TableComponent::getDragSourceDescription( const SparseSet<int>& selectedRows )
+    {
+        int rowNumber    = selectedRows[0];
+        XmlElement* item = data_->getChildElement( rowNumber );
+
+        return (item != nullptr) ? item->getIntAttribute( "id" ) : -1;
+    }
+
+
+    bool TableComponent::isInterestedInDragSource( const SourceDetails& )
+    {
+        return table_.getHeader().getSortColumnId() == 1 && table_.getHeader().isSortedForwards();
+    }
+
+
+    void TableComponent::itemDragMove( const SourceDetails &dragSourceDetails )
+    {
+        // force scrolling if needed while dragging
+        const Point<int>& p = dragSourceDetails.localPosition;
+        int rowNumber       = table_.getInsertionIndexForPosition( p.x, p.y );
+
+        table_.scrollToEnsureRowIsOnscreen( rowNumber );
+    }
+
+
+    void TableComponent::itemDropped( const SourceDetails& dragSourceDetails )
+    {
+        int oldIndex = dragSourceDetails.description;
+        XmlElement* itemMoved = data_->getChildByAttribute( "id", String( oldIndex ) );
+
+        if (itemMoved != nullptr)
+        {
+            // sort by id
+            //XmlSorter sorter1( "id", true );
+            //data_->sortChildElements( sorter1 );
+
+            // get index to where the item was moved
+            const Point<int>& p = dragSourceDetails.localPosition;
+            int insertIndex     = table_.getInsertionIndexForPosition( p.x, p.y );
+
+            // move the item in the xml list
+            data_->removeChildElement( itemMoved, false );
+            data_->insertChildElement( itemMoved, insertIndex );
+
+            // update id's
+            int index = 0;
+            forEachXmlChildElementWithTagName( *data_, e, "instrument" ) {
+                e->setAttribute( "id", index++ );
+            }
+                
+            // re-sort in configured sorting order
+            //table_.getHeader().reSortTable();
+            table_.updateContent();
+            table_.selectRow( insertIndex );
+        }
     }
 
 

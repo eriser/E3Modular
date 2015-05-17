@@ -13,9 +13,10 @@ namespace e3
         instrumentBrowser_ = instrumentBrowser;
         presetBrowser_     = presetBrowser;
 
-        instrumentBrowser_->addColumn( "Name",     InstrumentBrowser::NameColumn );
-        instrumentBrowser_->addColumn( "Category", InstrumentBrowser::CategoryColumn );
-        instrumentBrowser_->addColumn( "Comment",  InstrumentBrowser::CommentColumn );
+        instrumentBrowser_->addColumn( "Id", InstrumentBrowser::IdColumn, 20 );
+        instrumentBrowser_->addColumn( "Name", InstrumentBrowser::NameColumn, 200 );
+        instrumentBrowser_->addColumn( "Category", InstrumentBrowser::CategoryColumn, 200 );
+        instrumentBrowser_->addColumn( "Comment",  InstrumentBrowser::CommentColumn, 200 );
 
         tabPanel_ = new TabComponent( TabbedButtonBar::TabsAtTop, 10 );
         tabPanel_->addTab( "Instruments", Colours::transparentBlack, instrumentBrowser_, false, 0 );
@@ -56,9 +57,9 @@ namespace e3
 
     void BrowserPanel::updateContents( XmlElement* root )
     {
-		if( root != nullptr ) {
-			instrumentBrowser_->loadData( root );
-		}
+        if( root != nullptr ) {
+            instrumentBrowser_->loadData( root );
+        }
     }
 
 

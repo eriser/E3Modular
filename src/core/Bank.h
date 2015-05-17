@@ -39,7 +39,9 @@ namespace e3 {
         void setXml( XmlElement* e );
         bool hasLoaded() const;
 
+        int getNumInstruments() const;
+
     protected:
-        std::unique_ptr<XmlElement> xml_          = nullptr;
+        std::unique_ptr<XmlElement> xml_ = nullptr;
     };
 }  // namespace e3

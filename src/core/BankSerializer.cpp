@@ -10,13 +10,17 @@
 namespace e3 {
 
     std::string BankSerializer::defaultBankXml =
-        "<bank name='New Bank' instrument='1'>"
-        "<instrument name='Empty Instrument' id='0' category='' comment='' voices='32'>"
+        "<bank name='New Bank' instrument='0'>"
+        "<instrument name='Empty Instrument' id='0' preset='0' category='' comment='' voices='32'>"
+        "<modules />"
+        "<links />"
+        "<panels/>"
+        "<presets />"
         "</instrument>"
         "</bank>";
 
 
-    XmlElement* BankSerializer::readBank( const std::string& path )
+    XmlElement* BankSerializer::loadBank( const std::string& path )
     {
         File file = checkPath( path );
         XmlElement* root = XmlDocument::parse( file );

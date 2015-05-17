@@ -16,7 +16,7 @@ namespace e3 {
             createNewBank();
         }
         else {
-            XmlElement* root = BankSerializer::readBank( path );
+            XmlElement* root = BankSerializer::loadBank( path );
             if (root != nullptr) {
                 setPath( path );
                 setXml( root );
@@ -158,5 +158,9 @@ namespace e3 {
     }
 
 
+    int Bank::getNumInstruments() const
+    {
+        return (xml_ != nullptr) ? xml_->getNumChildElements() : 0;
+    }
 
 } // namespace e3

@@ -51,7 +51,7 @@ namespace e3 {
         setColour( TextEditor::textColourId, colourMap["textEditorText"] );
         setColour( TextEditor::highlightColourId, colourMap["textEditorHighlight"] );
         setColour( TextEditorFocusedColourId, colourMap["textEditorFocused"] );
-        setColour( TextEditor::highlightedTextColourId, colourMap["textEditorHighlighted"] );
+        setColour( TextEditor::highlightedTextColourId, colourMap["textEditorHighlightedText"] );
         setColour( TextEditor::outlineColourId, colourMap["textEditorOutline"] );
         setColour( TextEditor::focusedOutlineColourId, colourMap["textEditorFocusedOutline"] );
         setColour( TextEditor::shadowColourId, colourMap["textEditorShadow"] );

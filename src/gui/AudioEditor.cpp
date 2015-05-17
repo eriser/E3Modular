@@ -34,17 +34,10 @@ namespace e3 {
         commandManager->registerAllCommandsForTarget( this );
         addKeyListener( commandManager->getKeyMappings() );
         setWantsKeyboardFocus( true );
-
         setLookAndFeel( &Style::getInstance() );
 
-        processor_->getPolyphony()->monitorUpdateSignal.Connect( monitor_.get(), &MonitorComponent::monitor );
+        connectSignals();
         
-        modulePanel_->showInstrumentSignal.Connect( parameterPanel_.get(), &ParameterPanel::showInstrument );
-        modulePanel_->showModuleSignal.Connect( parameterPanel_.get(), &ParameterPanel::showModule );
-
-        parameterPanel_->instrumentAttributesSignal.Connect( this, &AudioEditor::parameterPanelAttributesChanged );
-        instrumentBrowser_->instrumentAttributesSignal.Connect( this, &AudioEditor::browserPanelAttributesChanged );
-
         browserPanel_->updateContents( processor_->getBankXml() );
         modulePanel_->createModules( processor_, browserPanel_->getSelectedInstrumentXml() );
     }
@@ -52,15 +45,8 @@ namespace e3 {
 
     AudioEditor::~AudioEditor()
     {
-        modulePanel_->showInstrumentSignal.Disconnect( parameterPanel_.get(), &ParameterPanel::showInstrument );
-        modulePanel_->showModuleSignal.Disconnect( parameterPanel_.get(), &ParameterPanel::showModule );
-
-        parameterPanel_->instrumentAttributesSignal.Disconnect( this, &AudioEditor::parameterPanelAttributesChanged );
-        instrumentBrowser_->instrumentAttributesSignal.Disconnect( this, &AudioEditor::browserPanelAttributesChanged );
-
-        processor_->getPolyphony()->monitorUpdateSignal.Disconnect( monitor_.get(), &MonitorComponent::monitor );
+        disconnectSignals();
         removeKeyListener( getCommandManager()->getKeyMappings() );
-
         Settings::getInstance().store();
     }
 
@@ -175,6 +161,30 @@ namespace e3 {
     }
 
 
+    void AudioEditor::connectSignals()
+    {
+        processor_->getPolyphony()->monitorUpdateSignal.Connect( monitor_.get(), &MonitorComponent::monitor );
+
+        modulePanel_->showInstrumentSignal.Connect( parameterPanel_.get(), &ParameterPanel::showInstrument );
+        modulePanel_->showModuleSignal.Connect( parameterPanel_.get(), &ParameterPanel::showModule );
+
+        parameterPanel_->instrumentAttributesSignal.Connect( this, &AudioEditor::parameterPanelAttributesChanged );
+        instrumentBrowser_->instrumentAttributesSignal.Connect( this, &AudioEditor::browserPanelAttributesChanged );
+    }
+
+
+    void AudioEditor::disconnectSignals()
+    {
+        modulePanel_->showInstrumentSignal.Disconnect( parameterPanel_.get(), &ParameterPanel::showInstrument );
+        modulePanel_->showModuleSignal.Disconnect( parameterPanel_.get(), &ParameterPanel::showModule );
+
+        parameterPanel_->instrumentAttributesSignal.Disconnect( this, &AudioEditor::parameterPanelAttributesChanged );
+        instrumentBrowser_->instrumentAttributesSignal.Disconnect( this, &AudioEditor::browserPanelAttributesChanged );
+
+        processor_->getPolyphony()->monitorUpdateSignal.Disconnect( monitor_.get(), &MonitorComponent::monitor );
+    }
+
+    
     void AudioEditor::onOpenBank()
     {
         // TODO: store current ModulePanel

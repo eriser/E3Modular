@@ -45,6 +45,8 @@ namespace e3 {
     private:
         void restoreWindowState();
         void createComponents();
+        void connectSignals();
+        void disconnectSignals();
 
         void onOpenBank();
         void onSaveBank(bool askForFilename);

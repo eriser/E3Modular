@@ -1,6 +1,7 @@
 
 #include <string>
 #include <e3_Exception.h>
+#include <e3_Trace.h>
 #include "gui/Style.h"
 #include "gui/AudioEditor.h"
 #include "gui/EditableTableCell.h"
@@ -8,6 +9,12 @@
 
 
 namespace e3 {
+
+    InstrumentBrowser::InstrumentBrowser() : TableComponent()
+    {
+        table_.setMultipleSelectionEnabled(true);
+    }
+
 
     void InstrumentBrowser::loadData( XmlElement* data )
     {
@@ -30,9 +37,9 @@ namespace e3 {
             EditableTableCell* editor = dynamic_cast<EditableTableCell*>(componentToUpdate);
 
             if (editor == nullptr) {
-                std::string text = getText( rowNumber, columnId );
-                editor = new EditableTableCell( this, text, rowNumber, columnId );
+                editor = new EditableTableCell( this );
             }
+            editor->setRowAndColumn( rowNumber, columnId );
             return editor;
         }
         else {
@@ -42,16 +49,9 @@ namespace e3 {
     }
 
 
-    void InstrumentBrowser::returnKeyPressed( int lastRowSelected )
-    {
-        setActiveItem( lastRowSelected );
-    }
-
-
     void InstrumentBrowser::setActiveItem( int rowNumber )
     {
-        activeItem_ = data_->getChildElement( rowNumber );
-        repaint();
+        TableComponent::setActiveItem( rowNumber );
         AudioEditor::getCommandManager()->invokeDirectly( AudioEditor::cmdLoadInstrument, false );
     }
 
@@ -74,11 +74,13 @@ namespace e3 {
     {
         switch (columnId)
         {
+        case IdColumn:       return "id";
         case NameColumn:     return "name";
         case CategoryColumn: return "category";
         case CommentColumn:  return "comment";
-        default: ASSERT( false ); return "";
         }
+        ASSERT( false ); 
+        return "";
     }
 
 

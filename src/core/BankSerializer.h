@@ -23,7 +23,7 @@ namespace e3 {
     class BankSerializer
     {
     public:
-        static XmlElement* readBank( const std::string& path );
+        static XmlElement* loadBank( const std::string& path );
         static XmlElement* createNewBank();
         static void saveBank( const std::string& path, XmlElement* root );
 
