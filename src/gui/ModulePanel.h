@@ -28,7 +28,7 @@ namespace e3 {
         void paint( Graphics& g ) override;
         void paintOverChildren( Graphics& g ) override;
 
-        void createModules( Processor* processor, XmlElement* instrumentXml );
+        void createModules( Processor* processor );
         void createModule( int moduleType, Point<int> pos );
         void deleteSelectedModules();
         void saveModulePosition( int moduleId, Point<int> pos, bool isNewModule );
@@ -59,6 +59,7 @@ namespace e3 {
         void portAction( PortComponent* port, PortAction action, const Point<int>& pos );
 
         Processor* getProcessor() const;
+        XmlElement* getPanelXml() const;
 
         Gallant::Signal1<Instrument*> showInstrumentSignal;
         Gallant::Signal2<Instrument*, Module*> showModuleSignal;
@@ -83,7 +84,6 @@ namespace e3 {
         bool dragging_ = false;
         Point<int> popupMenuPosition_;
 
-        XmlElement* panelXml_;
         Processor* processor_;
 
         enum MenuTags {

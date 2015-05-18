@@ -26,7 +26,7 @@ namespace e3 {
         window_->setContentOwned( editor, true );
 
         Settings& settings = Settings::getInstance();
-        window_->restoreWindowStateFromString( settings.getWindowState( "Standalone" ) );
+        window_->restoreWindowStateFromString( settings.getWindowState( "standalone" ) );
         window_->setLookAndFeel( &Style::getInstance() );
         window_->setUsingNativeTitleBar( false );
         window_->setVisible( true );
@@ -43,8 +43,8 @@ namespace e3 {
 
         if (AudioProcessorEditor* editor = dynamic_cast<AudioProcessorEditor*> (window_->getContentComponent()))
         {
-            Settings::getInstance().setWindowState( window_->getWindowStateAsString().toStdString(), "Standalone" );
-			audioEngine_->storeAudioSettings();
+            Settings::getInstance().setWindowState( window_->getWindowStateAsString().toStdString(), "standalone" );
+            audioEngine_->storeAudioSettings();
             audioEngine_->getProcessor()->editorBeingDeleted( editor );
             window_->clearContentComponent();
         }

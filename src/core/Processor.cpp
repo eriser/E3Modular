@@ -5,7 +5,7 @@
 #include "core/Settings.h"
 #include "core/CpuMeter.h"
 #include "core/Polyphony.h"
-#include "core/Bank.h"
+#include "core/Database.h"
 #include "core/Instrument.h"
 #include "core/Sink.h"
 
@@ -24,7 +24,7 @@ namespace e3 {
 
     Processor::Processor() : AudioProcessor(),
         polyphony_( new Polyphony() ),
-        bank_( new Bank() ),
+        database_( new Database() ),
         sink_( new Sink() ),
         cpuMeter_( new CpuMeter() )
     {
@@ -43,11 +43,12 @@ namespace e3 {
     {
         sink_->setSampleRate( sampleRate );
         cpuMeter_->setSampleRate( (uint32_t)sampleRate );
+        database_->build();
 
         if (instrument_ == nullptr)
         {
-            loadBank( Settings::getInstance().getRecentBankPath() );
-            loadInstrument();
+            //loadBank( Settings::getInstance().getRecentBankPath() );
+            loadInstrument( Settings::getInstance().getRecentInstrumentPath() );
         }
         else {
             try {
@@ -94,43 +95,67 @@ namespace e3 {
 
 
     //-----------------------------------------------------
-    // Bank, Instrument, Modules
+    // Database, Instrument, Modules
     //-----------------------------------------------------
 
-    XmlElement* Processor::getBankXml() const
+    XmlElement* Processor::getDatabaseXml() const
     {
-        return (bank_ != nullptr) ? bank_->getXml() : nullptr;
+        return (database_ != nullptr) ? database_->getXml() : nullptr;
     }
 
 
     void Processor::loadBank( const std::string& path )
     {
-        bank_->load( path );
+        database_->load( path );
     }
 
 
     void Processor::newBank()
     {
-        bank_->createNewBank();
+        database_->createNewBank();
     }
 
 
     void Processor::saveBank( const std::string& path )
     {
-        bank_->saveInstrument( instrument_ );
-        bank_->save( path );
+        //database_->saveInstrument( instrument_ );
+        //database_->save( path );
     }
 
+
+    void Processor::loadInstrument( const std::string& path, bool saveCurrent )
+    {
+        suspend();
+
+        if (instrument_ != nullptr && saveCurrent) {
+            database_->saveInstrument( instrument_ );
+        }
+
+        instrument_ = database_->loadInstrument( path );        // this calls instrument::ctor first!
+        if (instrument_ != nullptr)
+        {
+            polyphony_->setNumVoices( instrument_->numVoices_ );
+            polyphony_->setNumUnison( instrument_->numUnison_ );
+            polyphony_->setUnisonSpread( instrument_->unisonSpread_ );
+            polyphony_->setHold( instrument_->hold_ );
+            polyphony_->setRetrigger( instrument_->retrigger_ );
+            polyphony_->setLegato( instrument_->legato_ );
+
+            initInstrument();
+        }
+
+        resume();
+    }
 
     void Processor::loadInstrument( int id, bool saveCurrent )
     {
         suspend();
 
         if (instrument_ != nullptr && saveCurrent) {
-            bank_->saveInstrument( instrument_ );
+            database_->saveInstrument( instrument_ );
         }
 
-        instrument_ = bank_->loadInstrument( id );        // this calls instrument::ctor first!
+        instrument_ = database_->loadInstrument( id );        // this calls instrument::ctor first!
         if (instrument_ != nullptr)
         {
             polyphony_->setNumVoices( instrument_->numVoices_ );
@@ -175,7 +200,7 @@ namespace e3 {
         suspend();
         try {
             instrument_->addLink( link );
-            bank_->saveInstrumentLinks( instrument_ );
+            database_->saveInstrumentLinks( instrument_ );
             resetAndInitInstrument();
         }
         catch (const std::exception& e) {
@@ -193,7 +218,7 @@ namespace e3 {
         suspend();
         try {
             instrument_->removeLink( link );
-            bank_->saveInstrumentLinks( instrument_ );
+            database_->saveInstrumentLinks( instrument_ );
             resetAndInitInstrument();
         }
         catch (const std::exception& e) 
@@ -211,7 +236,7 @@ namespace e3 {
         Module* module = nullptr;
         try {
             module = instrument_->createAndAddModule( (ModuleType)moduleType );
-            bank_->saveInstrument( instrument_ );
+            database_->saveInstrument( instrument_ );
         }
         catch (const std::exception& e) 
         {
@@ -230,7 +255,7 @@ namespace e3 {
         suspend();
         try {
             instrument_->deleteModule( module );
-            bank_->saveInstrument( instrument_ );
+            database_->saveInstrument( instrument_ );
             resetAndInitInstrument();
         }
         catch (const std::exception& e) 
@@ -275,7 +300,7 @@ namespace e3 {
             instrument_->setLegato( value );
             polyphony_->setLegato( value );
         }
-        bank_->saveInstrumentAttributes( instrument_ );
+        database_->saveInstrumentAttributes( instrument_ );
     }
 
 
@@ -284,7 +309,7 @@ namespace e3 {
         if (instrument_ != nullptr && instrumentId == instrument_->id_) {
             setInstrumentAttributes( name, value );
         }
-        bank_->saveInstrumentAttribute( instrumentId, name, value );
+        database_->saveInstrumentAttribute( instrumentId, name, value );
     }
 
     

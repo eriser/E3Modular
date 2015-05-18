@@ -16,6 +16,7 @@ namespace e3 {
     {
     public:
         Instrument();
+        Instrument( XmlElement* xml, const std::string& path );
         ~Instrument();
 
         void deleteModules();
@@ -51,6 +52,13 @@ namespace e3 {
         void setRetrigger( bool retrigger )        { retrigger_    = retrigger; }
         void setLegato( bool legato )              { legato_       = legato; }
 
+        void setPath( const std::string& path ) const;
+        std::string getPath() const;
+
+        void setXml( XmlElement* xml )    { xml_ = xml; }
+        XmlElement* getXml()              { return xml_; }
+
+
         int id_           = -1;
         int presetId_     = 0;
         int numVoices_    = 1;
@@ -74,6 +82,9 @@ namespace e3 {
         ModuleList modules_;
         LinkSet links_;
         PresetSet presetSet_;
+
+        ScopedPointer<XmlElement> xml_ = nullptr;
+
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( Instrument )
     };

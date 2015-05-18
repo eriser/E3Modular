@@ -28,7 +28,7 @@ namespace e3 {
         ASSERT( styleXml );
 
         std::map<std::string, Colour> colourMap;
-        forEachXmlChildElementWithTagName( *styleXml, e, "Color" )
+        forEachXmlChildElementWithTagName( *styleXml, e, "color" )
         {
             std::string name = e->getStringAttribute( "name" ).toStdString();
             std::string hex  = e->getStringAttribute( "argb" ).toStdString();

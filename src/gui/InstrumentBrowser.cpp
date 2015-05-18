@@ -2,7 +2,6 @@
 #include <string>
 #include <e3_Exception.h>
 #include <e3_Trace.h>
-#include "gui/Style.h"
 #include "gui/AudioEditor.h"
 #include "gui/EditableTableCell.h"
 #include "gui/InstrumentBrowser.h"
@@ -10,21 +9,9 @@
 
 namespace e3 {
 
-    InstrumentBrowser::InstrumentBrowser() : TableComponent()
+    InstrumentBrowser::InstrumentBrowser() : TableComponent( "instrument" )
     {
         table_.setMultipleSelectionEnabled(true);
-    }
-
-
-    void InstrumentBrowser::loadData( XmlElement* data )
-    {
-        data_       = data;
-        numRows_    = data_ ? data_->getNumChildElements() : 0;
-        int id      = data_->getIntAttribute( "instrument" );
-        activeItem_ = data_->getChildByAttribute( "id", String( id ) );
-
-        table_.updateContent();
-        table_.selectRow( getActiveRowNumber() );
     }
 
 
@@ -53,20 +40,6 @@ namespace e3 {
     {
         TableComponent::setActiveItem( rowNumber );
         AudioEditor::getCommandManager()->invokeDirectly( AudioEditor::cmdLoadInstrument, false );
-    }
-
-
-    int InstrumentBrowser::getActiveRowNumber() const
-    {
-        int i = 0;
-        forEachXmlChildElementWithTagName( *data_, e, "instrument" )
-        {
-            if (e == activeItem_) {
-                return i;
-            }
-            i++;
-        }
-        return -1;
     }
 
 

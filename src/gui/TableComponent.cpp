@@ -34,7 +34,8 @@ namespace e3 {
     };
 
 
-    TableComponent::TableComponent()
+    TableComponent::TableComponent(const std::string& tagName) : 
+        tagName_(tagName)
     {
         addAndMakeVisible( table_ );
         table_.setModel( this );
@@ -45,7 +46,29 @@ namespace e3 {
 
     void TableComponent::addColumn( const std::string& name, int id, int width )
     {
-        table_.getHeader().addColumn( name, id, width, std::min<int>(width, 50) );
+        table_.getHeader().addColumn( name, id, width, std::min<int>(width, 50), 300, TableHeaderComponent::notSortable );
+    }
+
+
+    void TableComponent::loadData( XmlElement* xml )
+    {
+        ASSERT( xml );
+        data_ = xml;
+
+        if (data_ == nullptr) {
+            activeItem_ = nullptr;
+            numRows_    = 0;
+        }
+        else {
+            numRows_    = data_->getNumChildElements();
+            int id      = data_->getIntAttribute( StringRef(tagName_) );
+            activeItem_ = data_->getChildByAttribute( "id", String( id ) );
+            if (activeItem_ == nullptr) {
+                activeItem_ = data_->getFirstChildElement();
+            }
+        }
+        table_.updateContent();
+        table_.selectRow( getActiveRowNumber() );
     }
 
 
@@ -105,18 +128,6 @@ namespace e3 {
     }
 
 
-    void TableComponent::sortOrderChanged( int newSortColumnId, bool isForwards )
-    {
-        if (newSortColumnId != 0)
-        {
-            XmlSorter sorter( getAttributeName( newSortColumnId ), isForwards );
-            data_->sortChildElements( sorter );
-
-            table_.updateContent();
-        }
-    }
-
-
     void TableComponent::cellDoubleClicked( int rowNumber, int, const MouseEvent& )
     {
         setActiveItem( rowNumber );
@@ -149,6 +160,23 @@ namespace e3 {
     }
 
 
+    int TableComponent::getActiveRowNumber() const
+    {
+        int i = 0;
+        forEachXmlChildElementWithTagName( *data_, e, StringRef(tagName_) )
+        {
+            if (e == activeItem_) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
+
+
+
+
+
     var TableComponent::getDragSourceDescription( const SparseSet<int>& selectedRows )
     {
         int rowNumber    = selectedRows[0];
@@ -160,7 +188,8 @@ namespace e3 {
 
     bool TableComponent::isInterestedInDragSource( const SourceDetails& )
     {
-        return table_.getHeader().getSortColumnId() == 1 && table_.getHeader().isSortedForwards();
+        //return table_.getHeader().getSortColumnId() == 1 && table_.getHeader().isSortedForwards();
+        return true;
     }
 
 
@@ -181,10 +210,6 @@ namespace e3 {
 
         if (itemMoved != nullptr)
         {
-            // sort by id
-            //XmlSorter sorter1( "id", true );
-            //data_->sortChildElements( sorter1 );
-
             // get index to where the item was moved
             const Point<int>& p = dragSourceDetails.localPosition;
             int insertIndex     = table_.getInsertionIndexForPosition( p.x, p.y );
@@ -199,11 +224,24 @@ namespace e3 {
                 e->setAttribute( "id", index++ );
             }
                 
-            // re-sort in configured sorting order
-            //table_.getHeader().reSortTable();
+            // update table and select item
             table_.updateContent();
             table_.selectRow( insertIndex );
         }
+    }
+
+
+    void TableComponent::sortOrderChanged( int newSortColumnId, bool isForwards )
+    {
+        UNUSED( newSortColumnId );
+        UNUSED( isForwards );
+        //if (newSortColumnId != 0)
+        //{
+        //    XmlSorter sorter( getAttributeName( newSortColumnId ), isForwards );
+        //    data_->sortChildElements( sorter );
+
+        //    table_.updateContent();
+        //}
     }
 
 

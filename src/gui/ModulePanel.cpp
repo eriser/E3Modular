@@ -24,41 +24,38 @@ namespace e3 {
     }
 
 
-    void ModulePanel::createModules( Processor* processor, XmlElement* instrumentXml )
+    void ModulePanel::createModules( Processor* processor )
     {
         selection_->deselectAll();
         removeAllChildren();
         modules_.clear();
         wires_->deleteAll();
 
-        processor_ = processor;
+        processor_             = processor;
         Instrument* instrument = processor_->getInstrument();
+        XmlElement* panelXml   = getPanelXml();
 
-        if (instrument != nullptr && instrumentXml != nullptr)
+        if (panelXml != nullptr && instrument != nullptr)
         {
-            panelXml_ = instrumentXml->getChildByName( "panel" );
-            if (panelXml_)
+            forEachXmlChildElementWithTagName( *panelXml, e, "module" )
             {
-                forEachXmlChildElementWithTagName( *panelXml_, e, "module" )
+                String posString = e->getStringAttribute( "pos" ).toStdString();
+                StringArray tokens;
+                int numTokens = tokens.addTokens( posString, false );
+                ASSERT( numTokens == 2 );
+
+                int id = e->getIntAttribute( "id", -1 );
+                Module* module = instrument->getModule( id );
+                ASSERT( module );
+
+                if (module != nullptr && numTokens == 2)
                 {
-                    String posString = e->getStringAttribute( "pos" ).toStdString();
-                    StringArray tokens;
-                    int numTokens = tokens.addTokens( posString, false );
-                    ASSERT( numTokens == 2 );
-
-                    int id = e->getIntAttribute( "id", -1 );
-                    Module* module = instrument->getModule( id );
-                    ASSERT( module );
-
-                    if (module != nullptr && numTokens == 2)
-                    {
-                        createModuleComponent( module, tokens[0].getIntValue(), tokens[1].getIntValue() );
-                    }
+                    createModuleComponent( module, tokens[0].getIntValue(), tokens[1].getIntValue() );
                 }
-                createWires( instrument->getLinks() );
             }
-            showInstrumentSignal( instrument );   // update parameterPanel
+            createWires( instrument->getLinks() );
         }
+        showInstrumentSignal( instrument );   // update parameterPanel
     }
 
 
@@ -381,15 +378,15 @@ namespace e3 {
 
     void ModulePanel::saveModulePosition( int moduleId, Point<int> pos, bool isNewModule )
     {
-        ASSERT( panelXml_ );
-        if (panelXml_ != nullptr) 
+        XmlElement* panelXml = getPanelXml();
+        if (panelXml != nullptr) 
         {
-            XmlElement* e = panelXml_->getChildByAttribute( "id", String( moduleId ) );
+            XmlElement* e = panelXml->getChildByAttribute( "id", String( moduleId ) );
             ASSERT( (isNewModule && e == nullptr) || e != nullptr );
 
             if (e == nullptr && isNewModule) 
             {
-                e = panelXml_->createNewChildElement( "module" );
+                e = panelXml->createNewChildElement( "module" );
                 e->setAttribute( "id", moduleId );
             }
             if (e != nullptr) {
@@ -456,5 +453,21 @@ namespace e3 {
 
 
     Processor* ModulePanel::getProcessor() const    { return processor_; }
+
+    XmlElement* ModulePanel::getPanelXml() const
+    {
+        if (processor_) {
+            Instrument* instrument = processor_->getInstrument();
+            if (instrument) {
+                XmlElement* xml = instrument->getXml();
+                if (xml) {
+                    return xml->getChildByName( "panel" );
+                }
+            }
+        }
+        ASSERT( false );
+        return nullptr;
+    }
+
 
 } // namespace e3

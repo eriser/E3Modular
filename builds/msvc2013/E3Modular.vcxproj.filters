@@ -48,12 +48,6 @@
     <ClInclude Include="..\..\src\modules\MidiModules.h">
       <Filter>src\modules</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\core\Bank.h">
-      <Filter>src\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\BankSerializer.h">
-      <Filter>src\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\app\AudioEngine.h">
       <Filter>src\app</Filter>
     </ClInclude>
@@ -162,6 +156,12 @@
     <ClInclude Include="..\..\src\modules\AdsrEnvelope.h">
       <Filter>src\modules</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\core\Database.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\Serializer.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp">
@@ -177,12 +177,6 @@
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\Module.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\Bank.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\BankSerializer.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\app\AppWindow.cpp">
@@ -294,6 +288,12 @@
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\Link.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Database.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Serializer.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
   </ItemGroup>

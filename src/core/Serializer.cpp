@@ -3,13 +3,13 @@
 #include <e3_Trace.h>
 
 #include "core/Instrument.h"
-#include "core/Bank.h"
-#include "core/BankSerializer.h"
+#include "core/Database.h"
+#include "core/Serializer.h"
 
 
 namespace e3 {
 
-    std::string BankSerializer::defaultBankXml =
+    std::string Serializer::defaultBankXml =
         "<bank name='New Bank' instrument='0'>"
         "<instrument name='Empty Instrument' id='0' preset='0' category='' comment='' voices='32'>"
         "<modules />"
@@ -20,26 +20,113 @@ namespace e3 {
         "</bank>";
 
 
-    XmlElement* BankSerializer::loadBank( const std::string& path )
+    XmlElement* Serializer::loadBank( const std::string& path )
     {
         File file = checkPath( path );
         XmlElement* root = XmlDocument::parse( file );
-        checkRoot( root );
+
+        if (root == nullptr || root->hasTagName( "bank" ) == false) {
+            if (root) delete root;
+            THROW( std::runtime_error, "Invalid bank file" );
+        }
 
         return root;
     }
 
 
-    XmlElement* BankSerializer::createNewBank()
+    XmlElement* Serializer::loadDatabase( File& file )
     {
-        XmlElement* root = XmlDocument::parse( defaultBankXml );
-        checkRoot( root );
+        checkPath( file );
+        XmlElement* root = XmlDocument::parse( file );
 
+        if (root == nullptr || root->hasTagName( "e3m-database" ) == false) {
+            if (root) delete root;
+            root = nullptr;
+        }
+        if (root == nullptr) {
+            root = new XmlElement( "e3m-database" );
+        }
         return root;
     }
 
 
-    void BankSerializer::saveBank( const std::string& path, XmlElement* root )
+    bool Serializer::storeDatabase( XmlElement* xml, const File& file )
+    {
+        return xml != nullptr ? xml->writeToFile( file, "", "UTF-8", 1000 ) : false;
+    }
+
+
+    Instrument* Serializer::loadInstrument( const std::string& path )
+    {
+        File file = checkPath( path );
+        XmlElement* root = XmlDocument::parse( file );
+
+        if (root != nullptr)
+        {
+            try {
+                Instrument* instrument = new Instrument( root, path );  // processor will be owner of the instrument and delete it
+                
+                readInstrumentAttributes( root, instrument );
+                readInstrumentModules( root, instrument );
+                readInstrumentLinks( root, instrument );
+                readInstrumentPresets( root, instrument );
+
+                return instrument;
+            }
+            catch (const std::exception& e) {               // parse error, skip instrument
+                TRACE( e.what() );
+            }
+        }
+        return nullptr;
+    }
+
+
+    void Serializer::scanInstrument( XmlElement* databaseXml, const File& file )
+    {
+        XmlElement* instrumentXml = nullptr;
+        ScopedPointer<XmlElement> root = XmlDocument::parse( file );
+
+        if (root != nullptr)
+        {
+            try {
+                if (databaseXml == nullptr) {
+                    databaseXml = new XmlElement( "e3m_database" );
+                }
+                instrumentXml = new XmlElement( "instrument" );
+                instrumentXml->setAttribute( "path", file.getFullPathName() );
+
+                XmlElement* presetsXml = getChildElement( root, "presets" );
+
+                forEachXmlChildElementWithTagName( *presetsXml, e, "preset" )
+                {
+                    XmlElement* presetXml = new XmlElement( "preset" );
+                    presetXml->setAttribute( "id", e->getIntAttribute( "id" ));
+                    presetXml->setAttribute( "name", e->getStringAttribute( "name" ) );
+                    presetXml->setAttribute( "category1", e->getStringAttribute( "category1" ) );
+                    presetXml->setAttribute( "category2", e->getStringAttribute( "category2" ) );
+                    presetXml->setAttribute( "category3", e->getStringAttribute( "category3" ) );
+
+                    instrumentXml->addChildElement( presetXml );
+                }
+            }
+            catch (const std::exception& e) {  // parse error
+                TRACE( e.what() );
+                if (instrumentXml != nullptr) delete instrumentXml;
+                return;
+            }
+            databaseXml->addChildElement( instrumentXml );
+        }
+    }
+
+
+
+    XmlElement* Serializer::createNewBank()
+    {
+        return XmlDocument::parse( defaultBankXml );
+    }
+
+
+    void Serializer::saveBank( const std::string& path, XmlElement* root )
     {
         if (root->writeToFile( File( path ), "", "UTF-8", 1000 ) == false) {
             THROW( std::runtime_error, "error writing bank file" );
@@ -47,7 +134,7 @@ namespace e3 {
     }
 
 
-    Instrument* BankSerializer::loadInstrument( XmlElement* root, int id )
+    Instrument* Serializer::loadInstrument( XmlElement* root, int id )
     {
         XmlElement* e = root->getChildByAttribute( "id", String( id ) );
         if (e != nullptr)
@@ -68,7 +155,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::saveInstrument( XmlElement* root, Instrument* instrument )
+    void Serializer::saveInstrument( XmlElement* root, Instrument* instrument )
     {
         XmlElement* e = root->getChildByAttribute( "id", String( instrument->id_ ) );
         if (e != nullptr)
@@ -86,7 +173,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::saveInstrumentAttributes( XmlElement* root, Instrument* instrument )
+    void Serializer::saveInstrumentAttributes( XmlElement* root, Instrument* instrument )
     {
         XmlElement* e = root->getChildByAttribute( "id", String( instrument->id_ ) );
         if (e != nullptr)
@@ -101,7 +188,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::saveInstrumentAttribute( XmlElement* root, int id, const std::string& name, const var value )
+    void Serializer::saveInstrumentAttribute( XmlElement* root, int id, const std::string& name, const var value )
     {
         XmlElement* e = root->getChildByAttribute( "id", String( id ) );
         if (e != nullptr)
@@ -111,7 +198,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::saveInstrumentLinks( XmlElement* root, Instrument* instrument )
+    void Serializer::saveInstrumentLinks( XmlElement* root, Instrument* instrument )
     {
         XmlElement* e = root->getChildByAttribute( "id", String( instrument->id_ ) );
         if (e != nullptr)
@@ -126,7 +213,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readInstrumentAttributes( XmlElement* e, Instrument* instrument )
+    void Serializer::readInstrumentAttributes( XmlElement* e, Instrument* instrument )
     {
         instrument->id_           = e->getIntAttribute( "id" );
         instrument->presetId_     = e->getIntAttribute( "preset", -1 );
@@ -142,7 +229,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readInstrumentModules( XmlElement* parent, Instrument* instrument )
+    void Serializer::readInstrumentModules( XmlElement* parent, Instrument* instrument )
     {
         XmlElement* modules = getChildElement( parent, "modules" );
 
@@ -163,7 +250,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readInstrumentLinks( XmlElement* parent, Instrument* instrument )
+    void Serializer::readInstrumentLinks( XmlElement* parent, Instrument* instrument )
     {
         XmlElement* links = getChildElement( parent, "links" );
 
@@ -181,7 +268,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readInstrumentPresets( XmlElement* parent, Instrument* instrument )
+    void Serializer::readInstrumentPresets( XmlElement* parent, Instrument* instrument )
     {
         XmlElement* presetsXml = getChildElement( parent, "presets" );
 
@@ -224,7 +311,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::readParameter( XmlElement* e, const Parameter& p )
+    void Serializer::readParameter( XmlElement* e, const Parameter& p )
     {
         p.value_        = e->getDoubleAttribute( "value", p.value_ );
         p.defaultValue_ = e->getDoubleAttribute( "default", p.defaultValue_ );
@@ -249,10 +336,10 @@ namespace e3 {
 
 
     //--------------------------------------------------------------------------------
-    // BankSerializer write methods
+    // Serializer write methods
     //--------------------------------------------------------------------------------
 
-    void BankSerializer::writeInstrumentAttributes( XmlElement* e, Instrument* instrument )
+    void Serializer::writeInstrumentAttributes( XmlElement* e, Instrument* instrument )
     {
         e->removeAllAttributes();
 
@@ -276,7 +363,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writeInstrumentModules( XmlElement* e, Instrument* instrument )
+    void Serializer::writeInstrumentModules( XmlElement* e, Instrument* instrument )
     {
         XmlElement* modules = getAndClearChildElement( e, "modules" );
 
@@ -289,7 +376,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writeInstrumentLinks( XmlElement* e, Instrument* instrument )
+    void Serializer::writeInstrumentLinks( XmlElement* e, Instrument* instrument )
     {
         XmlElement* links = getAndClearChildElement( e, "links" );
 
@@ -302,7 +389,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writeInstrumentPresets( XmlElement* e, Instrument* instrument )
+    void Serializer::writeInstrumentPresets( XmlElement* e, Instrument* instrument )
     {
         XmlElement* presetsXml = getAndClearChildElement( e, "presets" );
 
@@ -315,7 +402,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writeModule( XmlElement* e, Module* module )
+    void Serializer::writeModule( XmlElement* e, Module* module )
     {
         e->setAttribute( "id", module->getId() );
         e->setAttribute( "label", module->getLabel() );
@@ -324,7 +411,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writePreset( XmlElement* e, Instrument* instrument, const Preset& preset )
+    void Serializer::writePreset( XmlElement* e, Instrument* instrument, const Preset& preset )
     {
         e->setAttribute( "name", preset.getName() );
         e->setAttribute( "id", preset.getId() );
@@ -362,7 +449,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writeLink( XmlElement* e, const Link& link )
+    void Serializer::writeLink( XmlElement* e, const Link& link )
     {
         e->setAttribute( "id", link.getId() );
         e->setAttribute( "left_module", link.leftModule_ );
@@ -372,7 +459,7 @@ namespace e3 {
     }
 
 
-    void BankSerializer::writeParameter( XmlElement* e, const Parameter& param, const Parameter& defaultParam )
+    void Serializer::writeParameter( XmlElement* e, const Parameter& param, const Parameter& defaultParam )
     {
         e->setAttribute( "value", param.value_ );
 
@@ -417,7 +504,7 @@ namespace e3 {
     }
 
 
-    XmlElement* BankSerializer::getChildElement( XmlElement* e, const std::string& name )
+    XmlElement* Serializer::getChildElement( XmlElement* e, const std::string& name )
     {
         XmlElement* c = e->getChildByName( StringRef(name) );
 
@@ -428,7 +515,7 @@ namespace e3 {
     }
 
 
-    XmlElement* BankSerializer::getAndClearChildElement( XmlElement* e, const std::string& name )
+    XmlElement* Serializer::getAndClearChildElement( XmlElement* e, const std::string& name )
     {
         XmlElement* c = getChildElement( e, name );
         c->deleteAllChildElements();
@@ -437,7 +524,7 @@ namespace e3 {
 
 
 
-    File BankSerializer::checkPath( const std::string& path )
+    File Serializer::checkPath( const std::string& path )
     {
         StringRef p = path.c_str();
         File f = File::isAbsolutePath( p ) ? File( path ) : File::getCurrentWorkingDirectory().getChildFile( p );
@@ -449,11 +536,12 @@ namespace e3 {
     }
 
 
-    void BankSerializer::checkRoot( XmlElement* root )
+    void Serializer::checkPath( File& file )
     {
-        if (root == nullptr || root->hasTagName( "bank" ) == false) {
-            if (root) delete root;
-            THROW( std::runtime_error, "Bank file contains errors" );
+        StringRef path = file.getFullPathName();
+
+        if (File::isAbsolutePath( path ) == false) {
+            file = File::getCurrentWorkingDirectory().getChildFile( path );
         }
     }
 

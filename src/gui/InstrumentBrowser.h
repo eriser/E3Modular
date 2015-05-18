@@ -12,11 +12,8 @@ namespace e3 {
     public:
         InstrumentBrowser();
 
-        void loadData(XmlElement* data) override;
-
         Component* refreshComponentForCell( int rowNumber, int columnId, bool isRowSelected,  Component* componentToUpdate) override;
         void setActiveItem(int rowNumber) override;
-        int getActiveRowNumber() const override;
 
         enum ColumnIds {
             IdColumn       = 1,
@@ -25,7 +22,7 @@ namespace e3 {
             CommentColumn  = 4,
         };
 
-    private:
+    protected:
         std::string getAttributeName( int columnId ) override;
     };
 

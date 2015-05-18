@@ -38,8 +38,8 @@ namespace e3 {
 
         connectSignals();
         
-        browserPanel_->updateContents( processor_->getBankXml() );
-        modulePanel_->createModules( processor_, browserPanel_->getSelectedInstrumentXml() );
+        //browserPanel_->updateContents( processor_->getDatabaseXml() );
+        modulePanel_->createModules( processor_ );
     }
 
 
@@ -71,7 +71,7 @@ namespace e3 {
         monitor_->setBounds( r );
 
         std::string bounds = getScreenBounds().toString().toStdString();
-        Settings::getInstance().setWindowState( bounds, "Plugin" );
+        Settings::getInstance().setWindowState( bounds, "plugin" );
     }
 
 
@@ -103,7 +103,7 @@ namespace e3 {
 
     void AudioEditor::restoreWindowState()
     {
-        std::string context     = processor_->isPlugin() ? "Plugin" : "Standalone";
+        std::string context     = processor_->isPlugin() ? "plugin" : "standalone";
         std::string windowState = Settings::getInstance().getWindowState( context );
 
         StringArray tokens;
@@ -197,9 +197,9 @@ namespace e3 {
         {
             std::string path = fc.getResult().getFullPathName().toStdString();
             processor_->loadBank( path );
-            browserPanel_->updateContents( processor_->getBankXml() );
+            browserPanel_->updateContents( processor_->getDatabaseXml() );
             processor_->loadInstrument();
-            modulePanel_->createModules( processor_, browserPanel_->getSelectedInstrumentXml() );
+            modulePanel_->createModules( processor_ );
         }
     }
 
@@ -228,20 +228,20 @@ namespace e3 {
     void AudioEditor::onNewBank()
     {
         processor_->newBank();
-        browserPanel_->updateContents( processor_->getBankXml() );
+        browserPanel_->updateContents( processor_->getDatabaseXml() );
         processor_->loadInstrument();
     }
 
 
     void AudioEditor::onLoadInstrument()
     {
-        XmlElement* xml = browserPanel_->getSelectedInstrumentXml();
-        if (xml != nullptr)
-        {
-            int id = xml->getIntAttribute( "id" );
-            processor_->loadInstrument( id );
-            modulePanel_->createModules( processor_, xml );
-        }
+        //XmlElement* xml = browserPanel_->getSelectedInstrumentXml();
+        //if (xml != nullptr)
+        //{
+        //    int id = xml->getIntAttribute( "id" );
+        //    processor_->loadInstrument( id );
+        //    modulePanel_->createModules( processor_, xml );
+        //}
     }
 
 
@@ -253,7 +253,7 @@ namespace e3 {
         processor_->setInstrumentAttributes( name, value );
 
         if (name == "name" || name == "category" || name == "comment") {
-            browserPanel_->updateContents( processor_->getBankXml() );  // TODO: update only active row
+            browserPanel_->updateContents( processor_->getDatabaseXml() );  // TODO: update only active row
         }
     }
 

@@ -19,12 +19,13 @@ namespace e3 {
     void Settings::load()
     {
         if (file_ == File())
-            setPath("");
+            setPath( "" );
 
         if (file_.existsAsFile() == false)  {
-            parse(getDefaultXml());
-        } else {
-            parse(file_);
+            parse( getDefaultXml() );
+        }
+        else {
+            parse( file_ );
         }
     }
 
@@ -41,52 +42,52 @@ namespace e3 {
     {
         if (file_ == File() || file_.isDirectory() || !file_.getParentDirectory().createDirectory())
             return false;
-        
+
         needsStore_ = false;
-        return root_->writeToFile(file_, String::empty);
+        return root_->writeToFile( file_, String::empty );
     }
 
 
-    XmlElement* Settings::getElement(const string& path) const
+    XmlElement* Settings::getElement( const string& path ) const
     {
         StringArray tokens;
-        tokens.addTokens(StringRef(path), "/", "\"");
+        tokens.addTokens( StringRef( path ), "/", "\"" );
 
         XmlElement* e = root_;
         for (int i = 0; i < tokens.size(); i++)
         {
-            VERIFY(e != nullptr);
-            e = e->getChildByName(tokens[i]);
+            VERIFY( e != nullptr );
+            e = e->getChildByName( tokens[i] );
         }
         return e;
     }
 
 
-    void Settings::setPath(const std::string& path)
+    void Settings::setPath( const std::string& path )
     {
-        if (path.empty()) 
+        if (path.empty())
             file_ = createDefaultFilename();
-        else 
-            file_ = File::getCurrentWorkingDirectory().getChildFile(path.c_str());
+        else
+            file_ = File::getCurrentWorkingDirectory().getChildFile( path.c_str() );
     }
-    
 
-    void Settings::parse(const File& file)
+
+    void Settings::parse( const File& file )
     {
-        XmlDocument doc(file);
+        XmlDocument doc( file );
         root_ = doc.getDocumentElement();
 
         if (checkValid()) return;
-        parse(getDefaultXml());
+        parse( getDefaultXml() );
     }
 
 
-    void Settings::parse(const string& settings)
+    void Settings::parse( const string& settings )
     {
-        XmlDocument doc(settings);
+        XmlDocument doc( settings );
         root_ = doc.getDocumentElement();
         if (checkValid() == false) {
-            THROW(std::invalid_argument, "XML error: %s", doc.getLastParseError().toUTF8());
+            THROW( std::invalid_argument, "XML error: %s", doc.getLastParseError().toUTF8() );
         }
         storeIfNeeded();
         needsStore_ = true;
@@ -100,18 +101,19 @@ namespace e3 {
                 return true;
             }
         }
-        TRACE("Invalid settings file, using default settings");
+        TRACE( "Invalid settings file, using default settings" );
         return false;
     }
 
-    string Settings::createDefaultFilename()
+
+    File Settings::createDefaultFilename()
     {
         PropertiesFile::Options options;
         options.applicationName     = ProjectInfo::projectName;
         options.filenameSuffix      = "settings";
         options.osxLibrarySubFolder = "Preferences";
 
-        return options.getDefaultFile().getFullPathName().toStdString();
+        return options.getDefaultFile();
     }
 
 
@@ -130,7 +132,7 @@ namespace e3 {
     {
         if (root_ != nullptr)
         {
-            forEachXmlChildElementWithTagName( *root_, e, "Style" ) {
+            forEachXmlChildElementWithTagName( *root_, e, "style" ) {
                 if (e->getStringAttribute( "name" ) == name) {
                     return e;
                 }
@@ -138,116 +140,145 @@ namespace e3 {
         }
         return nullptr;
     }
-    
-    
-    std::string Settings::getWindowState( const std::string& context ) const
-    {
-        std::string defaultState = "0 0 1000 700";
-        std::string path = context + "/Window";
-        XmlElement* e = getElement(path);
 
-        return e ? e->getStringAttribute("state", defaultState).toStdString() : defaultState;
+    
+    XmlElement* Settings::getDatabaseXml() const
+    {
+        if (root_ != nullptr)
+        {
+            XmlElement* databaseXml = getElement( "database" );
+            if (databaseXml == nullptr) 
+            {
+                databaseXml = new XmlElement( "database" );
+                databaseXml->setAttribute( "path", "" );
+                root_->addChildElement( databaseXml );
+            }
+            return databaseXml;
+        }
+        return nullptr;
     }
 
 
-    void Settings::setWindowState(const std::string& state, const std::string& context)
+    std::string Settings::getWindowState( const std::string& context ) const
     {
-        std::string path = context + "/Window";
-        XmlElement* e = getElement(path);
-        if (e) e->setAttribute("state", state);
+        std::string defaultState = "0 0 1000 700";
+        std::string path = context + "/window";
+        XmlElement* e = getElement( path );
+
+        return e ? e->getStringAttribute( "state", defaultState ).toStdString() : defaultState;
+    }
+
+
+    void Settings::setWindowState( const std::string& state, const std::string& context )
+    {
+        std::string path = context + "/window";
+        XmlElement* e = getElement( path );
+        if (e) e->setAttribute( "state", state );
     }
 
 
     std::string Settings::getRecentBankPath() const
     {
-        XmlElement* e = getElement("Application");
-        return e->getStringAttribute("RecentBank", "").toStdString();
+        XmlElement* e = getElement( "application" );
+        return e->getStringAttribute( "recent-bank", "" ).toStdString();
     }
 
 
-    void Settings::setRecentBankPath(const std::string& path)
+    void Settings::setRecentBankPath( const std::string& path )
     {
-        XmlElement* e = getElement("Application");
-        e->setAttribute("RecentBank", path);
+        XmlElement* e = getElement( "application" );
+        e->setAttribute( "recent-bank", path );
+    }
+
+
+    std::string Settings::getRecentInstrumentPath() const
+    {
+        XmlElement* e = getElement( "application" );
+        return e->getStringAttribute( "recent-instrument", "" ).toStdString();
+    }
+
+
+    void Settings::setRecentInstrumentPath( const std::string& path )
+    {
+        XmlElement* e = getElement( "application" );
+        e->setAttribute( "recent-instrument", path );
     }
 
 
 #ifdef BUILD_TARGET_APP
 
-    void Settings::loadAudioDevices(AudioDeviceManager* manager, int numInputChannels, int numOutputChannels)
+    void Settings::loadAudioDevices( AudioDeviceManager* manager, int numInputChannels, int numOutputChannels )
     {
         AudioDeviceManager::AudioDeviceSetup setup;
-        manager->getAudioDeviceSetup(setup);
+        manager->getAudioDeviceSetup( setup );
 
-        XmlElement* e          = getElement("Standalone/AudioDeviceState");
-        setup.inputDeviceName  = e->getStringAttribute("InputDeviceName");
-        setup.outputDeviceName = e->getStringAttribute("OutputDeviceName");
-        setup.sampleRate       = e->getDoubleAttribute("SampleRate");
-        setup.bufferSize       = e->getIntAttribute("BufferSize");
+        XmlElement* e          = getElement( "standalone/audio-devices" );
+        setup.inputDeviceName  = e->getStringAttribute( "input-device" );
+        setup.outputDeviceName = e->getStringAttribute( "output-device" );
+        setup.sampleRate       = e->getDoubleAttribute( "samplerate" );
+        setup.bufferSize       = e->getIntAttribute( "buffersize" );
 
-        String deviceType = e->getStringAttribute("DeviceType");
+        String deviceType = e->getStringAttribute( "device-type" );
         manager->getAvailableDeviceTypes();             // force device scan
-        manager->setCurrentAudioDeviceType(deviceType, true);
+        manager->setCurrentAudioDeviceType( deviceType, true );
 
-        String error = manager->initialise(numInputChannels, numOutputChannels, nullptr, true, deviceType, &setup);
+        String error = manager->initialise( numInputChannels, numOutputChannels, nullptr, true, deviceType, &setup );
 
         if (error.isNotEmpty())
         {
-            TRACE("Error initializing audio devices from settings file: %s\n", error);
+            TRACE( "Error initializing audio devices from settings file: %s\n", error );
 
-            error = manager->initialise(numInputChannels, numOutputChannels, nullptr, true);
+            error = manager->initialise( numInputChannels, numOutputChannels, nullptr, true );
             if (error.isNotEmpty()) {
-                THROW(std::runtime_error, "Error initializing default audio devices: %s\n", error);
+                THROW( std::runtime_error, "Error initializing default audio devices: %s\n", error );
             }
         }
-		//AudioIODevice* device = manager->getCurrentAudioDevice();
-		//ASSERT( device );
     }
 
 
-    void Settings::loadMidiDevices(AudioDeviceManager* manager) 
+    void Settings::loadMidiDevices( AudioDeviceManager* manager )
     {
-        const StringArray allMidiIns(MidiInput::getDevices());
+        const StringArray allMidiIns( MidiInput::getDevices() );
         StringArray midiInsFromXml;
 
-        XmlElement* e = getElement("Standalone");
-        forEachXmlChildElementWithTagName(*e, c, "MidiInput") {
-            midiInsFromXml.add(c->getStringAttribute("name"));
+        XmlElement* e = getElement( "standalone" );
+        forEachXmlChildElementWithTagName( *e, c, "midi-input" ) {
+            midiInsFromXml.add( c->getStringAttribute( "name" ) );
         }
 
         for (int i = allMidiIns.size(); --i >= 0;) {
-            manager->setMidiInputEnabled(allMidiIns[i], midiInsFromXml.contains(allMidiIns[i]));
+            manager->setMidiInputEnabled( allMidiIns[i], midiInsFromXml.contains( allMidiIns[i] ) );
         }
     }
-    
 
-    void Settings::storeAudioDevices(AudioDeviceManager* manager) 
+
+    void Settings::storeAudioDevices( AudioDeviceManager* manager )
     {
         AudioDeviceManager::AudioDeviceSetup setup;
-        manager->getAudioDeviceSetup(setup);
+        manager->getAudioDeviceSetup( setup );
 
         XmlElement* e;
-        e = getElement("Standalone/AudioDeviceState");
-        e->setAttribute("DeviceType", manager->getCurrentAudioDeviceType());
-        e->setAttribute("OutputDeviceName", setup.outputDeviceName);
-        e->setAttribute("InputDeviceName", setup.inputDeviceName);
-        e->setAttribute("SampleRate", setup.sampleRate);
-        e->setAttribute("BufferSize", setup.bufferSize);
+        e = getElement( "standalone/audio-devices" );
+        e->setAttribute( "device-type", manager->getCurrentAudioDeviceType() );
+        e->setAttribute( "output-device", setup.outputDeviceName );
+        e->setAttribute( "input-device", setup.inputDeviceName );
+        e->setAttribute( "samplerate", setup.sampleRate );
+        e->setAttribute( "buffersize", setup.bufferSize );
     }
-    
-    
-    void Settings::storeMidiDevices(AudioDeviceManager* manager)
-    {
-        XmlElement* e = getElement("Standalone");
-        e->deleteAllChildElementsWithTagName("MidiInput");
 
-        const StringArray allMidiIns(MidiInput::getDevices());
+
+    void Settings::storeMidiDevices( AudioDeviceManager* manager )
+    {
+        XmlElement* e = getElement( "standalone" );
+        e->deleteAllChildElementsWithTagName( "midi-input" );
+
+        const StringArray allMidiIns( MidiInput::getDevices() );
 
         for (int i = allMidiIns.size(); --i >= 0;) {
-            if (manager->isMidiInputEnabled(allMidiIns[i]))
+            if (manager->isMidiInputEnabled( allMidiIns[i] ))
             {
-                XmlElement* c = e->createNewChildElement("MidiInput");
-                c->setAttribute("name", allMidiIns[i]);
+                XmlElement* c = e->createNewChildElement( "midi-input" );
+                c->setAttribute( "name", allMidiIns[i] );
             }
         }
     }

@@ -13,8 +13,8 @@
 #include <core/Sink.h>
 #include <core/Polyphony.h>
 #include <core/Instrument.h>
-#include <core/Bank.h>
-#include <core/BankSerializer.h>
+#include <core/Database.h>
+#include <core/Serializer.h>
 #include <core/CpuMeter.h>
 #include <modules/ModuleFactory.h>
 #include <modules/AudioOutTerminal.h>
@@ -36,9 +36,9 @@ namespace e3 {
             bool testValid()
             {
                 bool result = true;
-                XmlElement* e = getElement( "Application" );
+                XmlElement* e = getElement( "application" );
                 result &= (nullptr != e);
-                bool autosave = e->getBoolAttribute( "Autosave" );
+                bool autosave = e->getBoolAttribute( "autosave" );
                 result &= autosave;
 
                 return result;
@@ -962,73 +962,73 @@ namespace e3 {
 
 
         //---------------------------------------------------
-        // BankSerializerTest
+        // Serializer
         //---------------------------------------------------
-        class TestableBankSerializer : public BankSerializer
+        class TestablSerializer : public Serializer
         {
         public:
-            using BankSerializer::checkPath;
-            using BankSerializer::checkRoot;
+            using Serializer::checkPath;
+            using Serializer::checkRoot;
         };
 
-        class BankSerializerTest : public ::testing::Test
+        class SerializerTest : public ::testing::Test
         {};
 
 
-        TEST_F( BankSerializerTest, checkPath )
+        TEST_F( SerializerTest, checkPath )
         {
             File file;
             std::string path;
 
-            file = TestableBankSerializer::checkPath( testBank_valid_filename );
+            file = TestableSerializer::checkPath( testBank_valid_filename );
             EXPECT_TRUE( file.existsAsFile() );
 
             path = File::getCurrentWorkingDirectory().getChildFile( testBank_valid_filename ).getFullPathName().toStdString();
-            file = TestableBankSerializer::checkPath( path );
+            file = TestableSerializer::checkPath( path );
             EXPECT_TRUE( file.existsAsFile() );
 
             path = "slime.txt";
-            EXPECT_THROW( TestableBankSerializer::checkPath( path ), std::invalid_argument );
+            EXPECT_THROW( TestableSerializer::checkPath( path ), std::invalid_argument );
 
             path = File::getCurrentWorkingDirectory().getChildFile( path.c_str() ).getFullPathName().toStdString();
-            EXPECT_THROW( TestableBankSerializer::checkPath( path ), std::invalid_argument );
+            EXPECT_THROW( TestableSerializer::checkPath( path ), std::invalid_argument );
         }
 
-        TEST_F( BankSerializerTest, parse_ok )
+        TEST_F( SerializerTest, parse_ok )
         {
             std::unique_ptr<XmlElement> xml;
 
             File file = File::getCurrentWorkingDirectory().getChildFile( testBank_valid_filename );
             xml.reset( XmlDocument::parse( file ) );
             EXPECT_NE( nullptr, xml.get() );
-            TestableBankSerializer::checkRoot( xml.get() );
+            TestableSerializer::checkRoot( xml.get() );
         }
 
 
-        TEST_F( BankSerializerTest, parse_error )
+        TEST_F( SerializerTest, parse_error )
         {
-            File file = File::getCurrentWorkingDirectory().getChildFile( "BankSerializerTest_parse_nofile" );
-            EXPECT_THROW( TestableBankSerializer::checkPath( file.getFullPathName().toStdString() ), std::invalid_argument );
+            File file = File::getCurrentWorkingDirectory().getChildFile( "SerializerTest_parse_nofile" );
+            EXPECT_THROW( TestableSerializer::checkPath( file.getFullPathName().toStdString() ), std::invalid_argument );
 
             file = File::getCurrentWorkingDirectory().getChildFile( testBank_incompatible_xml_filename );
-            EXPECT_THROW( TestableBankSerializer::loadBank( file.getFullPathName().toStdString() ), std::runtime_error );
+            EXPECT_THROW( TestableSerializer::loadBank( file.getFullPathName().toStdString() ), std::runtime_error );
 
             file = File::getCurrentWorkingDirectory().getChildFile( testBank_invalid_xml_filename );
-            EXPECT_THROW( TestableBankSerializer::loadBank( file.getFullPathName().toStdString() ), std::runtime_error );
+            EXPECT_THROW( TestableSerializer::loadBank( file.getFullPathName().toStdString() ), std::runtime_error );
         }
 
         //---------------------------------------------------
-        // BankTest
+        // DatabaseTest
         //---------------------------------------------------
-        class TestableBank : public Bank
+        class TestableDatabase : public Database
         {
         public:
         };
 
-        class BankTest : public ::testing::Test
+        class DatabaseTest : public ::testing::Test
         {
         public:
-            BankTest() {
+            DatabaseTest() {
                 Settings::getInstance().load();
             }
 
@@ -1039,15 +1039,15 @@ namespace e3 {
 
             Polyphony polyphony_;
             Settings settings_;
-            TestableBank bank_;
+            TestableDatabase database_;
 
-            void checkBank( Bank& bank )
+            void checkDatabase( Database& database )
             {
-                ASSERT_NE( nullptr, bank.getXml() );
-                EXPECT_EQ( "test", bank.getName() );
-                EXPECT_EQ( 51, bank.getNumInstruments() );
+                ASSERT_NE( nullptr, database.getXml() );
+                EXPECT_EQ( "test",  database.getName() );
+                EXPECT_EQ( 51,      database.getNumInstruments() );
 
-                XmlElement* xml = bank.getXml();
+                XmlElement* xml = database.getXml();
                 int index = 0;
                 forEachXmlChildElementWithTagName( *xml, e, "instrument" ) 
                 {
@@ -1155,64 +1155,64 @@ namespace e3 {
             }
         };
 
-        TEST_F( BankTest, load_nofile )
+        TEST_F( DatabaseTest, load_nofile )
         {
-            EXPECT_THROW( bank_.load( "BankTest_load_error" ), std::invalid_argument );
+            EXPECT_THROW( database_.load( "DatabaseTest_load_error" ), std::invalid_argument );
         }
 
-        TEST_F( BankTest, load_invalid_xml )
+        TEST_F( DatabaseTest, load_invalid_xml )
         {
-            EXPECT_THROW( bank_.load( testBank_invalid_xml_filename ), std::runtime_error );
+            EXPECT_THROW( database_.load( testBank_invalid_xml_filename ), std::runtime_error );
         }
 
-        TEST_F( BankTest, load_incompatible_xml )
+        TEST_F( DatabaseTest, load_incompatible_xml )
         {
-            EXPECT_THROW( bank_.load( testBank_incompatible_xml_filename ), std::runtime_error );
+            EXPECT_THROW( database_.load( testBank_incompatible_xml_filename ), std::runtime_error );
         }
 
-        TEST_F( BankTest, load_ok )
+        TEST_F( DatabaseTest, load_ok )
         {
-            bank_.load( testBank_valid_filename );
-            checkBank( bank_ );
+            database_.load( testBank_valid_filename );
+            checkDatabase( database_ );
         }
 
-        TEST_F( BankTest, load_multiple )
+        TEST_F( DatabaseTest, load_multiple )
         {
             for (int i = 0; i < 10; i++) {
-                bank_.load( testBank_valid_filename );
-                checkBank( bank_ );
+                database_.load( testBank_valid_filename );
+                checkDatabase( database_ );
             }
         }
 
-        TEST_F( BankTest, load_instrument )
+        TEST_F( DatabaseTest, load_instrument )
         {
-            bank_.load( testBank_valid_filename );
-            int id = bank_.getCurrentInstrumentId();
-            ScopedPointer<Instrument> instrument = bank_.loadInstrument( id );
+            database_.load( testBank_valid_filename );
+            int id = database_.getCurrentInstrumentId();
+            ScopedPointer<Instrument> instrument = database_.loadInstrument( id );
             checkInstrument( instrument );
         }
 
-        TEST_F( BankTest, store )
+        TEST_F( DatabaseTest, store )
         {
             std::string path = makeAbsolutePath( "TestBank_storeTest.e3mb" );
 
-            bank_.load( testBank_valid_filename );
-            bank_.save( path, false, false );
-            bank_.load( path );
-            checkBank( bank_ );
+            database_.load( testBank_valid_filename );
+            database_.save( path, false, false );
+            database_.load( path );
+            checkDatabase( database_ );
 
-            ScopedPointer<Instrument> instrument = bank_.loadInstrument();
+            ScopedPointer<Instrument> instrument = database_.loadInstrument();
             ASSERT_NE( nullptr, instrument );
             instrument->deleteModules();
-            bank_.saveInstrument( instrument );
+            database_.saveInstrument( instrument );
             int id = instrument->id_;
-            bank_.setCurrentInstrumentId( id );
+            database_.setCurrentInstrumentId( id );
 
-            bank_.save( path, false, false );
-            bank_.load( path );
-            EXPECT_EQ( id, bank_.getCurrentInstrumentId() );
+            database_.save( path, false, false );
+            database_.load( path );
+            EXPECT_EQ( id, database_.getCurrentInstrumentId() );
 
-            instrument = bank_.loadInstrument();
+            instrument = database_.loadInstrument();
             ASSERT_NE( nullptr, instrument );
             EXPECT_EQ( id, instrument->id_ );
             EXPECT_EQ( 0, instrument->getModules().size() );
@@ -1220,12 +1220,12 @@ namespace e3 {
         }
 
 
-        TEST_F( BankTest, saveInstrumentAttributes1 )
+        TEST_F( DatabaseTest, saveInstrumentAttributes1 )
         {
-            bank_.load( testBank_valid_filename );
-            checkBank( bank_ );
+            database_.load( testBank_valid_filename );
+            checkDatabase( database_ );
 
-            ScopedPointer<Instrument> instrument = bank_.loadInstrument();
+            ScopedPointer<Instrument> instrument = database_.loadInstrument();
             instrument->name_ = "testName";
             instrument->category_ = "testCategory";
             instrument->comment_ = "testComment";
@@ -1235,14 +1235,14 @@ namespace e3 {
             instrument->setHold( true );
             instrument->setRetrigger( true );
             instrument->setLegato( true );
-            bank_.saveInstrumentAttributes( instrument );
+            database_.saveInstrumentAttributes( instrument );
 
             std::string path = makeAbsolutePath( "TestBank_storeTest.e3mb" );
             File file( path );
             file.deleteFile();
-            bank_.save( path, false, false );
-            bank_.load( path );
-            instrument = bank_.loadInstrument();
+            database_.save( path, false, false );
+            database_.load( path );
+            instrument = database_.loadInstrument();
 
             ASSERT_NE( nullptr, instrument );
             EXPECT_EQ( "testName", instrument->name_ );

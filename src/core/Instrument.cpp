@@ -1,6 +1,7 @@
 
 
 #include "core/Polyphony.h"
+#include "core/Settings.h"
 #include "modules/ModuleFactory.h"
 #include "core/Instrument.h"
 
@@ -11,6 +12,15 @@ namespace e3 {
     {
         modules_.reserve( 100 );
     }
+
+
+    Instrument::Instrument( XmlElement* xml, const std::string& path )
+    {
+        setXml( xml );
+        setPath( path );
+        modules_.reserve( 100 );
+    }
+
 
     Instrument::~Instrument()
     {
@@ -274,5 +284,18 @@ namespace e3 {
         return "";
     }
 
+
+    void Instrument::setPath( const std::string& path ) const
+    {
+        XmlElement* e = Settings::getInstance().getElement( "application" );
+        e->setAttribute( "recent-instrument", path );
+    }
+
+
+    std::string Instrument::getPath() const
+    {
+        XmlElement* e = Settings::getInstance().getElement( "application" );
+        return e->getStringAttribute( "recent-instrument" ).toStdString();
+    }
 
 }  // namespace e3

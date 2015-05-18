@@ -11,7 +11,7 @@ namespace juce {
 
 namespace e3 {
 
-    class Bank;
+    class Database;
     class Instrument;
     class Module;
     class Parameter;
@@ -20,14 +20,20 @@ namespace e3 {
     using juce::XmlElement;
 
 
-    class BankSerializer
+    class Serializer
     {
     public:
         static XmlElement* loadBank( const std::string& path );
+        static XmlElement* loadDatabase( File& file );
+        static bool storeDatabase( XmlElement* xml, const File& file );
+
+        static Instrument* loadInstrument( const std::string& path );
+
         static XmlElement* createNewBank();
         static void saveBank( const std::string& path, XmlElement* root );
 
         static Instrument* loadInstrument( XmlElement* root, int id );
+        static void scanInstrument( XmlElement* databaseXml, const File& file );
         static void saveInstrument( XmlElement* root, Instrument* instrument );
         static void saveInstrumentAttributes( XmlElement* root, Instrument* instrument );
         static void saveInstrumentAttribute( XmlElement* root, int id, const std::string& name, const var value );
@@ -54,10 +60,10 @@ namespace e3 {
         static XmlElement* getAndClearChildElement( XmlElement* e, const std::string& name );
 
         static File checkPath( const std::string& path );
+        static void checkPath( File& file );
         static void checkRoot( XmlElement* root );
 
         static std::string defaultBankXml;
     };
-
 
 } // namespace e3

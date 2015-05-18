@@ -17,49 +17,54 @@ namespace e3 {
         void storeIfNeeded();
 
         XmlElement* getRoot() { return root_; }
-        XmlElement* getElement(const std::string& name) const;
+        XmlElement* getElement( const std::string& name ) const;
 
-        void setPath(const std::string& path);
+        void setPath( const std::string& path );
         const std::string getPath()             { return file_.getFullPathName().toStdString(); }
 
         XmlElement* getStyleXml( const std::string& name = "Default" ) const;
+        XmlElement* getDatabaseXml() const;
 
-        std::string getWindowState(const std::string& context) const;
-        void setWindowState(const std::string& state, const std::string& context);
+        std::string getWindowState( const std::string& context ) const;
+        void setWindowState( const std::string& state, const std::string& context );
 
         std::string getRecentBankPath() const;
-        void setRecentBankPath(const std::string& path);
+        void setRecentBankPath( const std::string& path );
+
+        std::string getRecentInstrumentPath() const;
+        void setRecentInstrumentPath( const std::string& path );
 
 #ifdef BUILD_TARGET_APP
-        void loadAudioDevices(AudioDeviceManager* manager, int numInputChannels, int numOutputChannels);
-        void loadMidiDevices(AudioDeviceManager* manager);
-        void storeAudioDevices(AudioDeviceManager* manager);
-        void storeMidiDevices(AudioDeviceManager* manager);
+        void loadAudioDevices( AudioDeviceManager* manager, int numInputChannels, int numOutputChannels );
+        void loadMidiDevices( AudioDeviceManager* manager );
+        void storeAudioDevices( AudioDeviceManager* manager );
+        void storeMidiDevices( AudioDeviceManager* manager );
 #endif
 
     protected:
         bool checkValid();
-        void parse(const File& file);
-        void parse(const std::string& settings);
+        void parse( const File& file );
+        void parse( const std::string& settings );
 
         std::string getDefaultXml() const;
-        static std::string createDefaultFilename();
+        static File createDefaultFilename();
 
         File file_;
         ScopedPointer<XmlElement> root_;
 
         bool needsStore_ = false;
 
-        const char* rootTagname_ = "E3MSettings";
+        const char* rootTagname_ = "e3m-settings";
         std::string defaultXml_ =
-            "<Application Autosave='1' RecentBank='' Style='Default' />"
-            "<Standalone>"
-            "<WindowState x='10' y='10' w='1000' h='700' />"
-            "<AudioDeviceState DeviceType = '' OutputDeviceName = '' InputDeviceName = '' "
-            "SampleRate = '' BufferSize = '' />"
-            "</Standalone>"
-            "<Plugin>"
-            "<WindowState x='10' y='10' w='1000' h='700' />"
-            "</Plugin>";
+            "<application autosave='1' recent-instrument='' style='Default' />"
+            "<standalone>"
+            "<window state x='10' y='10' w='1000' h='700' />"
+            "<audio-devices device-type = '' output-device = '' input-device = '' "
+            "samplerate = '' buffersize = '' />"
+            "</standalone>"
+            "<plugin>"
+            "<window state x='10' y='10' w='1000' h='700' />"
+            "<database path='' />"
+            "</plugin>";
     };
 } // namespace e3 
