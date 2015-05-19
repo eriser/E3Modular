@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<e3m-database>
+  <instrument path="D:\Dev\C++\Projects\E3Modular\snd\DevInstrument.e3mi">
+    <preset id="0" name="Unnamed" category1="" category2="" category3=""/>
+  </instrument>
+</e3m-database>
