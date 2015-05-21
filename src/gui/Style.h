@@ -57,7 +57,10 @@ namespace e3 {
         {
             BackgroundColourId              = 0x2000000,
             ContentBackground1ColourId      = 0x2000001,
-            ContentBackground2ColourId      = 0x2000002,
+			ContentBackground2ColourId      = 0x2000002,
+			ListBackgroundColourId          = 0x2000003,
+			DarkTextColourId                = 0x2000004,
+			LightTextColourId               = 0x2000005,
             HighlightColourId               = 0x2000010,
 
             MonitorText                     = 0x2000020,

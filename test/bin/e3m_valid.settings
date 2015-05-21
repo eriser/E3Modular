@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <e3m-settings>
-  <application 
-    autosave="1" 
-    recent-bank="D:\Dev\C++\Projects\E3Modular\snd\DevBank.e3mb"
-    recent-instrument="D:\Dev\C++\Projects\E3Modular\snd\DevInstrument.e3mi"
-    style="Default"/>
+  <application autosave-presets="1" autosave-instruments="1" recent-instrument="D:\Dev\C++\Projects\E3Modular\snd\DevInstrument.e3mi"
+               style="Default"/>
   <standalone>
-    <window state="70 58 1043 600"/>
-    <audio-devices device-type="Windows Audio" output-device="Lautsprecher (Realtek High Definition Audio)"
-                      input-device="Mikrofon (Realtek High Definition Audio)" samplerate="44100"
-                      buffersize="448"/>
-    <midi-input name="microKEY-25"/>
+    <window state="70 58 1049 605"/>
+    <audio-devices device-type="Windows Audio" output-device="Lautsprecher (Conexant 20585 SmartAudio HD)"
+                   input-device="Internal Microphone (Conexant 20585 SmartAudio HD)"
+                   samplerate="44100" buffersize="448"/>
+    <midi-input name="microKEY-25 1 KEYBOARD"/>
   </standalone>
   <plugin>
-    <window state="71 85 1041 572"/>
+    <window state="71 85 1047 577"/>
   </plugin>
-  <database>
-    <path>D:\Dev\C++\Projects\E3Modular\snd\</path>
+  <database path="C:\Users\Media\AppData\Roaming\E3M\E3M.e3mdb">
+    <path>D:\Dev\C++\Projects\E3Modular\test\bin</path>
   </database>
   <style name="Default">
     <color argb="ff5f5f60" name="background"/>
     <color argb="ffbebdbb" name="contentBackground1"/>
     <color argb="ff808080" name="contentBackground2"/>
+    <color argb="ffc8c8c8" name="listBackground"/>
     <color argb="ff000000" name="darkText"/>
     <color argb="ffbdbcba" name="lightText"/>
     <color argb="ffd08930" name="highlight"/>

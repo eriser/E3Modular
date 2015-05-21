@@ -14,7 +14,7 @@
 #include <core/Polyphony.h>
 #include <core/Instrument.h>
 #include <core/Database.h>
-#include <core/Serializer.h>
+#include <core/InstrumentSerializer.h>
 #include <core/CpuMeter.h>
 #include <modules/ModuleFactory.h>
 #include <modules/AudioOutTerminal.h>
@@ -24,9 +24,9 @@
 namespace e3 {
     namespace testing {
 
-        const char* testBank_valid_filename            = "TestBank.e3mb";
-        const char* testBank_invalid_xml_filename      = "TestBank_invalid_xml.e3mb";
-        const char* testBank_incompatible_xml_filename = "TestBank_incompatible_xml.e3mb";
+        const char* instrument_valid_file        = "TestInstrument.e3mi_";
+        const char* instrument_invalid_file      = "TestInstrument_invalid.e3mi_";
+        const char* instrument_incompatible_file = "TestInstrument_incompatible.e3mi_";
 
         class TestableSettings : public Settings
         {
@@ -36,12 +36,27 @@ namespace e3 {
             bool testValid()
             {
                 bool result = true;
-                XmlElement* e = getElement( "application" );
-                result &= (nullptr != e);
-                bool autosave = e->getBoolAttribute( "autosave" );
-                result &= autosave;
+				XmlElement* e = nullptr;
 
-                return result;
+				std::string tagNames[] = {
+					"application", "style", "database", "standalone", "plugin",
+					"standalone/window", "plugin/window", "standalone/audio-devices"
+				};
+
+				for( int i = 0; i < ARRAY_SIZE( tagNames ); i++ )
+				{
+					e = getElement( tagNames[i] );
+					result &= ( e != nullptr );
+				}
+
+				e = getElement( "application" );
+                bool autosavePresets = e->getBoolAttribute( "autosave-presets" );
+                result &= autosavePresets;
+				bool autosaveInstruments = e->getBoolAttribute( "autosave-instruments" );
+				result &= autosaveInstruments;
+
+				
+				return result;
             }
         };
 
@@ -578,6 +593,38 @@ namespace e3 {
         }
 
 
+        TEST_F( PresetSetTest, updateSelectedPreset )
+        {
+            set_.selectPreset(0);
+            const Preset& preset1 = set_.getSelectedPreset();
+            ParameterSet& params1 = preset1.getModuleParameters();
+            int c1 = params1.size();
+            params1.addModuleParameter( 3, 7, "Tune", ControlBiSlider, 0 );
+
+            set_.updateSelectedPreset( preset1 );
+            const Preset& preset2 = set_.getSelectedPreset();
+            const ParameterSet& params2 = preset2.getModuleParameters();
+            int c2 = params2.size();
+            EXPECT_NE( c1, c2 );
+        }
+
+        TEST_F( PresetSetTest, copyPreset )
+        {
+            set_.selectPreset( 0 );
+            const Preset& preset1 = set_.getSelectedPreset();
+            ParameterSet& params1 = preset1.getModuleParameters();
+            const Parameter& p1 = params1.addModuleParameter( 3, 7, "Tune", ControlBiSlider, 0 );
+            int c1 = params1.size();
+
+            Preset preset2 = preset1;
+            ParameterSet& params2 = preset2.getModuleParameters();
+            int c2 = params2.size();
+            EXPECT_EQ( c1, c2 );
+
+            const Parameter& p2 = params2.get( 3, 7 );
+            EXPECT_EQ( p1, p2 );
+        }
+
         //----------------------------------------------------------------------------------------
         // ModuleTest
         //----------------------------------------------------------------------------------------
@@ -761,31 +808,350 @@ namespace e3 {
         }
 
 
+		//---------------------------------------------------
+		// InstrumentSerializerTest
+		//---------------------------------------------------
+
+		class TestableInstrument : public Instrument
+		{
+		public:
+			TestableInstrument() : Instrument() {}
+
+			using Instrument::getModule;
+			using Instrument::createUniqueId;
+			using Instrument::hasAudioOutTerminal;
+		};
+
+
+		class TestableInstrumentSerializer : public InstrumentSerializer
+		{
+		public:
+			using InstrumentSerializer::checkPath;
+			using InstrumentSerializer::checkRoot;
+		};
+
+		class InstrumentSerializerTest : public ::testing::Test
+		{
+		public:
+			Polyphony polyphony_;
+
+			InstrumentSerializerTest()
+			{
+				Settings::getInstance().load();
+			}
+
+			std::string makeAbsolutePath( const std::string& filename )
+			{
+				return File::getCurrentWorkingDirectory().getChildFile( StringRef( filename ) ).getFullPathName().toStdString();
+			}
+
+
+			void checkInstrument( Instrument* i )
+			{
+				ASSERT_NE( nullptr, i );
+
+				polyphony_.setNumVoices( i->numVoices_ );
+
+				TestableInstrument* instrument = static_cast<TestableInstrument*>( i );
+				instrument->initModules( 44100, 32, &polyphony_ );
+				instrument->connectModules();
+
+				EXPECT_EQ( "instrument_0", instrument->name_ );
+				EXPECT_EQ( 32, instrument->numVoices_ );
+				ASSERT_EQ( 4, instrument->getNumModules() );
+
+				Module* audioOut = instrument->getModule( 0 );
+				Module* input = instrument->getModule( 1 );
+				Module* sine = instrument->getModule( 2 );
+				Module* adsr = instrument->getModule( 3 );
+
+				EXPECT_NE( nullptr, audioOut );
+				EXPECT_NE( nullptr, input );
+				EXPECT_NE( nullptr, sine );
+				EXPECT_NE( nullptr, adsr );
+
+				EXPECT_EQ( Monophonic, audioOut->getVoicingType() );
+				EXPECT_EQ( Polyphonic, input->getVoicingType() );
+				EXPECT_EQ( Polyphonic, sine->getVoicingType() );
+				EXPECT_EQ( Polyphonic, adsr->getVoicingType() );
+
+				EXPECT_EQ( 1, audioOut->getNumInports() );
+				EXPECT_EQ( 2, input->getNumOutports() );
+				EXPECT_EQ( 2, sine->getNumInports() );
+				EXPECT_EQ( 1, sine->getNumOutports() );
+				EXPECT_EQ( 2, adsr->getNumInports() );
+				EXPECT_EQ( 1, adsr->getNumOutports() );
+
+				EXPECT_EQ( "AudioOut", audioOut->getLabel() );
+				EXPECT_EQ( "MidiInput", input->getLabel() );
+				EXPECT_EQ( "Sine", sine->getLabel() );
+				EXPECT_EQ( "ADSR", adsr->getLabel() );
+
+				EXPECT_EQ( ModuleTypeAudioOutTerminal, audioOut->moduleType_ );
+				EXPECT_EQ( ModuleTypeMidiInput, input->moduleType_ );
+				EXPECT_EQ( ModuleTypeSineOscillator, sine->moduleType_ );
+				EXPECT_EQ( ModuleTypeAdsrEnvelope, adsr->moduleType_ );
+
+				const LinkSet& links = instrument->getLinks();
+				const Link& link = links.get( 0 );
+				ASSERT_EQ( links.size(), 4 );
+				EXPECT_EQ( link.leftModule_, 3 );
+				EXPECT_EQ( link.rightModule_, 0 );
+				EXPECT_EQ( link.leftPort_, 0 );
+				EXPECT_EQ( link.rightPort_, 0 );
+
+				Module* m = instrument->getModule( link.leftModule_ );
+				EXPECT_NE( nullptr, m );
+				EXPECT_EQ( adsr, m );
+				EXPECT_EQ( 3, m->getId() );
+				EXPECT_EQ( ModuleTypeAdsrEnvelope, m->moduleType_ );
+
+				//checkMidiParameters( input->getParameter(0) );
+				//checkMidiParameters( input->getParameter(1) );
+				//checkMidiParameters( input->getParameter(2) );
+				//checkMidiParameters( sine ->getParameter(0) );
+				//checkMidiParameters( sine ->getParameter(1) );
+				//checkMidiParameters( instrument->getLinks()[1] );
+				//checkMidiParameters( adsr->getParameter(0) );
+				//checkMidiParameters( adsr->getParameter(1) );
+				//checkMidiParameters( adsr->getParameter(2) );
+				//checkMidiParameters( adsr->getParameter(3) );
+				//checkMidiParameters( instrument->getLinks()[2] );
+				//checkMidiParameters( instrument->getLinks()[3] );
+
+				LinkList linksForAdsr;
+				instrument->getLinksForModule( adsr->getId(), PortTypeUndefined, linksForAdsr );
+				EXPECT_EQ( 3, linksForAdsr.size() );
+
+				instrument->getLinksForModule( adsr->getId(), PortTypeInport, linksForAdsr );
+				EXPECT_EQ( 2, linksForAdsr.size() );
+
+				instrument->getLinksForModule( adsr->getId(), PortTypeOutport, linksForAdsr );
+				EXPECT_EQ( 1, linksForAdsr.size() );
+
+				Sink sink;
+				EXPECT_NO_THROW( sink.compile( instrument ) );
+				EXPECT_EQ( 4, sink.size() );
+			}
+
+			void checkMidiParameters( const Parameter& model )
+			{
+				EXPECT_EQ( -1, model.midiShaper_.getControllerId() );
+				EXPECT_EQ( 0, model.midiShaper_.getControllerMin() );
+				EXPECT_EQ( 127, model.midiShaper_.getControllerMax() );
+				EXPECT_EQ( false, model.midiShaper_.getSoftTakeover() );
+			}
+		};
+
+
+		TEST_F( InstrumentSerializerTest, load_nofile )
+		{
+			EXPECT_THROW( InstrumentSerializer::loadInstrument( "non_existing_file" ), std::invalid_argument );
+		}
+
+		TEST_F( InstrumentSerializerTest, load_invalid_xml )
+		{
+			EXPECT_EQ( nullptr, InstrumentSerializer::loadInstrument( instrument_invalid_file ));
+		}
+
+		TEST_F( InstrumentSerializerTest, load_incompatible_xml )
+		{
+			EXPECT_THROW( InstrumentSerializer::loadInstrument( instrument_incompatible_file ), std::runtime_error );
+		}
+
+
+		TEST_F( InstrumentSerializerTest, checkPath )
+		{
+			File file;
+			std::string path;
+
+			file = TestableInstrumentSerializer::checkPath( instrument_valid_file );
+			EXPECT_TRUE( file.existsAsFile() );
+
+			path = File::getCurrentWorkingDirectory().getChildFile( instrument_valid_file ).getFullPathName().toStdString();
+			file = TestableInstrumentSerializer::checkPath( path );
+			EXPECT_TRUE( file.existsAsFile() );
+
+			path = "slime.txt";
+			EXPECT_THROW( TestableInstrumentSerializer::checkPath( path ), std::invalid_argument );
+
+			path = File::getCurrentWorkingDirectory().getChildFile( path.c_str() ).getFullPathName().toStdString();
+			EXPECT_THROW( TestableInstrumentSerializer::checkPath( path ), std::invalid_argument );
+		}
+
+		TEST_F( InstrumentSerializerTest, parse_ok )
+		{
+			std::unique_ptr<XmlElement> xml;
+
+			File file = File::getCurrentWorkingDirectory().getChildFile( instrument_valid_file );
+			xml.reset( XmlDocument::parse( file ) );
+			EXPECT_NE( nullptr, xml.get() );
+			TestableInstrumentSerializer::checkRoot( xml.get() );
+		}
+
+
+		TEST_F( InstrumentSerializerTest, parse_error )
+		{
+			File file = File::getCurrentWorkingDirectory().getChildFile( "InstrumentSerializerTest_parse_nofile" );
+			EXPECT_THROW( TestableInstrumentSerializer::checkPath( file.getFullPathName().toStdString()), std::invalid_argument);
+			
+			file = File::getCurrentWorkingDirectory().getChildFile( instrument_incompatible_file );
+			EXPECT_THROW( TestableInstrumentSerializer::loadInstrument( file.getFullPathName().toStdString()), std::runtime_error); 
+			
+			file = File::getCurrentWorkingDirectory().getChildFile( instrument_invalid_file );
+			EXPECT_EQ( nullptr, TestableInstrumentSerializer::loadInstrument( file.getFullPathName().toStdString()));
+		}
+
+
+		TEST_F( InstrumentSerializerTest, check_instrument )
+		{
+			ScopedPointer<Instrument> instrument = InstrumentSerializer::loadInstrument( instrument_valid_file );
+			checkInstrument( instrument );
+		}
+
+		TEST_F( InstrumentSerializerTest, store )
+		{
+			std::string tempPath = makeAbsolutePath( "InstrumentTest_temp.e3mi_" );
+			std::string validPath = makeAbsolutePath( instrument_valid_file );
+
+			ScopedPointer<Instrument> instrument = InstrumentSerializer::loadInstrument( validPath );
+			InstrumentSerializer::saveInstrument( instrument );
+			instrument = InstrumentSerializer::loadInstrument( validPath );
+			checkInstrument( instrument );
+			File( tempPath ).deleteFile();
+		}
+
+
+		TEST_F( InstrumentSerializerTest, deleteAllModules )
+		{
+			std::string tempPath = makeAbsolutePath( "InstrumentTest_temp.e3mi_" );
+			std::string validPath = makeAbsolutePath( instrument_valid_file );
+
+			ScopedPointer<Instrument> instrument = InstrumentSerializer::loadInstrument( validPath );
+			instrument->deleteModules();
+			instrument->setFilePath( tempPath );
+			InstrumentSerializer::saveInstrument( instrument );
+
+			instrument = InstrumentSerializer::loadInstrument( tempPath );
+			ASSERT_NE( nullptr, instrument );
+			EXPECT_EQ( 0, instrument->getModules().size() );
+			EXPECT_EQ( 0, instrument->getLinks().size() );
+
+			XmlElement* xml = instrument->getXml();
+			std::string tagNames[] = { "panel", "modules", "links" };
+			for( int i = 0; i < ARRAY_SIZE( tagNames ); i++ )
+			{
+				XmlElement* e = xml->getChildByName( StringRef(tagNames[i]) );
+				int numChildren = e->getNumChildElements();
+				EXPECT_EQ( 0, numChildren );
+			}
+
+			File( tempPath ).deleteFile();
+		}
+
+
+		TEST_F( InstrumentSerializerTest, deleteSingleModule )
+		{
+			std::string tempPath = makeAbsolutePath( "InstrumentTest_temp.e3mi_" );
+			std::string validPath = makeAbsolutePath( instrument_valid_file );
+			int moduleId = 2;
+
+			ScopedPointer<Instrument> instrument = InstrumentSerializer::loadInstrument( validPath );
+			Module* module = instrument->getModule( moduleId );		// sine oscillator
+			ASSERT_NE( nullptr, module );
+
+			instrument->deleteModule( module );
+			instrument->setFilePath( tempPath );
+			InstrumentSerializer::saveInstrument( instrument );
+
+			instrument = InstrumentSerializer::loadInstrument( tempPath );
+			ASSERT_NE( nullptr, instrument );
+			EXPECT_EQ( 3, instrument->getModules().size() );
+
+			LinkList list;
+			instrument->getLinksForModule( moduleId, PortTypeUndefined, list );
+			EXPECT_EQ( 0, list.size() );
+
+			ParameterSet& p = instrument->getCurrentPreset().getModuleParameters();
+			for( ParameterSet::const_iterator it = p.moduleFirst( moduleId ); it != p.moduleLast( moduleId ); ) {
+				THROW( std::runtime_error, "Not all module parameters for module were deleted" );
+			}
+
+			p = instrument->getCurrentPreset().getLinkParameters();
+			for( ParameterSet::const_iterator it = p.moduleFirst( moduleId ); it != p.moduleLast( moduleId ); ) {
+				THROW( std::runtime_error, "Not all link parameters for module were deleted" );
+			}
+
+			XmlElement* xml = instrument->getXml();
+			XmlElement* e = xml->getChildByName( "panel" );
+			int numChildren = e->getNumChildElements();
+			EXPECT_EQ( 3, numChildren );
+
+			File( tempPath ).deleteFile();
+		}
+
+		TEST_F( InstrumentSerializerTest, saveInstrumentAttributes1 )
+		{
+			std::string path = makeAbsolutePath( "InstrumentTest_temp.e3mi_" );
+
+			ScopedPointer<Instrument> instrument = InstrumentSerializer::loadInstrument( instrument_valid_file );
+			instrument->name_ = "testName";
+			instrument->setNumVoices( 17 );
+			instrument->setNumUnison( 18 );
+			instrument->setUnisonSpread( 19 );
+			instrument->setHold( true );
+			instrument->setRetrigger( true );
+			instrument->setLegato( true );
+			instrument->setFilePath( path );
+
+			InstrumentSerializer::saveAttributes( instrument );
+
+			File file( path );
+			file.deleteFile();
+			InstrumentSerializer::saveInstrument( instrument );
+			instrument = InstrumentSerializer::loadInstrument( path );
+
+			ASSERT_NE( nullptr, instrument );
+			EXPECT_EQ( "testName", instrument->name_ );
+			EXPECT_EQ( 17, instrument->numVoices_ );
+			EXPECT_EQ( 18, instrument->numUnison_ );
+			EXPECT_EQ( 19, instrument->unisonSpread_ );
+			EXPECT_TRUE( instrument->hold_ );
+			EXPECT_TRUE( instrument->retrigger_ );
+			EXPECT_TRUE( instrument->legato_ );
+
+			instrument->name_ = "instrument_0";
+			instrument->setNumVoices( 32 );
+			checkInstrument( instrument );
+		}
+
+
+
         //----------------------------------------------------------------------------------------
         // InstrumentTest
         //----------------------------------------------------------------------------------------
 
-        class TestableInstrument : public Instrument
-        {
-        public:
-            TestableInstrument() : Instrument() {}
-
-            using Instrument::getModule;
-            using Instrument::createUniqueId;
-            using Instrument::hasAudioOutTerminal;
-        };
-
         class InstrumentTest : public ::testing::Test
         {
         public:
-            InstrumentTest()
-            {
-                for (uint16_t i = 0; i < ARRAY_SIZE( testModuleTypes ); i++)
-                {
-                    instrument_.createAndAddModule( testModuleTypes[i] );
-                }
-                instrument_.name_ = "testInstrument";
-            }
+			TestableInstrument instrument_;
+
+
+            InstrumentTest()  
+			{
+				for( uint16_t i = 0; i < ARRAY_SIZE( testModuleTypes ); i++ )
+				{
+					instrument_.createAndAddModule( testModuleTypes[i] );
+				}
+				instrument_.name_ = "testInstrument";
+			}
+
+
+			std::string makeAbsolutePath( const std::string& filename )
+			{
+				return File::getCurrentWorkingDirectory().getChildFile( StringRef( filename ) ).getFullPathName().toStdString();
+			}
+
 
             bool testModuleIdsAreUnique( const Instrument& instrument )
             {
@@ -810,27 +1176,25 @@ namespace e3 {
                 ModuleType type( static_cast<ModuleType>(types[r]) );
                 return type;
             }
-
-            TestableInstrument instrument_;
         };
 
 
         TEST_F( InstrumentTest, deleteModules )
         {
-            instrument_.deleteModules();
+			instrument_.deleteModules();
             EXPECT_EQ( 0, instrument_.getNumModules() );
         }
 
 
         TEST_F( InstrumentTest, getModule )
         {
-            Module* m = instrument_.getModule( 2 );
+			Module* m = instrument_.getModule( 2 );
             EXPECT_NE( nullptr, m );
         }
 
         TEST_F( InstrumentTest, createUniqueId )
         {
-            Module* m = nullptr;
+			Module* m = nullptr;
 
             uint16_t id = instrument_.createUniqueId( ModuleTypeAudioOutTerminal );
             EXPECT_EQ( ModuleTypeAudioOutTerminal, id );
@@ -857,13 +1221,13 @@ namespace e3 {
 
         TEST_F( InstrumentTest, hasAudioOutTerminal )
         {
-            EXPECT_TRUE( instrument_.hasAudioOutTerminal() );
+			EXPECT_TRUE( instrument_.hasAudioOutTerminal() );
         }
 
 
         TEST_F( InstrumentTest, addAndRemoveLink )
         {
-            const Preset& preset     = instrument_.getPreset();
+			const Preset& preset     = instrument_.getCurrentPreset();
             ParameterSet& parameters = preset.getLinkParameters();
             LinkSet& links           = instrument_.getLinks();
 
@@ -893,7 +1257,7 @@ namespace e3 {
 
         TEST_F( InstrumentTest, sendOverPortsManySources )
         {
-            instrument_.deleteModules();
+			instrument_.deleteModules();
             Polyphony polyphony;
 
             Module* audioOut = instrument_.createAndAddModule( ModuleTypeAudioOutTerminal );
@@ -925,7 +1289,7 @@ namespace e3 {
 
         TEST_F( InstrumentTest, sendOverPortsManyTargets )
         {
-            instrument_.deleteModules();
+			instrument_.deleteModules();
             Polyphony polyphony;
 
             Module* sine = instrument_.createAndAddModule( ModuleTypeSineOscillator );
@@ -958,306 +1322,6 @@ namespace e3 {
                 double value   = *inport->getAudioBuffer();
                 EXPECT_EQ( 1173, value );
             }
-        }
-
-
-        //---------------------------------------------------
-        // Serializer
-        //---------------------------------------------------
-        class TestablSerializer : public Serializer
-        {
-        public:
-            using Serializer::checkPath;
-            using Serializer::checkRoot;
-        };
-
-        class SerializerTest : public ::testing::Test
-        {};
-
-
-        TEST_F( SerializerTest, checkPath )
-        {
-            File file;
-            std::string path;
-
-            file = TestableSerializer::checkPath( testBank_valid_filename );
-            EXPECT_TRUE( file.existsAsFile() );
-
-            path = File::getCurrentWorkingDirectory().getChildFile( testBank_valid_filename ).getFullPathName().toStdString();
-            file = TestableSerializer::checkPath( path );
-            EXPECT_TRUE( file.existsAsFile() );
-
-            path = "slime.txt";
-            EXPECT_THROW( TestableSerializer::checkPath( path ), std::invalid_argument );
-
-            path = File::getCurrentWorkingDirectory().getChildFile( path.c_str() ).getFullPathName().toStdString();
-            EXPECT_THROW( TestableSerializer::checkPath( path ), std::invalid_argument );
-        }
-
-        TEST_F( SerializerTest, parse_ok )
-        {
-            std::unique_ptr<XmlElement> xml;
-
-            File file = File::getCurrentWorkingDirectory().getChildFile( testBank_valid_filename );
-            xml.reset( XmlDocument::parse( file ) );
-            EXPECT_NE( nullptr, xml.get() );
-            TestableSerializer::checkRoot( xml.get() );
-        }
-
-
-        TEST_F( SerializerTest, parse_error )
-        {
-            File file = File::getCurrentWorkingDirectory().getChildFile( "SerializerTest_parse_nofile" );
-            EXPECT_THROW( TestableSerializer::checkPath( file.getFullPathName().toStdString() ), std::invalid_argument );
-
-            file = File::getCurrentWorkingDirectory().getChildFile( testBank_incompatible_xml_filename );
-            EXPECT_THROW( TestableSerializer::loadBank( file.getFullPathName().toStdString() ), std::runtime_error );
-
-            file = File::getCurrentWorkingDirectory().getChildFile( testBank_invalid_xml_filename );
-            EXPECT_THROW( TestableSerializer::loadBank( file.getFullPathName().toStdString() ), std::runtime_error );
-        }
-
-        //---------------------------------------------------
-        // DatabaseTest
-        //---------------------------------------------------
-        class TestableDatabase : public Database
-        {
-        public:
-        };
-
-        class DatabaseTest : public ::testing::Test
-        {
-        public:
-            DatabaseTest() {
-                Settings::getInstance().load();
-            }
-
-            std::string makeAbsolutePath( const std::string& filename )
-            {
-                return File::getCurrentWorkingDirectory().getChildFile( StringRef(filename)).getFullPathName().toStdString();
-            }
-
-            Polyphony polyphony_;
-            Settings settings_;
-            TestableDatabase database_;
-
-            void checkDatabase( Database& database )
-            {
-                ASSERT_NE( nullptr, database.getXml() );
-                EXPECT_EQ( "test",  database.getName() );
-                EXPECT_EQ( 51,      database.getNumInstruments() );
-
-                XmlElement* xml = database.getXml();
-                int index = 0;
-                forEachXmlChildElementWithTagName( *xml, e, "instrument" ) 
-                {
-                    std::ostringstream os;
-                    os << "instrument_" << index++;
-                    std::string name = e->getStringAttribute( "name" ).toStdString();
-                    EXPECT_EQ( os.str(), name );
-                }
-            }
-
-            void checkInstrument( Instrument* i )
-            {
-                ASSERT_NE( nullptr, i );
-
-                polyphony_.setNumVoices( i->numVoices_ );
-
-                TestableInstrument* instrument = static_cast<TestableInstrument*>(i);
-                instrument->initModules( 44100, 32, &polyphony_ );
-                instrument->connectModules();
-
-                EXPECT_EQ( "instrument_0", instrument->name_ );
-                EXPECT_EQ( 32, instrument->numVoices_ );
-                ASSERT_EQ( 4, instrument->getNumModules() );
-
-                Module* audioOut = instrument->getModule( 0 );
-                Module* input    = instrument->getModule( 1 );
-                Module* sine     = instrument->getModule( 2 );
-                Module* adsr     = instrument->getModule( 3 );
-
-                EXPECT_NE( nullptr, audioOut );
-                EXPECT_NE( nullptr, input );
-                EXPECT_NE( nullptr, sine );
-                EXPECT_NE( nullptr, adsr );
-
-                EXPECT_EQ( Monophonic, audioOut->getVoicingType() );
-                EXPECT_EQ( Polyphonic, input->getVoicingType() );
-                EXPECT_EQ( Polyphonic, sine->getVoicingType() );
-                EXPECT_EQ( Polyphonic, adsr->getVoicingType() );
-
-                EXPECT_EQ( 1, audioOut->getNumInports() );
-                EXPECT_EQ( 2, input->getNumOutports() );
-                EXPECT_EQ( 2, sine->getNumInports() );
-                EXPECT_EQ( 1, sine->getNumOutports() );
-                EXPECT_EQ( 2, adsr->getNumInports() );
-                EXPECT_EQ( 1, adsr->getNumOutports() );
-
-                EXPECT_EQ( "AudioOut", audioOut->getLabel() );
-                EXPECT_EQ( "MidiInput", input->getLabel() );
-                EXPECT_EQ( "Sine", sine->getLabel() );
-                EXPECT_EQ( "ADSR", adsr->getLabel() );
-
-                EXPECT_EQ( ModuleTypeAudioOutTerminal, audioOut->moduleType_ );
-                EXPECT_EQ( ModuleTypeMidiInput, input->moduleType_ );
-                EXPECT_EQ( ModuleTypeSineOscillator, sine->moduleType_ );
-                EXPECT_EQ( ModuleTypeAdsrEnvelope, adsr->moduleType_ );
-
-                const LinkSet& links = instrument->getLinks();
-                const Link& link = links.get( 0 );
-                ASSERT_EQ( links.size(), 4 );
-                EXPECT_EQ( link.leftModule_, 3 );
-                EXPECT_EQ( link.rightModule_, 0 );
-                EXPECT_EQ( link.leftPort_, 0 );
-                EXPECT_EQ( link.rightPort_, 0 );
-
-                Module* m = instrument->getModule( link.leftModule_ );
-                EXPECT_NE( nullptr, m );
-                EXPECT_EQ( adsr, m );
-                EXPECT_EQ( 3, m->getId() );
-                EXPECT_EQ( ModuleTypeAdsrEnvelope, m->moduleType_ );
-
-                //checkMidiParameters( input->getParameter(0) );
-                //checkMidiParameters( input->getParameter(1) );
-                //checkMidiParameters( input->getParameter(2) );
-                //checkMidiParameters( sine ->getParameter(0) );
-                //checkMidiParameters( sine ->getParameter(1) );
-                //checkMidiParameters( instrument->getLinks()[1] );
-                //checkMidiParameters( adsr->getParameter(0) );
-                //checkMidiParameters( adsr->getParameter(1) );
-                //checkMidiParameters( adsr->getParameter(2) );
-                //checkMidiParameters( adsr->getParameter(3) );
-                //checkMidiParameters( instrument->getLinks()[2] );
-                //checkMidiParameters( instrument->getLinks()[3] );
-
-                LinkList linksForAdsr;
-                instrument->getLinksForModule( adsr->getId(), PortTypeUndefined, linksForAdsr );
-                EXPECT_EQ( 3, linksForAdsr.size() );
-
-                instrument->getLinksForModule( adsr->getId(), PortTypeInport, linksForAdsr );
-                EXPECT_EQ( 2, linksForAdsr.size() );
-                
-                instrument->getLinksForModule( adsr->getId(), PortTypeOutport, linksForAdsr );
-                EXPECT_EQ( 1, linksForAdsr.size() );
-
-                Sink sink;
-                EXPECT_NO_THROW( sink.compile( instrument ) );
-                EXPECT_EQ( 4, sink.size() );
-            }
-
-            void checkMidiParameters( const Parameter& model )
-            {
-                EXPECT_EQ( -1, model.midiShaper_.getControllerId() );
-                EXPECT_EQ( 0, model.midiShaper_.getControllerMin() );
-                EXPECT_EQ( 127, model.midiShaper_.getControllerMax() );
-                EXPECT_EQ( false, model.midiShaper_.getSoftTakeover() );
-            }
-        };
-
-        TEST_F( DatabaseTest, load_nofile )
-        {
-            EXPECT_THROW( database_.load( "DatabaseTest_load_error" ), std::invalid_argument );
-        }
-
-        TEST_F( DatabaseTest, load_invalid_xml )
-        {
-            EXPECT_THROW( database_.load( testBank_invalid_xml_filename ), std::runtime_error );
-        }
-
-        TEST_F( DatabaseTest, load_incompatible_xml )
-        {
-            EXPECT_THROW( database_.load( testBank_incompatible_xml_filename ), std::runtime_error );
-        }
-
-        TEST_F( DatabaseTest, load_ok )
-        {
-            database_.load( testBank_valid_filename );
-            checkDatabase( database_ );
-        }
-
-        TEST_F( DatabaseTest, load_multiple )
-        {
-            for (int i = 0; i < 10; i++) {
-                database_.load( testBank_valid_filename );
-                checkDatabase( database_ );
-            }
-        }
-
-        TEST_F( DatabaseTest, load_instrument )
-        {
-            database_.load( testBank_valid_filename );
-            int id = database_.getCurrentInstrumentId();
-            ScopedPointer<Instrument> instrument = database_.loadInstrument( id );
-            checkInstrument( instrument );
-        }
-
-        TEST_F( DatabaseTest, store )
-        {
-            std::string path = makeAbsolutePath( "TestBank_storeTest.e3mb" );
-
-            database_.load( testBank_valid_filename );
-            database_.save( path, false, false );
-            database_.load( path );
-            checkDatabase( database_ );
-
-            ScopedPointer<Instrument> instrument = database_.loadInstrument();
-            ASSERT_NE( nullptr, instrument );
-            instrument->deleteModules();
-            database_.saveInstrument( instrument );
-            int id = instrument->id_;
-            database_.setCurrentInstrumentId( id );
-
-            database_.save( path, false, false );
-            database_.load( path );
-            EXPECT_EQ( id, database_.getCurrentInstrumentId() );
-
-            instrument = database_.loadInstrument();
-            ASSERT_NE( nullptr, instrument );
-            EXPECT_EQ( id, instrument->id_ );
-            EXPECT_EQ( 0, instrument->getModules().size() );
-            EXPECT_EQ( 0, instrument->getLinks().size() );
-        }
-
-
-        TEST_F( DatabaseTest, saveInstrumentAttributes1 )
-        {
-            database_.load( testBank_valid_filename );
-            checkDatabase( database_ );
-
-            ScopedPointer<Instrument> instrument = database_.loadInstrument();
-            instrument->name_ = "testName";
-            instrument->category_ = "testCategory";
-            instrument->comment_ = "testComment";
-            instrument->setNumVoices( 17 );
-            instrument->setNumUnison( 18 );
-            instrument->setUnisonSpread( 19 );
-            instrument->setHold( true );
-            instrument->setRetrigger( true );
-            instrument->setLegato( true );
-            database_.saveInstrumentAttributes( instrument );
-
-            std::string path = makeAbsolutePath( "TestBank_storeTest.e3mb" );
-            File file( path );
-            file.deleteFile();
-            database_.save( path, false, false );
-            database_.load( path );
-            instrument = database_.loadInstrument();
-
-            ASSERT_NE( nullptr, instrument );
-            EXPECT_EQ( "testName", instrument->name_ );
-            EXPECT_EQ( "testCategory", instrument->category_ );
-            EXPECT_EQ( "testComment", instrument->comment_ );
-            EXPECT_EQ( 17, instrument->numVoices_ );
-            EXPECT_EQ( 18, instrument->numUnison_ );
-            EXPECT_EQ( 19, instrument->unisonSpread_ );
-            EXPECT_TRUE( instrument->hold_ );
-            EXPECT_TRUE( instrument->retrigger_ );
-            EXPECT_TRUE( instrument->legato_ );
-
-            instrument->name_ = "instrument_0";
-            instrument->setNumVoices( 32 );
-            checkInstrument( instrument );
         }
 
 

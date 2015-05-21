@@ -48,19 +48,62 @@ namespace e3 {
     }
 
 
+	void Preset::update( const Preset& other ) const
+	{
+		moduleParameters_ = other.moduleParameters_;
+		linkParameters_   = other.linkParameters_;
+	}
+
+
+	void Preset::clear() const
+	{
+		moduleParameters_.clear();
+		linkParameters_.clear();
+	}
+
+
+    bool Preset::empty() const 
+    { 
+        return moduleParameters_.empty() && linkParameters_.empty(); 
+    }
+
+
 
     //-----------------------------------------------------
     // class PresetSet
     //-----------------------------------------------------
 
-    const Preset& PresetSet::get( int id )
-    {
-        const_iterator pos = find( id );
-        if (pos != end()) {
-            return *pos;
-        }
-        else THROW( std::out_of_range, "No Preset found with id=%d", id );
-    }
+	const Preset& PresetSet::getSelectedPreset() const
+	{
+		const_iterator pos = find( selectedPresetId_ );
+		if( pos != end() ) {
+			return *pos;
+		}
+		else THROW( std::out_of_range, "No Preset found with id=%d", selectedPresetId_ );
+	}
+
+
+	void PresetSet::updateSelectedPreset( const Preset& newPreset )
+	{
+		const_iterator pos = find( selectedPresetId_ );
+		if( pos != end() ) 
+		{
+			const Preset& preset = *pos;
+			preset.update( newPreset );
+		}
+	}
+
+
+	void PresetSet::clearSelectedPreset()
+	{
+		const_iterator pos = find( selectedPresetId_ );
+		if( pos != end() )
+		{
+			const Preset& preset = *pos;
+			preset.clear();
+		}
+	}
+
 
 
     void PresetSet::remove( int id )
@@ -69,6 +112,17 @@ namespace e3 {
         ASSERT( pos != end() );
         if (pos != end()) {
             erase( pos );
+        }
+    }
+
+
+    void PresetSet::renamePreset( int id, const std::string& name )
+    {
+        const_iterator pos = find( id );
+        ASSERT( pos != end() );
+        if (pos != end()) {
+            const Preset& preset = *pos;
+            preset.setName( name );
         }
     }
 
@@ -117,6 +171,20 @@ namespace e3 {
         }
         THROW( std::runtime_error, "Can not insert Preset with non-unique id" );
     }
+
+
+    void PresetSet::addPreset( Preset& preset )
+    {
+        int id = createUniqueId();
+        preset.setId( id );
+        auto result = insert( preset );
+
+        if (result.second == false) {
+            THROW( std::runtime_error, "Can not insert Preset" );
+        }
+        selectPreset( id );
+    }
+
 
 
 } // namespace e3

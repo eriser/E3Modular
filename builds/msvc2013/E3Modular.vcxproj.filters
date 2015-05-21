@@ -159,7 +159,10 @@
     <ClInclude Include="..\..\src\core\Database.h">
       <Filter>src\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\core\Serializer.h">
+    <ClInclude Include="..\..\src\gui\DatabaseBrowser.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\InstrumentSerializer.h">
       <Filter>src\core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -293,7 +296,10 @@
     <ClCompile Include="..\..\src\core\Database.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\Serializer.cpp">
+    <ClCompile Include="..\..\src\gui\DatabaseBrowser.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\InstrumentSerializer.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
   </ItemGroup>

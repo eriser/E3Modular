@@ -28,11 +28,11 @@ namespace e3 {
         std::string getWindowState( const std::string& context ) const;
         void setWindowState( const std::string& state, const std::string& context );
 
-        std::string getRecentBankPath() const;
-        void setRecentBankPath( const std::string& path );
-
         std::string getRecentInstrumentPath() const;
         void setRecentInstrumentPath( const std::string& path );
+
+		bool getAutosavePresets() const;
+		bool getAutosaveInstruments() const;
 
 #ifdef BUILD_TARGET_APP
         void loadAudioDevices( AudioDeviceManager* manager, int numInputChannels, int numOutputChannels );
@@ -55,16 +55,17 @@ namespace e3 {
         bool needsStore_ = false;
 
         const char* rootTagname_ = "e3m-settings";
-        std::string defaultXml_ =
-            "<application autosave='1' recent-instrument='' style='Default' />"
-            "<standalone>"
-            "<window state x='10' y='10' w='1000' h='700' />"
-            "<audio-devices device-type = '' output-device = '' input-device = '' "
-            "samplerate = '' buffersize = '' />"
-            "</standalone>"
-            "<plugin>"
-            "<window state x='10' y='10' w='1000' h='700' />"
-            "<database path='' />"
-            "</plugin>";
+		std::string defaultXml_ =
+			"<application autosave-presets='1' autosave-instruments='1' recent-instrument='' style='Default' />"
+			"<database path='' />"
+			"<standalone>"
+			"<window state='10 10 1000 700' />"
+			"<audio-devices device-type = '' output-device = '' input-device = '' "
+			"samplerate = '' buffersize = '' />"
+			"</standalone>"
+			"<plugin>"
+			"<window state='10 10 1000 700' />"
+			"</plugin>"
+			"<style />";
     };
 } // namespace e3 

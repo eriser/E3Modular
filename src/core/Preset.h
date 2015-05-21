@@ -22,21 +22,23 @@ namespace e3 {
             name_( name )
         {}
 
-        //void addModuleParameter( const Parameter& p ) const;
-        //void addLinkParameter( const Parameter& p ) const;
-        //void removeLinkParameter( int linkId, int moduleId ) const;
+        bool operator<(const Preset& other) const     { return id_ < other.id_; }
 
         void addParameterSet( const ParameterSet& set ) const;
+		void update( const Preset& other ) const;
+		void clear() const;
 
-        ParameterSet& getModuleParameters() const             { return moduleParameters_; }
-        ParameterSet& getLinkParameters() const               { return linkParameters_; }
+        ParameterSet& getModuleParameters() const     { return moduleParameters_; }
+        ParameterSet& getLinkParameters() const       { return linkParameters_; }
 
-        bool operator<(const Preset& other) const             { return id_ < other.id_; }
 
-        int getId() const                                     { return id_; }
+        int getId() const                             { return id_; }
+        void setId( int id )                          { id_ = id; }
 
-        const std::string& getName() const                    { return name_; }
-        void setName( const std::string& name ) const         { name_ = name; }
+        const std::string& getName() const            { return name_; }
+        void setName( const std::string& name ) const { name_ = name; }
+
+        bool empty() const;
 
     protected:
         int id_ = 0;
@@ -47,21 +49,32 @@ namespace e3 {
     };
 
 
+
     //-----------------------------------------------------------------
-    // class PresetList
+    // class PresetSet
     //---------------------------------------------------------------- -
 
     class PresetSet : public std::set < Preset >
     {
     public:
-        const Preset& get( int id );
+		const Preset& getSelectedPreset() const;
+		void updateSelectedPreset( const Preset& newPreset );
+		void clearSelectedPreset();
+
         void remove( int id );
+        void renamePreset( int id, const std::string& name );
         const Preset& addPreset(int id, const std::string& name="");
+        void addPreset( Preset& preset );
         bool contains( int id ) const;
+
+		void selectPreset( int id ) const  { selectedPresetId_ = id; }
+		int getSelectedPresetId() const	   { return selectedPresetId_; }
 
     protected:
         const_iterator find( int id ) const;
         int createUniqueId();
+
+		mutable int selectedPresetId_ = -1;
     };
 
 

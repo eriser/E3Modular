@@ -59,7 +59,6 @@ namespace e3 {
         void portAction( PortComponent* port, PortAction action, const Point<int>& pos );
 
         Processor* getProcessor() const;
-        XmlElement* getPanelXml() const;
 
         Gallant::Signal1<Instrument*> showInstrumentSignal;
         Gallant::Signal2<Instrument*, Module*> showModuleSignal;
@@ -67,6 +66,9 @@ namespace e3 {
     protected:
         ModuleComponent* createModuleComponent( Module* module, int x, int y );
         void createWires( LinkSet& links );
+		Instrument* getInstrument() const;
+		XmlElement* getPanelXml() const;
+
 
         void showPopupMenu( Point<int> pos );
         PopupMenu createPopupMenu();

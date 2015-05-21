@@ -5,6 +5,7 @@
 #include "core/Settings.h"
 #include "core/Processor.h"
 #include "core/Polyphony.h"
+#include "core/Database.h"
 #include "gui/Style.h"
 #include "gui/Resources.h"
 #include "gui/EditorPanel.h"
@@ -13,6 +14,7 @@
 #include "gui/BrowserPanel.h"
 #include "gui/SetupPanel.h"
 #include "gui/InstrumentBrowser.h"
+#include "gui/DatabaseBrowser.h"
 #include "gui/TabComponent.h"
 #include "gui/MonitorComponent.h"
 
@@ -39,6 +41,8 @@ namespace e3 {
         connectSignals();
         
         //browserPanel_->updateContents( processor_->getDatabaseXml() );
+		Database::getInstance().build();
+		databaseBrowser_->update();
         modulePanel_->createModules( processor_ );
     }
 
@@ -130,15 +134,15 @@ namespace e3 {
     void AudioEditor::createComponents()
     {
         modulePanel_       = new ModulePanel();
-        parameterPanel_    = new ParameterPanel();
+		parameterPanel_    = new ParameterPanel( processor_ );
         editorPanel_       = new EditorPanel();
         browserPanel_      = new BrowserPanel();
         setupPanel_        = new SetupPanel();
         instrumentBrowser_ = new InstrumentBrowser();
-        presetBrowser_     = new Component();
+        databaseBrowser_   = new DatabaseBrowser();
 
         editorPanel_->setComponents( modulePanel_, parameterPanel_ );
-        browserPanel_->setComponents( instrumentBrowser_, presetBrowser_ );
+		browserPanel_->setComponents( instrumentBrowser_, databaseBrowser_ );
 
         tabPanel_ = new TabComponent( TabbedButtonBar::TabsAtBottom, 10 );
         tabPanel_->addTab( "Editor", Colours::transparentBlack, editorPanel_, false, kEditorPanel );
@@ -167,9 +171,6 @@ namespace e3 {
 
         modulePanel_->showInstrumentSignal.Connect( parameterPanel_.get(), &ParameterPanel::showInstrument );
         modulePanel_->showModuleSignal.Connect( parameterPanel_.get(), &ParameterPanel::showModule );
-
-        parameterPanel_->instrumentAttributesSignal.Connect( this, &AudioEditor::parameterPanelAttributesChanged );
-        instrumentBrowser_->instrumentAttributesSignal.Connect( this, &AudioEditor::browserPanelAttributesChanged );
     }
 
 
@@ -178,9 +179,6 @@ namespace e3 {
         modulePanel_->showInstrumentSignal.Disconnect( parameterPanel_.get(), &ParameterPanel::showInstrument );
         modulePanel_->showModuleSignal.Disconnect( parameterPanel_.get(), &ParameterPanel::showModule );
 
-        parameterPanel_->instrumentAttributesSignal.Disconnect( this, &AudioEditor::parameterPanelAttributesChanged );
-        instrumentBrowser_->instrumentAttributesSignal.Disconnect( this, &AudioEditor::browserPanelAttributesChanged );
-
         processor_->getPolyphony()->monitorUpdateSignal.Disconnect( monitor_.get(), &MonitorComponent::monitor );
     }
 
@@ -188,48 +186,49 @@ namespace e3 {
     void AudioEditor::onOpenBank()
     {
         // TODO: store current ModulePanel
-        FileChooser fc( "Open Bank",
-            File::getCurrentWorkingDirectory(),
-            "*.e3mb",
-            true );
+        //FileChooser fc( "Open Bank",
+        //    File::getCurrentWorkingDirectory(),
+        //    "*.e3mb",
+        //    true );
 
-        if (fc.browseForFileToOpen())
-        {
-            std::string path = fc.getResult().getFullPathName().toStdString();
-            processor_->loadBank( path );
-            browserPanel_->updateContents( processor_->getDatabaseXml() );
-            processor_->loadInstrument();
-            modulePanel_->createModules( processor_ );
-        }
+        //if (fc.browseForFileToOpen())
+        //{
+        //    std::string path = fc.getResult().getFullPathName().toStdString();
+        //    processor_->loadBank( path );
+        //    browserPanel_->updateContents( processor_->getDatabaseXml() );
+        //    processor_->loadInstrument();
+        //    modulePanel_->createModules( processor_ );
+        //}
     }
 
 
     void AudioEditor::onSaveBank( bool askForFilename )
     {
-        if (askForFilename)
-        {
-            FileChooser fc( "Save Bank As",
-                File::getCurrentWorkingDirectory(),
-                "*.e3mb",
-                true );
+		UNUSED( askForFilename );
+		//if (askForFilename)
+        //{
+        //    FileChooser fc( "Save Bank As",
+        //        File::getCurrentWorkingDirectory(),
+        //        "*.e3mb",
+        //        true );
 
-            if (fc.browseForFileToSave( true ))
-            {
-                File file = fc.getResult();
-                processor_->saveBank( file.getFullPathName().toStdString() );
-            }
-        }
-        else {
-            processor_->saveBank();
-        }
+        //    if (fc.browseForFileToSave( true ))
+        //    {
+        //        File file = fc.getResult();
+        //        processor_->saveBank( file.getFullPathName().toStdString() );
+        //    }
+        //}
+        //else {
+        //    processor_->saveBank();
+        //}
     }
 
 
     void AudioEditor::onNewBank()
     {
-        processor_->newBank();
-        browserPanel_->updateContents( processor_->getDatabaseXml() );
-        processor_->loadInstrument();
+        //processor_->newBank();
+        //browserPanel_->updateContents( processor_->getDatabaseXml() );
+        //processor_->loadInstrument();
     }
 
 
@@ -242,30 +241,6 @@ namespace e3 {
         //    processor_->loadInstrument( id );
         //    modulePanel_->createModules( processor_, xml );
         //}
-    }
-
-
-    void AudioEditor::parameterPanelAttributesChanged( const std::string& name, var value )
-    {
-        TRACE( "AudioEditor::parameterPanelAttributesChanged: name=%s, value=%s\n",
-            name.c_str(), value.toString().toRawUTF8() );
-
-        processor_->setInstrumentAttributes( name, value );
-
-        if (name == "name" || name == "category" || name == "comment") {
-            browserPanel_->updateContents( processor_->getDatabaseXml() );  // TODO: update only active row
-        }
-    }
-
-
-    void AudioEditor::browserPanelAttributesChanged( int instrumentId, const std::string& name, var value )
-    {
-        ASSERT( name == "name" || name == "category" || name == "comment" );
-        TRACE( "AudioEditor::parameterPanelAttributesChanged: name=%s, value=%s\n",
-            name.c_str(), value.toString().toRawUTF8() );
-
-        processor_->setInstrumentAttribute( instrumentId, name, value );
-        parameterPanel_->showInstrument(processor_->getInstrument());
     }
 
 } // namespace e3

@@ -3,6 +3,7 @@
 
 #include "core/Processor.h"
 #include "core/Instrument.h"
+#include "core/InstrumentSerializer.h"
 #include "modules/ModuleFactory.h"
 #include "gui/Style.h"
 #include "gui/ModuleComponent.h"
@@ -35,7 +36,7 @@ namespace e3 {
         Instrument* instrument = processor_->getInstrument();
         XmlElement* panelXml   = getPanelXml();
 
-        if (panelXml != nullptr && instrument != nullptr)
+        if (panelXml != nullptr)
         {
             forEachXmlChildElementWithTagName( *panelXml, e, "module" )
             {
@@ -378,21 +379,7 @@ namespace e3 {
 
     void ModulePanel::saveModulePosition( int moduleId, Point<int> pos, bool isNewModule )
     {
-        XmlElement* panelXml = getPanelXml();
-        if (panelXml != nullptr) 
-        {
-            XmlElement* e = panelXml->getChildByAttribute( "id", String( moduleId ) );
-            ASSERT( (isNewModule && e == nullptr) || e != nullptr );
-
-            if (e == nullptr && isNewModule) 
-            {
-                e = panelXml->createNewChildElement( "module" );
-                e->setAttribute( "id", moduleId );
-            }
-            if (e != nullptr) {
-                e->setAttribute( "pos", pos.toString() );
-            }
-        }
+		InstrumentSerializer::saveModuleComponent( getInstrument(), moduleId, pos, isNewModule );
     }
 
 
@@ -413,8 +400,8 @@ namespace e3 {
 
         switch (result)
         {
-        case MenuSelectAll: panel->selectAll(); break;
-        case MenuUnselectAll: panel->deselectAll(); break;
+        case MenuSelectAll:    panel->selectAll(); break;
+        case MenuUnselectAll:  panel->deselectAll(); break;
         case MenuModuleDelete: panel->deleteSelectedModules(); break;
 
         default: if (result >= MenuSubModuleFirst)
@@ -454,19 +441,23 @@ namespace e3 {
 
     Processor* ModulePanel::getProcessor() const    { return processor_; }
 
+
+	Instrument* ModulePanel::getInstrument() const 
+	{
+		if( processor_ == nullptr ) return nullptr;
+		return processor_->getInstrument();
+	}
+
+
     XmlElement* ModulePanel::getPanelXml() const
     {
-        if (processor_) {
-            Instrument* instrument = processor_->getInstrument();
-            if (instrument) {
-                XmlElement* xml = instrument->getXml();
-                if (xml) {
-                    return xml->getChildByName( "panel" );
-                }
-            }
-        }
-        ASSERT( false );
-        return nullptr;
+		Instrument* instrument = getInstrument();
+		if( instrument == nullptr )  return nullptr;
+
+		XmlElement* xml = instrument->getXml();
+		if( xml == nullptr ) return nullptr;
+
+		return xml->getChildByName( "panel" );
     }
 
 

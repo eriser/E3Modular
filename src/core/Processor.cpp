@@ -3,9 +3,9 @@
 
 #include "gui/AudioEditor.h"
 #include "core/Settings.h"
+#include "core/InstrumentSerializer.h"
 #include "core/CpuMeter.h"
 #include "core/Polyphony.h"
-#include "core/Database.h"
 #include "core/Instrument.h"
 #include "core/Sink.h"
 
@@ -24,7 +24,6 @@ namespace e3 {
 
     Processor::Processor() : AudioProcessor(),
         polyphony_( new Polyphony() ),
-        database_( new Database() ),
         sink_( new Sink() ),
         cpuMeter_( new CpuMeter() )
     {
@@ -43,11 +42,9 @@ namespace e3 {
     {
         sink_->setSampleRate( sampleRate );
         cpuMeter_->setSampleRate( (uint32_t)sampleRate );
-        database_->build();
 
         if (instrument_ == nullptr)
         {
-            //loadBank( Settings::getInstance().getRecentBankPath() );
             loadInstrument( Settings::getInstance().getRecentInstrumentPath() );
         }
         else {
@@ -63,7 +60,7 @@ namespace e3 {
 
     void Processor::releaseResources()
     {
-        saveBank();
+        saveInstrument();
     }
 
 
@@ -98,28 +95,12 @@ namespace e3 {
     // Database, Instrument, Modules
     //-----------------------------------------------------
 
-    XmlElement* Processor::getDatabaseXml() const
+    void Processor::saveInstrument( const std::string& path )
     {
-        return (database_ != nullptr) ? database_->getXml() : nullptr;
-    }
-
-
-    void Processor::loadBank( const std::string& path )
-    {
-        database_->load( path );
-    }
-
-
-    void Processor::newBank()
-    {
-        database_->createNewBank();
-    }
-
-
-    void Processor::saveBank( const std::string& path )
-    {
-        //database_->saveInstrument( instrument_ );
-        //database_->save( path );
+		if( path.empty() == false ) {
+			instrument_->setFilePath( path );
+		}
+		InstrumentSerializer::saveInstrument( instrument_ );
     }
 
 
@@ -128,34 +109,10 @@ namespace e3 {
         suspend();
 
         if (instrument_ != nullptr && saveCurrent) {
-            database_->saveInstrument( instrument_ );
+			saveInstrument();
         }
 
-        instrument_ = database_->loadInstrument( path );        // this calls instrument::ctor first!
-        if (instrument_ != nullptr)
-        {
-            polyphony_->setNumVoices( instrument_->numVoices_ );
-            polyphony_->setNumUnison( instrument_->numUnison_ );
-            polyphony_->setUnisonSpread( instrument_->unisonSpread_ );
-            polyphony_->setHold( instrument_->hold_ );
-            polyphony_->setRetrigger( instrument_->retrigger_ );
-            polyphony_->setLegato( instrument_->legato_ );
-
-            initInstrument();
-        }
-
-        resume();
-    }
-
-    void Processor::loadInstrument( int id, bool saveCurrent )
-    {
-        suspend();
-
-        if (instrument_ != nullptr && saveCurrent) {
-            database_->saveInstrument( instrument_ );
-        }
-
-        instrument_ = database_->loadInstrument( id );        // this calls instrument::ctor first!
+		instrument_ = InstrumentSerializer::loadInstrument( path );        // this calls instrument::ctor first!
         if (instrument_ != nullptr)
         {
             polyphony_->setNumVoices( instrument_->numVoices_ );
@@ -195,12 +152,12 @@ namespace e3 {
     }
 
 
-    bool Processor::addLink( Link& link )
+	bool Processor::addLink( Link& link )
     {
         suspend();
         try {
             instrument_->addLink( link );
-            database_->saveInstrumentLinks( instrument_ );
+			InstrumentSerializer::saveLinks( instrument_ );
             resetAndInitInstrument();
         }
         catch (const std::exception& e) {
@@ -218,7 +175,7 @@ namespace e3 {
         suspend();
         try {
             instrument_->removeLink( link );
-            database_->saveInstrumentLinks( instrument_ );
+			InstrumentSerializer::saveLinks( instrument_ );
             resetAndInitInstrument();
         }
         catch (const std::exception& e) 
@@ -236,7 +193,7 @@ namespace e3 {
         Module* module = nullptr;
         try {
             module = instrument_->createAndAddModule( (ModuleType)moduleType );
-            database_->saveInstrument( instrument_ );
+            saveInstrument();
         }
         catch (const std::exception& e) 
         {
@@ -255,7 +212,7 @@ namespace e3 {
         suspend();
         try {
             instrument_->deleteModule( module );
-            database_->saveInstrument( instrument_ );
+            saveInstrument();
             resetAndInitInstrument();
         }
         catch (const std::exception& e) 
@@ -268,14 +225,12 @@ namespace e3 {
     }
 
 
-    void Processor::setInstrumentAttributes( const std::string& name, const var& value )
+    void Processor::setInstrumentAttribute( const std::string& name, const var& value )
     {
         ASSERT( instrument_ );
         if (instrument_ == nullptr) return;
 
-        if (name == "name")          instrument_->name_     = value.toString().toStdString();
-        else if (name == "category") instrument_->category_ = value.toString().toStdString();
-        else if (name == "comment")  instrument_->comment_  = value.toString().toStdString();
+        if (name == "name")          instrument_->name_ = value.toString().toStdString();
 
         else if (name == "numVoices") {
             setNumVoices( value );
@@ -300,19 +255,10 @@ namespace e3 {
             instrument_->setLegato( value );
             polyphony_->setLegato( value );
         }
-        database_->saveInstrumentAttributes( instrument_ );
+		InstrumentSerializer::saveAttribute( instrument_, name, value );
     }
 
 
-    void Processor::setInstrumentAttribute( int instrumentId, const std::string& name, const var& value )
-    {
-        if (instrument_ != nullptr && instrumentId == instrument_->id_) {
-            setInstrumentAttributes( name, value );
-        }
-        database_->saveInstrumentAttribute( instrumentId, name, value );
-    }
-
-    
     void Processor::setNumVoices( int numVoices )
     {
         suspend();

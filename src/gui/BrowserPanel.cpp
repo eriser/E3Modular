@@ -3,15 +3,16 @@
 #include "CommandTarget.h"
 #include "gui/TabComponent.h"
 #include "gui/InstrumentBrowser.h"
+#include "gui/DatabaseBrowser.h"
 #include "gui/BrowserPanel.h"
 
 
 namespace e3
 {
-    void BrowserPanel::setComponents( InstrumentBrowser* instrumentBrowser, Component* presetBrowser )
+    void BrowserPanel::setComponents( InstrumentBrowser* instrumentBrowser, DatabaseBrowser* browser )
     {
         instrumentBrowser_ = instrumentBrowser;
-        presetBrowser_     = presetBrowser;
+		browser_           = browser;
 
         instrumentBrowser_->addColumn( "Id", InstrumentBrowser::IdColumn, 20 );
         instrumentBrowser_->addColumn( "Name", InstrumentBrowser::NameColumn, 200 );
@@ -19,8 +20,8 @@ namespace e3
         instrumentBrowser_->addColumn( "Comment",  InstrumentBrowser::CommentColumn, 200 );
 
         tabPanel_ = new TabComponent( TabbedButtonBar::TabsAtTop, 10 );
-        tabPanel_->addTab( "Instruments", Colours::transparentBlack, instrumentBrowser_, false, 0 );
-        tabPanel_->addTab( "Presets", Colours::transparentBlack, presetBrowser_, false, 1 );
+		tabPanel_->addTab( "Database", Colours::transparentBlack, browser_, false, 0 );
+		tabPanel_->addTab( "Instruments", Colours::transparentBlack, instrumentBrowser_, false, 1 );
         addAndMakeVisible( tabPanel_ );
 
         openButton_.setButtonText( "Open" );

@@ -20,7 +20,6 @@ namespace e3 {
 
     class CpuMeter;
     class Polyphony;
-    class Database;
     class Instrument;
     class Sink;
     class Module;
@@ -85,12 +84,9 @@ namespace e3 {
         bool suspend();
         void resume( bool nested = false );
 
-        void loadBank( const std::string& path );
-        void newBank();
-        void saveBank( const std::string& path = "" );
-        void loadInstrument( int id = -1, bool saveCurrent = true );
+        void saveInstrument( const std::string& path = "" );
         void loadInstrument( const std::string& path, bool saveCurrent = true );
-
+		
         bool addLink( Link& link );
         void removeLink( const Link& link );
 
@@ -98,10 +94,7 @@ namespace e3 {
         void deleteModule( Module* module );
 
         Instrument* getInstrument() const   { return instrument_; }
-        XmlElement* getDatabaseXml() const;
-
-        void setInstrumentAttributes( const std::string& name, const var& value );
-        void setInstrumentAttribute( int instrumentId, const std::string& name, const var& value );
+        void setInstrumentAttribute( const std::string& attrName, const var& value );
 
         Gallant::Signal2<int, int> midiControllerSignal;
 
@@ -113,7 +106,6 @@ namespace e3 {
 
 
         Sink* sink_ = nullptr;
-        ScopedPointer<Database> database_;
         ScopedPointer<Polyphony> polyphony_;
         ScopedPointer<Instrument> instrument_;
         ScopedPointer<CpuMeter> cpuMeter_;

@@ -65,7 +65,8 @@ namespace e3 {
         setColour( ToggleButtonBackgroundColourId, colourMap["toggleButtonBackground"] );
         setColour( ToggleButtonTickColourId, colourMap["toggleButtonTick"] );
 
-        setColour( ComboBox::backgroundColourId, colourMap["comboBoxBackground"] );
+		setColour( ComboBox::backgroundColourId, colourMap["comboBoxBackground"] );
+		setColour( ComboBox::textColourId, colourMap["lightText"] );
         setColour( ComboBox::outlineColourId, colourMap["comboBoxOutline"] );
         setColour( ComboBox::arrowColourId, colourMap["comboBoxArrow"] );
 
@@ -79,7 +80,7 @@ namespace e3 {
         setColour( TabbedButtonBar::frontOutlineColourId, Colours::transparentBlack );
         setColour( TabbedButtonBar::frontTextColourId, colourMap["buttonOnText"] );
 
-        setColour( ListBox::backgroundColourId, colourMap["contentBackground2"] );
+        setColour( ListBox::backgroundColourId, colourMap["listBackground"] );
         setColour( ListBox::outlineColourId, Colours::transparentBlack );
         setColour( ListBox::textColourId, colourMap["lightText"] );
 
@@ -96,8 +97,12 @@ namespace e3 {
         // custom colours
         setColour( BackgroundColourId, colourMap["background"] );
         setColour( ContentBackground1ColourId, colourMap["contentBackground1"] );
-        setColour( ContentBackground2ColourId, colourMap["contentBackground2"] );
+		setColour( ContentBackground2ColourId, colourMap["contentBackground2"] );
+		setColour( ListBackgroundColourId, colourMap["listBackground"] );
         setColour( HighlightColourId, colourMap["highlight"] );
+		setColour( DarkTextColourId, colourMap["darkText"] );
+		setColour( LightTextColourId, colourMap["lightText"] );
+
         setColour( TabButtonOffBackgroundColourId, colourMap["buttonOffBackground"] );
         setColour( TabButtonOnBackgroundColourId, colourMap["buttonOnBackground"] );
         setColour( TabButtonOffTextColourId, colourMap["buttonOffText"] );

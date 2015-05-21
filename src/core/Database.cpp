@@ -3,211 +3,162 @@
 #include <e3_Trace.h>
 #include "JuceHeader.h"
 
-#include "core/Serializer.h"
 #include "core/Settings.h"
-#include "core/Instrument.h"
 #include "core/Database.h"
 
 
 namespace e3 {
 
+	Database& Database::getInstance()
+	{
+		static Database instance;
+		return instance;
+	}
+
+
     void Database::build( bool force )
     {
-        File databaseFile = getDatabaseFilename();
+		instruments_.clear();
+		presets_.clear();
+		category1_.clear();
+		category2_.clear();
+		category3_.clear();
+		
+		File databaseFile = getDatabaseFilename();
 
-        if (force == false) {
-            databaseXml_ = Serializer::loadDatabase( databaseFile );
-        } else {
-            databaseXml_ = nullptr;
-        }
+		UNUSED( force );
+		//if (force == false) {
+        //    databaseXml_ = load( databaseFile );
+        //} else {
+        //    databaseXml_ = nullptr;
+        //}
 
+		databaseXml_ = nullptr;
         XmlElement* settingsXml = Settings::getInstance().getDatabaseXml();
 
         if (databaseXml_ != nullptr && databaseXml_->getNumChildElements() || settingsXml == nullptr) {
             return;
         }
 
+		int count = 0;
         forEachXmlChildElementWithTagName( *settingsXml, e, "path" )
         {
-            File directory(e->getAllSubText());
+			File directory( e->getAllSubText() );
             DirectoryIterator iter( directory, true, "*.e3mi" );
             while (iter.next())
             {
                 File instrumentFile( iter.getFile() );
-                Serializer::scanInstrument( databaseXml_, instrumentFile );
+                //scanInstrument( databaseXml_, instrumentFile, count );
+				scanInstrument( instrumentFile, count );
+				count++;
             }
         }
-        Serializer::storeDatabase( databaseXml_, databaseFile );
+		databaseXml_ != nullptr ? databaseXml_->writeToFile( databaseFile, "", "UTF-8", 1000 ) : false;
     }
 
 
-    void Database::load( const std::string& path )
-    {
-        if (path.empty()) {
-            createNewBank();
-        }
-        else {
-            XmlElement* root = Serializer::loadBank( path );
-            if (root != nullptr) {
-                setPath( path );
-                setXml( root );
-            }
-        }
-    }
+	XmlElement* Database::load( File& file )
+	{
+		XmlElement* root = XmlDocument::parse( file );
+
+		if( root == nullptr || root->hasTagName( "e3m-database" ) == false ) {
+			if( root ) delete root;
+			root = nullptr;
+		}
+		if( root == nullptr ) {
+			root = new XmlElement( "e3m-database" );
+		}
+		return root;
+	}
 
 
-    void Database::save( const std::string& path, bool saveCurrent, bool makeBackup )
-    {
-        std::string p = path.empty() ? getPath() : path;
-        if (hasLoaded() == false || p.empty()) {
-            return;
-        }
+	void Database::scanInstrument( XmlElement* databaseXml, const File& file, int count )
+	{
+		XmlElement* instrumentXml = nullptr;
+		ScopedPointer<XmlElement> root = XmlDocument::parse( file );
 
-        UNUSED( saveCurrent );
-        UNUSED( makeBackup );
-        //if (saveCurrent)
-        //saveCurrentInstrument();
+		if( root != nullptr )
+		{
+			try {
+				instrumentXml = new XmlElement( "instrument" );
+				instrumentXml->setAttribute( "path", file.getFullPathName() );
+				instrumentXml->setAttribute( "name", root->getStringAttribute( "name" ) );
+				instrumentXml->setAttribute( "id", count );
 
-        //if (makeBackup)
-        //makeBackup();
-
-        Serializer::saveBank( p, getXml() );
-        setPath( p );
-    }
-
-
-    void Database::createNewBank()
-    {
-        XmlElement* root = Serializer::createNewBank();
-        setXml( root );
-        setPath( "" );
-    }
-
-
-    Instrument* Database::createNewInstrument()
-    {
-        return nullptr;     // TODO: implement Database::createNewInstrument
-    }
-
-
-    void Database::append( Instrument* instrument )
-    {
-        bool isNull = (nullptr == instrument);
-        ASSERT( !isNull );
-
-        //if (!isNull) instrumentList_.push_back(instrument);
-    }
+				XmlElement* presetsXml = root->getChildByName( "presets" );
+				if( presetsXml != nullptr )
+				{
+					forEachXmlChildElementWithTagName( *presetsXml, e, "preset" )
+					{
+						XmlElement* presetXml = new XmlElement( "preset" );
+						presetXml->setAttribute( "instrumentId", count );
+						presetXml->setAttribute( "presetId", e->getIntAttribute( "id" ) );
+						presetXml->setAttribute( "name", e->getStringAttribute( "name" ) );
+						presetXml->setAttribute( "category1", e->getStringAttribute( "category1" ) );
+						presetXml->setAttribute( "category2", e->getStringAttribute( "category2" ) );
+						presetXml->setAttribute( "category3", e->getStringAttribute( "category3" ) );
+						
+						instrumentXml->addChildElement( presetXml );
+					}
+				}
+			}
+			catch( const std::exception& e ) {  // parse error
+				TRACE( e.what() );
+				if( instrumentXml != nullptr ) delete instrumentXml;
+				return;
+			}
+			databaseXml->addChildElement( instrumentXml );
+		}
+	}
 
 
-    Instrument* Database::loadInstrument( int id )
-    {
-        id = (id == -1) ? getCurrentInstrumentId() : id;
+	void Database::scanInstrument( const File& file, int count )
+	{
+		ScopedPointer<XmlElement> root = XmlDocument::parse( file );
 
-        Instrument* instrument = Serializer::loadInstrument( getXml(), id );
-        if (instrument != nullptr) {
-            setCurrentInstrumentId( instrument->id_ );
-        }
-        return instrument;
-    }
+		if( root != nullptr )
+		{
+			try {
+				Instrument i;
+				i.id   = count;
+				i.file = file;
+				i.name = root->getStringAttribute( "name" );
 
+				auto result = instruments_.insert( i );
+				ASSERT( result.second == true );
 
-    Instrument* Database::loadInstrument( const std::string& path )
-    {
-        return path.empty() ? createNewInstrument() : Serializer::loadInstrument( path );
-    }
+				XmlElement* presetsXml = root->getChildByName( "presets" );
+				if( presetsXml != nullptr )
+				{
+					forEachXmlChildElementWithTagName( *presetsXml, e, "preset" )
+					{
+						Preset p;
+						p.instrumentId = i.id;
+						p.presetId     = e->getIntAttribute( "id" );
+						p.name         = e->getStringAttribute( "name" );
 
+						p.category1.name = e->getStringAttribute( "category1" );
+						p.category2.name = e->getStringAttribute( "category2" );
+						p.category3.name = e->getStringAttribute( "category3" );
 
-    void Database::saveInstrument( Instrument* instrument )
-    {
-        Serializer::saveInstrument( getXml(), instrument );
-    }
-
-
-    void Database::saveInstrumentAttributes( Instrument* instrument )
-    {
-        Serializer::saveInstrumentAttributes( getXml(), instrument );
-    }
-
-
-    void Database::saveInstrumentAttribute( int instrumentId, const std::string& name, const var& value )
-    {
-        Serializer::saveInstrumentAttribute( getXml(), instrumentId, name, value );
-    }
-
-
-    void Database::saveInstrumentLinks( Instrument* instrument )
-    {
-        Serializer::saveInstrumentLinks( getXml(), instrument );
-    }
-
-
-    XmlElement* Database::getXml()
-    {
-        return bankXml_.get();
-    }
-
-
-    void Database::setXml( XmlElement* xml )
-    {
-        bankXml_.reset( xml );
-    }
-
-
-    void Database::setCurrentInstrumentId( int id )
-    {
-        if (bankXml_ != nullptr) {
-            bankXml_->setAttribute( "instrument", id );
-        }
-    }
-
-
-    int Database::getCurrentInstrumentId() const
-    {
-        return (bankXml_ != nullptr) ? bankXml_->getIntAttribute( "instrument" ) : 0;
-    }
-
-
-    void Database::setPath( const std::string& path )
-    {
-        XmlElement* e = Settings::getInstance().getElement( "application" );
-        e->setAttribute( "RecentBank", path );
-    }
-
-
-    std::string Database::getPath()
-    {
-        XmlElement* e = Settings::getInstance().getElement( "application" );
-        return e->getStringAttribute( "RecentBank" ).toStdString();
-    }
-
-
-    const std::string Database::getName() const
-    {
-        return (bankXml_ != nullptr) ? bankXml_->getStringAttribute( "name" ).toStdString() : "";
-    }
-
-
-    void Database::setName( const std::string& name )
-    {
-        if (bankXml_ != nullptr) {
-            bankXml_->setAttribute( "name", name );
-        }
-    }
-
-
-    bool Database::hasLoaded() const
-    {
-        return bankXml_ != nullptr;
-    }
-
-
-    int Database::getNumInstruments() const
-    {
-        return (bankXml_ != nullptr) ? bankXml_->getNumChildElements() : 0;
-    }
-
-
-    File Database::createDefaultFilename()
+						auto result = presets_.insert( p );
+						if( result.second ) {
+							category1_.insert( p.category1 );
+							category2_.insert( p.category2 );
+							category3_.insert( p.category3 );
+						}
+					}
+				}
+			}
+			catch( const std::exception& e ) {  // parse error
+				TRACE( e.what() );
+				return;
+			}
+		}
+	}
+	
+	
+	File Database::createDefaultFilename()
     {
         PropertiesFile::Options options;
         options.applicationName     = ProjectInfo::projectName;

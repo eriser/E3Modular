@@ -33,4 +33,14 @@ namespace e3 {
         int maxValue_ = std::numeric_limits<int>::max();
     };
 
+
+    class EditableComboBox : public ComboBox
+    {
+    public:
+        void labelTextChanged( Label* label ) override
+        {
+            ComboBox::labelTextChanged( label );
+        }
+    };
+
 } // namespace e3

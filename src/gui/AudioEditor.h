@@ -24,6 +24,7 @@ namespace e3 {
     class BrowserPanel;
     class SetupPanel;
     class InstrumentBrowser;
+	class DatabaseBrowser;
     class MonitorComponent;
 
 
@@ -38,9 +39,6 @@ namespace e3 {
         void createIcon(Image& image);
 
         bool perform(const InvocationInfo& info) override;      // Implementation for ApplicationCommandTarget
-
-        void parameterPanelAttributesChanged( const std::string& attributeName, var value );
-        void browserPanelAttributesChanged( int instrumentId, const std::string& attributeName, var value );
 
     private:
         void restoreWindowState();
@@ -68,7 +66,7 @@ namespace e3 {
         ScopedPointer<ModulePanel> modulePanel_;
         ScopedPointer<ParameterPanel> parameterPanel_;
         ScopedPointer<InstrumentBrowser> instrumentBrowser_;
-        ScopedPointer<Component> presetBrowser_;
+        ScopedPointer<DatabaseBrowser> databaseBrowser_;
         ScopedPointer<MonitorComponent> monitor_;
         ScopedPointer<ResizableCornerComponent> resizer_;
 

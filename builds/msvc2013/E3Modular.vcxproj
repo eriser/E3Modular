@@ -434,7 +434,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='App_Release|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\src\core\Database.h" />
-    <ClInclude Include="..\..\src\core\Serializer.h" />
+    <ClInclude Include="..\..\src\core\InstrumentSerializer.h" />
     <ClInclude Include="..\..\src\core\GlobalHeader.h" />
     <ClInclude Include="..\..\src\core\Link.h" />
     <ClInclude Include="..\..\src\core\MonitorUpdater.h" />
@@ -455,6 +455,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClInclude Include="..\..\src\gui\AudioEditor.h" />
     <ClInclude Include="..\..\src\gui\BrowserPanel.h" />
     <ClInclude Include="..\..\src\gui\CommandTarget.h" />
+    <ClInclude Include="..\..\src\gui\DatabaseBrowser.h" />
     <ClInclude Include="..\..\src\gui\EditableTableCell.h" />
     <ClInclude Include="..\..\src\gui\InstrumentBrowser.h" />
     <ClInclude Include="..\..\src\gui\ModuleComponent.h">
@@ -521,7 +522,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VST_Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\core\Database.cpp" />
-    <ClCompile Include="..\..\src\core\Serializer.cpp" />
+    <ClCompile Include="..\..\src\core\InstrumentSerializer.cpp" />
     <ClCompile Include="..\..\src\core\CpuMeter.cpp" />
     <ClCompile Include="..\..\src\core\Link.cpp" />
     <ClCompile Include="..\..\src\core\Module.cpp" />
@@ -541,6 +542,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\gui\AudioEditor.cpp" />
     <ClCompile Include="..\..\src\gui\BrowserPanel.cpp" />
     <ClCompile Include="..\..\src\gui\CommandTarget.cpp" />
+    <ClCompile Include="..\..\src\gui\DatabaseBrowser.cpp" />
     <ClCompile Include="..\..\src\gui\EditableTableCell.cpp" />
     <ClCompile Include="..\..\src\gui\EditorPanel.cpp" />
     <ClCompile Include="..\..\src\gui\TableComponent.cpp" />

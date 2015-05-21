@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<instrument name="instrument_2">
+	<presets>
+		<preset name="preset_2_0" id="0" category1="cat1_0" category1="cat2_0" category1="cat3_0" />
+		<preset name="preset_2_1" id="1" category1="cat1_1" category1="cat2_1" category1="cat3_1" />
+		<preset name="preset_2_2" id="2" category1="cat1_2" category1="cat2_2" category1="cat3_2" />
+		<preset name="preset_2_3" id="3" category1="cat1_0" category1="cat2_0" category1="cat3_0" />
+		<preset name="preset_2_4" id="4" category1="cat1_1" category1="cat2_1" category1="cat3_1" />
+		<preset name="preset_2_5" id="5" category1="cat1_2" category1="cat2_2" category1="cat3_2" />
+		<preset name="preset_2_6" id="6" category1="cat1_0" category1="cat2_0" category1="cat3_0" />
+		<preset name="preset_2_7" id="7" category1="cat1_1" category1="cat2_1" category1="cat3_1" />
+		<preset name="preset_2_8" id="8" category1="cat1_2" category1="cat2_2" category1="cat3_2" />
+		<preset name="preset_2_9" id="9" category1="cat1_0" category1="cat2_0" category1="cat3_0" />
+	</presets>
+</instrument>

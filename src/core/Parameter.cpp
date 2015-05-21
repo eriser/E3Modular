@@ -92,6 +92,5 @@ namespace e3 {
     }
 
 
-
 } // namespace e3
 

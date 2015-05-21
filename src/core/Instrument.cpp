@@ -3,6 +3,7 @@
 #include "core/Polyphony.h"
 #include "core/Settings.h"
 #include "modules/ModuleFactory.h"
+#include "core/InstrumentSerializer.h"
 #include "core/Instrument.h"
 
 
@@ -17,7 +18,7 @@ namespace e3 {
     Instrument::Instrument( XmlElement* xml, const std::string& path )
     {
         setXml( xml );
-        setPath( path );
+        setFilePath( path );
         modules_.reserve( 100 );
     }
 
@@ -38,6 +39,8 @@ namespace e3 {
         }
         modules_.clear();
         links_.clear();
+		presetSet_.clearSelectedPreset();
+		InstrumentSerializer::clearModuleComponent( this );
     }
 
 
@@ -56,7 +59,10 @@ namespace e3 {
         ASSERT( module );
         if (module)
         {
-            LinkList list;
+			InstrumentSerializer::clearModuleComponent( this, module->getId() );
+			getCurrentPreset().getModuleParameters().removeAllByModule( module->getId() );
+
+			LinkList list;
             getLinksForModule( module->getId(), PortTypeUndefined, list );
             module->reset();
             for (LinkList::const_iterator it = list.begin(); it != list.end(); ++it) {
@@ -70,10 +76,15 @@ namespace e3 {
     }
 
 
-    void Instrument::loadPreset()
+    void Instrument::loadPreset( int id )
     {
-        const Preset& preset     = getPreset();
-        ParameterSet& parameters = preset.getModuleParameters();
+		bool autosave = Settings::getInstance().getAutosavePresets();
+        if (autosave) {
+			saveCurrentPreset();
+		}
+		
+		currentPreset_ = setCurrentPreset( id );
+        ParameterSet& parameters = currentPreset_.getModuleParameters();
 
         for (ModuleList::iterator mit = modules_.begin(); mit != modules_.end(); mit++)
         {
@@ -89,26 +100,51 @@ namespace e3 {
     }
 
 
-    const Preset& Instrument::getPreset()
+    void Instrument::saveCurrentPreset()
+    {
+        if (currentPreset_.empty() == false)  {
+            presetSet_.updateSelectedPreset( currentPreset_ );
+        }
+    }
+
+
+    const Preset& Instrument::setCurrentPreset( int id )
     {
         if (presetSet_.empty()) {
             createDefaultPreset();
-            presetId_ = 0;
         }
-        return presetSet_.get( presetId_ );
+        if (id >= 0) {
+            presetSet_.selectPreset( id );
+        }
+        try {
+            return presetSet_.getSelectedPreset();
+        }
+        catch (const std::out_of_range&) // selected presetId was invalid
+        {
+            presetSet_.selectPreset( 0 );
+            return presetSet_.getSelectedPreset();
+        }
     }
 
 
-    const Preset& Instrument::addPreset( int id, const std::string& name )   
-    { 
-        return presetSet_.addPreset( id, name ); 
+    const Preset& Instrument::addPreset()
+    {
+        presetSet_.addPreset( currentPreset_ );
+        return currentPreset_;
     }
 
+
+    void Instrument::renameCurrentPreset(const std::string& name)
+    {
+        currentPreset_.setName( name );
+        presetSet_.renamePreset( currentPreset_.getId(), name );
+    }
 
 
     void Instrument::createDefaultPreset()
     {
-        const Preset& preset = presetSet_.addPreset(0, "Default Preset");
+		const Preset& preset = presetSet_.addPreset( 0, "Default Preset" );
+		presetSet_.selectPreset( 0 );
 
         for (ModuleList::iterator it = modules_.begin(); it != modules_.end(); it++)
         {
@@ -141,7 +177,7 @@ namespace e3 {
 
     void Instrument::connectModules()
     {
-        ParameterSet& linkParameters = getPreset().getLinkParameters();
+        ParameterSet& linkParameters = getCurrentPreset().getLinkParameters();
 
         for (LinkSet::const_iterator it = links_.begin(); it != links_.end(); ++it)
         {
@@ -215,7 +251,7 @@ namespace e3 {
         links_.add( link );
 
         if (addParameter) {
-            const Parameter& p = getPreset().getLinkParameters().addLinkParameter( link.getId(), link.leftModule_ );
+            const Parameter& p = getCurrentPreset().getLinkParameters().addLinkParameter( link.getId(), link.leftModule_ );
             p.label_ = createParameterLabel( link );
         }
     }
@@ -223,7 +259,7 @@ namespace e3 {
 
     void Instrument::removeLink( const Link& link )
     {
-        getPreset().getLinkParameters().remove( link.getId(), link.leftModule_ );
+        getCurrentPreset().getLinkParameters().remove( link.getId(), link.leftModule_ );
         links_.remove( link );
     }
 
@@ -285,14 +321,14 @@ namespace e3 {
     }
 
 
-    void Instrument::setPath( const std::string& path ) const
+    void Instrument::setFilePath( const std::string& path ) const
     {
         XmlElement* e = Settings::getInstance().getElement( "application" );
         e->setAttribute( "recent-instrument", path );
     }
 
 
-    std::string Instrument::getPath() const
+    std::string Instrument::getFilePath() const
     {
         XmlElement* e = Settings::getInstance().getElement( "application" );
         return e->getStringAttribute( "recent-instrument" ).toStdString();

@@ -12,33 +12,31 @@ namespace e3
 {
     class Module;
     class Instrument;
+	class Processor;
     class ParameterPanel;
     class ParameterStrip;
 
 
     class InstrumentParameterPanel : public Component, 
                                      public Label::Listener,
-                                     public Button::Listener
+                                     public Button::Listener,
+									 public ComboBox::Listener
     { 
     public:
-        InstrumentParameterPanel(ParameterPanel* owner);
+        InstrumentParameterPanel(Processor* processor);
 
         void resized() override;
         void paint( Graphics& g ) override;
         void update( Instrument* instrument );
 
-        void labelTextChanged( Label *labelThatHasChanged ) override;
+        void labelTextChanged( Label* label ) override;
         void buttonClicked( Button* button ) override;
-        //void buttonStateChanged( Button* button ) override;
+		void comboBoxChanged( ComboBox* comboBox ) override;
 
     protected:
         Label headerLabel_;
         Label nameLabel_;
-        Label categoryLabel_;
-        Label commentLabel_;
         Label nameEditor_;
-        Label categoryEditor_;
-        Label commentEditor_;
         Label voicesLabel_;
         Label unisonLabel_;
         Label spreadLabel_;
@@ -46,23 +44,25 @@ namespace e3
         NumericLabel unisonEditor_;
         NumericLabel spreadEditor_;
 
+		TextButton savePresetButton_;
+		TextButton addPresetButton_;
+		TextButton deletePresetButton_;
+
         ToggleButton holdButton_;
         ToggleButton retriggerButton_;
         ToggleButton legatoButton_;
 
         Label presetLabel_;
-        Label instrumentLabel_;
         ComboBox presetBox_;
-        ComboBox instrumentBox_;
 
-        ParameterPanel* owner_;
+		Processor* processor_;
     };
     
     
     class ModuleParameterPanel : public Component, public Label::Listener
     {
     public:
-        ModuleParameterPanel(ParameterPanel* owner);
+        ModuleParameterPanel();
 
         void resized() override;
         void paint( Graphics& g ) override;
@@ -72,8 +72,6 @@ namespace e3
     protected:
         void addParameters( ParameterSet& parameters, Module* module, Rectangle<int>& r );
         void removeAllParameters();
-
-        ParameterPanel* owner_;
 
         Label headerLabel_;
         OwnedArray<ParameterStrip> parameters_;
@@ -113,14 +111,13 @@ namespace e3
     class ParameterPanel : public Component
     {
     public:
-        ParameterPanel();
+		ParameterPanel( Processor* processor );
 
         void resized() override;
 
         void showInstrument( Instrument* instrument );
         void showModule( Instrument* instrument, Module* module );
 
-        Gallant::Signal2<const std::string&, var> instrumentAttributesSignal;     // attributeName, value
   
     protected:
         ScopedPointer<InstrumentParameterPanel> instrumentPanel_;

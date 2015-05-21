@@ -177,20 +177,6 @@ namespace e3 {
     }
 
 
-    std::string Settings::getRecentBankPath() const
-    {
-        XmlElement* e = getElement( "application" );
-        return e->getStringAttribute( "recent-bank", "" ).toStdString();
-    }
-
-
-    void Settings::setRecentBankPath( const std::string& path )
-    {
-        XmlElement* e = getElement( "application" );
-        e->setAttribute( "recent-bank", path );
-    }
-
-
     std::string Settings::getRecentInstrumentPath() const
     {
         XmlElement* e = getElement( "application" );
@@ -203,6 +189,20 @@ namespace e3 {
         XmlElement* e = getElement( "application" );
         e->setAttribute( "recent-instrument", path );
     }
+
+
+	bool Settings::getAutosavePresets() const
+	{
+		XmlElement* e = getElement( "application" );
+		return e->getBoolAttribute( "autosave-presests" );
+	}
+
+
+	bool Settings::getAutosaveInstruments() const
+	{
+		XmlElement* e = getElement( "application" );
+		return e->getBoolAttribute( "autosave-instruments" );
+	}
 
 
 #ifdef BUILD_TARGET_APP

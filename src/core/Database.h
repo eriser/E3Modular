@@ -1,61 +1,82 @@
 
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <memory>
+#include <set>
+#include "JuceHeader.h"
 
 
 namespace e3 {
-    class Instrument;
 
-    class Database {
-        friend class BankSerializer;
-
+    class Database 
+	{
     public:
+		static Database& getInstance();
+
         void build( bool force = false );
 
-        void load( const std::string& path );
-        void save( const std::string& path, bool saveCurrent=true, bool makeBackup=true );
-        void createNewBank();
+		XmlElement* getXml()	{ return databaseXml_; }
 
-        const std::string getName() const;
-        void setName( const std::string& name );
 
-        int getCurrentInstrumentId() const;
-        void setCurrentInstrumentId( int id );
+		struct Filter
+		{
+			String name;
+			bool selected = false;
 
-        void setPath( const std::string& path );
-        std::string getPath();
+			bool operator==( const Filter& other ) const { return other.name == name; }
+			bool operator<( const Filter& other ) const  { return name < other.name; }
+		};
 
-        void setInstrumentPath( const std::string& path ) const;
-        std::string getInstrumentPath() const;
+		struct Instrument 
+		{
+			int id;
+			String name;
+			File file;
+			bool selected = false;
 
-        Instrument* loadInstrument( const std::string& path );
-        Instrument* loadInstrument( int id = -1 );
-        Instrument* createNewInstrument();
+			bool operator==( const Instrument& other ) const { return other.id == id; }
+			bool operator<( const Instrument& other ) const  { return id < other.id;	}
+		};
 
-        void saveInstrument( Instrument* instrument );
-        void saveInstrumentAttributes( Instrument* instrument );
-        void saveInstrumentAttribute( int instrumentId, const std::string& name, const var& value );
-        void saveInstrumentLinks( Instrument* instrument );
+		struct Preset 
+		{
+			int presetId, instrumentId;
+			String name;
+			Filter category1, category2, category3;
 
-        void append( Instrument* instrument );
+			bool operator==( const Preset& other ) const { 
+				return other.presetId == presetId && other.instrumentId == instrumentId; 
+			}
+			bool operator<( const Preset& other ) const  { 
+				if( other.instrumentId != instrumentId ) return instrumentId < other.instrumentId;
+				return presetId < other.presetId;
+			}
+		};
 
-        XmlElement* getXml();
-        void setXml( XmlElement* e );
+		typedef std::set<Instrument> InstrumentSet;
+		typedef std::set<Preset> PresetSet;
+		typedef std::set<Filter> FilterSet;
 
-        bool hasLoaded() const;
+		const InstrumentSet& getInstruments() const  { return instruments_; }
+		const PresetSet& getPresets() const			 { return presets_; }
+		const FilterSet& getCategory1() const	     { return category1_; }
+		const FilterSet& getCategory2() const	     { return category2_; }
+		const FilterSet& getCategory3() const	     { return category3_; }
 
-        int getNumInstruments() const;
+	
+	protected:
+		XmlElement* load( File& file );
 
-    protected:
         static File createDefaultFilename();
         static File getDatabaseFilename();
+		static void scanInstrument( XmlElement* root, const File& file, int count );
+
+		void scanInstrument( const File& file, int count );
 
 
-        std::unique_ptr<XmlElement> bankXml_ = nullptr;
-        ScopedPointer<XmlElement> databaseXml_ = nullptr;
+		InstrumentSet instruments_;
+		PresetSet presets_;
+		FilterSet category1_, category2_, category3_;
+
+		ScopedPointer<XmlElement> databaseXml_ = nullptr;
     };
 }  // namespace e3

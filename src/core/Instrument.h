@@ -27,10 +27,12 @@ namespace e3 {
         void suspendModules();
         void resumeModules();
 
-        void loadPreset();
-        const PresetSet& getPresets() const                      { return presetSet_; }
-        const Preset& getPreset();
-        const Preset& addPreset( int id, const std::string& name="" );
+        void loadPreset( int id = -1 );
+        void saveCurrentPreset();
+        const Preset& addPreset();
+        void renameCurrentPreset( const std::string& name );
+        const PresetSet& getPresets() const { return presetSet_; }
+        const Preset& getCurrentPreset() const { return currentPreset_; }
 
         Module* getModule( int moduleId ) const;
         const ModuleList& getModules() const    { return modules_; }
@@ -38,7 +40,6 @@ namespace e3 {
 
         Module* createAndAddModule( ModuleType type );
         void deleteModule( Module* module );
-        //void disconnectModules( const Link& link );
 
         void addLink( Link& link, bool addParameter = true );
         void removeLink( const Link& link );
@@ -52,8 +53,8 @@ namespace e3 {
         void setRetrigger( bool retrigger )        { retrigger_    = retrigger; }
         void setLegato( bool legato )              { legato_       = legato; }
 
-        void setPath( const std::string& path ) const;
-        std::string getPath() const;
+        void setFilePath( const std::string& path ) const;
+        std::string getFilePath() const;
 
         void setXml( XmlElement* xml )    { xml_ = xml; }
         XmlElement* getXml()              { return xml_; }
@@ -70,18 +71,18 @@ namespace e3 {
         bool ready_       = false;
 
         std::string name_ = "Default";
-        std::string category_;
-        std::string comment_;
 
     protected:
         bool hasAudioOutTerminal();
         int createUniqueId( ModuleType type );
         void createDefaultPreset();
+        const Preset& setCurrentPreset( int id );
         std::string createParameterLabel( const Link& link );
 
         ModuleList modules_;
         LinkSet links_;
         PresetSet presetSet_;
+		Preset currentPreset_;
 
         ScopedPointer<XmlElement> xml_ = nullptr;
 
