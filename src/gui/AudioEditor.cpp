@@ -41,8 +41,8 @@ namespace e3 {
         connectSignals();
         
         //browserPanel_->updateContents( processor_->getDatabaseXml() );
-		Database::getInstance().build();
-		databaseBrowser_->update();
+        Database::getInstance().build();
+        databaseBrowser_->update();
         modulePanel_->createModules( processor_ );
     }
 
@@ -83,14 +83,13 @@ namespace e3 {
     {
         switch (info.commandID)
         {
-        case cmdShowEditor:     tabPanel_->setCurrentTabIndex( kEditorPanel ); break;
-        case cmdShowBrowser:    tabPanel_->setCurrentTabIndex( kBrowserPanel );  break;
-        case cmdShowSetup:      tabPanel_->setCurrentTabIndex( kSetupPanel ); break;
-        case cmdOpen:           onOpenBank(); break;
-        case cmdSave:           onSaveBank( false ); break;
-        case cmdSaveAs:         onSaveBank( true ); break;
-        case cmdNew:            onNewBank(); break;
-        case cmdLoadInstrument: onLoadInstrument(); break;
+        case cmdShowEditor:       tabPanel_->setCurrentTabIndex( kEditorPanel ); break;
+        case cmdShowBrowser:      tabPanel_->setCurrentTabIndex( kBrowserPanel );  break;
+        case cmdShowSetup:        tabPanel_->setCurrentTabIndex( kSetupPanel ); break;
+        case cmdOpenInstrument:   onOpenInstrument(); break;
+        case cmdSaveInstrument:   onSaveInstrument(); break;
+        case cmdSaveInstrumentAs: onSaveInstrumentAs(); break;
+        case cmdNewInstrument:    onNewInstrument(); break;
 
         default: return false;
         }
@@ -134,7 +133,7 @@ namespace e3 {
     void AudioEditor::createComponents()
     {
         modulePanel_       = new ModulePanel();
-		parameterPanel_    = new ParameterPanel( processor_ );
+        parameterPanel_    = new ParameterPanel( processor_ );
         editorPanel_       = new EditorPanel();
         browserPanel_      = new BrowserPanel();
         setupPanel_        = new SetupPanel();
@@ -142,7 +141,7 @@ namespace e3 {
         databaseBrowser_   = new DatabaseBrowser();
 
         editorPanel_->setComponents( modulePanel_, parameterPanel_ );
-		browserPanel_->setComponents( instrumentBrowser_, databaseBrowser_ );
+        browserPanel_->setComponents( instrumentBrowser_, databaseBrowser_ );
 
         tabPanel_ = new TabComponent( TabbedButtonBar::TabsAtBottom, 10 );
         tabPanel_->addTab( "Editor", Colours::transparentBlack, editorPanel_, false, kEditorPanel );
@@ -183,64 +182,47 @@ namespace e3 {
     }
 
     
-    void AudioEditor::onOpenBank()
+    void AudioEditor::onOpenInstrument()
     {
-        // TODO: store current ModulePanel
-        //FileChooser fc( "Open Bank",
-        //    File::getCurrentWorkingDirectory(),
-        //    "*.e3mb",
-        //    true );
+        FileChooser fc( "Open Instrument",
+            File::getCurrentWorkingDirectory(),
+            "*.e3mi",
+            true );
 
-        //if (fc.browseForFileToOpen())
-        //{
-        //    std::string path = fc.getResult().getFullPathName().toStdString();
-        //    processor_->loadBank( path );
-        //    browserPanel_->updateContents( processor_->getDatabaseXml() );
-        //    processor_->loadInstrument();
-        //    modulePanel_->createModules( processor_ );
-        //}
+        if (fc.browseForFileToOpen())
+        {
+            std::string path = fc.getResult().getFullPathName().toStdString();
+            processor_->loadInstrument( path );
+            modulePanel_->createModules( processor_ );
+        }
     }
 
 
-    void AudioEditor::onSaveBank( bool askForFilename )
+    void AudioEditor::onSaveInstrument()
     {
-		UNUSED( askForFilename );
-		//if (askForFilename)
-        //{
-        //    FileChooser fc( "Save Bank As",
-        //        File::getCurrentWorkingDirectory(),
-        //        "*.e3mb",
-        //        true );
-
-        //    if (fc.browseForFileToSave( true ))
-        //    {
-        //        File file = fc.getResult();
-        //        processor_->saveBank( file.getFullPathName().toStdString() );
-        //    }
-        //}
-        //else {
-        //    processor_->saveBank();
-        //}
+        processor_->saveInstrument();
     }
 
 
-    void AudioEditor::onNewBank()
+    void AudioEditor::onSaveInstrumentAs()
     {
-        //processor_->newBank();
-        //browserPanel_->updateContents( processor_->getDatabaseXml() );
-        //processor_->loadInstrument();
+        FileChooser fc( "Save Instrument As",
+            File::getCurrentWorkingDirectory(),
+            "*.e3mi",
+            true );
+
+        if (fc.browseForFileToSave( true ))
+        {
+            File file = fc.getResult();
+            processor_->saveInstrument( file.getFullPathName().toStdString() );
+        }
     }
 
 
-    void AudioEditor::onLoadInstrument()
+    void AudioEditor::onNewInstrument()
     {
-        //XmlElement* xml = browserPanel_->getSelectedInstrumentXml();
-        //if (xml != nullptr)
-        //{
-        //    int id = xml->getIntAttribute( "id" );
-        //    processor_->loadInstrument( id );
-        //    modulePanel_->createModules( processor_, xml );
-        //}
+        processor_->loadInstrument();
+        modulePanel_->createModules( processor_ );
     }
 
 } // namespace e3

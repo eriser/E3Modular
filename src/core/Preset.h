@@ -25,8 +25,8 @@ namespace e3 {
         bool operator<(const Preset& other) const     { return id_ < other.id_; }
 
         void addParameterSet( const ParameterSet& set ) const;
-		void update( const Preset& other ) const;
-		void clear() const;
+        void updateParameters( const Preset& other ) const;
+        void clear() const;
 
         ParameterSet& getModuleParameters() const     { return moduleParameters_; }
         ParameterSet& getLinkParameters() const       { return linkParameters_; }
@@ -57,24 +57,27 @@ namespace e3 {
     class PresetSet : public std::set < Preset >
     {
     public:
-		const Preset& getSelectedPreset() const;
-		void updateSelectedPreset( const Preset& newPreset );
-		void clearSelectedPreset();
+        const Preset& getCurrentPreset() const;
+        int getCurrentPresetId() const	   { return currentPresetId_; }
+        void setCurrentPresetId( int id ) const;
 
-        void remove( int id );
-        void renamePreset( int id, const std::string& name );
-        const Preset& addPreset(int id, const std::string& name="");
+        void updateCurrentPreset( const Preset& newPreset );
+        void clearCurrentPreset();
+
+        const Preset& addPreset( int id, const std::string& name="" );
         void addPreset( Preset& preset );
-        bool contains( int id ) const;
+        void removePreset( int id );
+        void renamePreset( int id, const std::string& name );
 
-		void selectPreset( int id ) const  { selectedPresetId_ = id; }
-		int getSelectedPresetId() const	   { return selectedPresetId_; }
+        bool contains( int id ) const;
+        int findClosestId( int id ) const;
 
     protected:
         const_iterator find( int id ) const;
         int createUniqueId();
+        std::string createUniqueName( const std::string& name ) const;
 
-		mutable int selectedPresetId_ = -1;
+        mutable int currentPresetId_ = -1;
     };
 
 

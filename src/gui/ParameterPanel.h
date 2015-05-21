@@ -12,7 +12,7 @@ namespace e3
 {
     class Module;
     class Instrument;
-	class Processor;
+    class Processor;
     class ParameterPanel;
     class ParameterStrip;
 
@@ -20,7 +20,7 @@ namespace e3
     class InstrumentParameterPanel : public Component, 
                                      public Label::Listener,
                                      public Button::Listener,
-									 public ComboBox::Listener
+                                     public CustomComboBox::Listener
     { 
     public:
         InstrumentParameterPanel(Processor* processor);
@@ -31,31 +31,41 @@ namespace e3
 
         void labelTextChanged( Label* label ) override;
         void buttonClicked( Button* button ) override;
-		void comboBoxChanged( ComboBox* comboBox ) override;
+        void comboBoxChanged( CustomComboBox* comboBox ) override;
+        void comboBoxTextChanged( CustomComboBox* comboBox ) override;
 
     protected:
+        void updatePresets( Instrument* instrument );
+
         Label headerLabel_;
         Label nameLabel_;
-        Label nameEditor_;
+        Label fileLabel_;
         Label voicesLabel_;
         Label unisonLabel_;
         Label spreadLabel_;
+
+        Label nameEditor_;
         NumericLabel voicesEditor_;
         NumericLabel unisonEditor_;
         NumericLabel spreadEditor_;
 
-		TextButton savePresetButton_;
-		TextButton addPresetButton_;
-		TextButton deletePresetButton_;
+        TextButton savePresetButton_;
+        TextButton addPresetButton_;
+        TextButton deletePresetButton_;
+
+        TextButton openInstrumentButton_;
+        TextButton newInstrumentButton_;
+        TextButton saveInstrumentButton_;
+        TextButton saveInstrumentAsButton_;
 
         ToggleButton holdButton_;
         ToggleButton retriggerButton_;
         ToggleButton legatoButton_;
 
         Label presetLabel_;
-        ComboBox presetBox_;
+        CustomComboBox presetBox_;
 
-		Processor* processor_;
+        Processor* processor_;
     };
     
     
@@ -71,7 +81,6 @@ namespace e3
 
     protected:
         void addParameters( ParameterSet& parameters, Module* module, Rectangle<int>& r );
-        void removeAllParameters();
 
         Label headerLabel_;
         OwnedArray<ParameterStrip> parameters_;
@@ -111,7 +120,7 @@ namespace e3
     class ParameterPanel : public Component
     {
     public:
-		ParameterPanel( Processor* processor );
+        ParameterPanel( Processor* processor );
 
         void resized() override;
 

@@ -85,8 +85,8 @@ namespace e3 {
         void resume( bool nested = false );
 
         void saveInstrument( const std::string& path = "" );
-        void loadInstrument( const std::string& path, bool saveCurrent = true );
-		
+        void loadInstrument( const std::string& path = "", bool saveCurrent = true );
+        
         bool addLink( Link& link );
         void removeLink( const Link& link );
 

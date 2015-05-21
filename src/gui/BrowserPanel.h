@@ -8,7 +8,7 @@ namespace e3
 {
     class TabComponent;
     class InstrumentBrowser;
-	class DatabaseBrowser;
+    class DatabaseBrowser;
 
     class BrowserPanel : public Component
     {

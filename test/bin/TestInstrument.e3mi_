@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<instrument id="0" name="instrument_0" voices="32" unison="3" spread="5">
+<instrument name="instrument_0" voices="32" unison="3" spread="5">
   <panel>
     <module id="0" pos="621, 249"/>
     <module id="1" pos="169, 249"/>

@@ -61,6 +61,10 @@ namespace e3 {
     void Processor::releaseResources()
     {
         saveInstrument();
+
+        if (instrument_) {
+            instrument_->storeFilePath();
+        }
     }
 
 
@@ -97,10 +101,9 @@ namespace e3 {
 
     void Processor::saveInstrument( const std::string& path )
     {
-		if( path.empty() == false ) {
-			instrument_->setFilePath( path );
-		}
-		InstrumentSerializer::saveInstrument( instrument_ );
+        if (instrument_) {
+            instrument_->save( path );
+        }
     }
 
 
@@ -108,11 +111,11 @@ namespace e3 {
     {
         suspend();
 
-        if (instrument_ != nullptr && saveCurrent) {
-			saveInstrument();
+        if (saveCurrent) {
+            saveInstrument();
         }
 
-		instrument_ = InstrumentSerializer::loadInstrument( path );        // this calls instrument::ctor first!
+        instrument_ = InstrumentSerializer::loadInstrument( path );        // this calls instrument::ctor first!
         if (instrument_ != nullptr)
         {
             polyphony_->setNumVoices( instrument_->numVoices_ );
@@ -152,12 +155,12 @@ namespace e3 {
     }
 
 
-	bool Processor::addLink( Link& link )
+    bool Processor::addLink( Link& link )
     {
         suspend();
         try {
             instrument_->addLink( link );
-			InstrumentSerializer::saveLinks( instrument_ );
+            InstrumentSerializer::saveLinks( instrument_ );
             resetAndInitInstrument();
         }
         catch (const std::exception& e) {
@@ -175,7 +178,7 @@ namespace e3 {
         suspend();
         try {
             instrument_->removeLink( link );
-			InstrumentSerializer::saveLinks( instrument_ );
+            InstrumentSerializer::saveLinks( instrument_ );
             resetAndInitInstrument();
         }
         catch (const std::exception& e) 
@@ -193,7 +196,7 @@ namespace e3 {
         Module* module = nullptr;
         try {
             module = instrument_->createAndAddModule( (ModuleType)moduleType );
-            saveInstrument();
+            saveInstrument();  // TODO: autosave?
         }
         catch (const std::exception& e) 
         {
@@ -255,7 +258,7 @@ namespace e3 {
             instrument_->setLegato( value );
             polyphony_->setLegato( value );
         }
-		InstrumentSerializer::saveAttribute( instrument_, name, value );
+        InstrumentSerializer::saveAttribute( instrument_, name, value );
     }
 
 

@@ -22,11 +22,10 @@ namespace e3 {
             cmdShowEditor,
             cmdShowBrowser,
             cmdShowSetup,
-            cmdOpen,
-            cmdSave,
-            cmdSaveAs,
-            cmdNew,
-            cmdLoadInstrument
+            cmdOpenInstrument,
+            cmdSaveInstrument,
+            cmdSaveInstrumentAs,
+            cmdNewInstrument
         };
         commands.addArray(ids, numElementsInArray(ids));
     }
@@ -48,24 +47,21 @@ namespace e3 {
             result.setInfo("Setup", "Display the setup panel", "View", 0);
             result.addDefaultKeypress(',', ModifierKeys::commandModifier);
             break;
-        case cmdOpen:
+        case cmdOpenInstrument:
             result.setInfo("Open...", "Opens a bank or instrument", "File", 0);
             result.addDefaultKeypress('o', ModifierKeys::commandModifier);
             break;
-        case cmdSave:
+        case cmdSaveInstrument:
             result.setInfo("Save", "Saves a bank or instrument", "File", 0);
             result.addDefaultKeypress('s', ModifierKeys::commandModifier);
             break;
-        case cmdSaveAs:
+        case cmdSaveInstrumentAs:
             result.setInfo("Save As...", "Opens a file choose to save a bank or instrument", "File", 0);
             result.addDefaultKeypress('s', ModifierKeys::commandModifier);
             break;
-        case cmdNew:
+        case cmdNewInstrument:
             result.setInfo("New", "Creates a new bank or instrument", "File", 0);
             result.addDefaultKeypress('s', ModifierKeys::commandModifier);
-            break;
-        case cmdLoadInstrument:
-            result.setInfo("Load Instrument", "Loads an Instrument", "File", 0);
             break;
         default:
             break;

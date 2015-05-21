@@ -19,6 +19,9 @@ namespace e3 {
         Instrument( XmlElement* xml, const std::string& path );
         ~Instrument();
 
+        void save( const std::string& path );
+
+
         void deleteModules();
         void initModules( double sampleRate, int numVoices, Polyphony* polyphony = nullptr );
         void resetModules();
@@ -27,9 +30,10 @@ namespace e3 {
         void suspendModules();
         void resumeModules();
 
-        void loadPreset( int id = -1 );
+        void loadPreset( int id = -1, bool allowSaving = false );
         void saveCurrentPreset();
         const Preset& addPreset();
+        const Preset& deleteCurrentPreset();
         void renameCurrentPreset( const std::string& name );
         const PresetSet& getPresets() const { return presetSet_; }
         const Preset& getCurrentPreset() const { return currentPreset_; }
@@ -53,14 +57,14 @@ namespace e3 {
         void setRetrigger( bool retrigger )        { retrigger_    = retrigger; }
         void setLegato( bool legato )              { legato_       = legato; }
 
-        void setFilePath( const std::string& path ) const;
-        std::string getFilePath() const;
+        void setFilePath( const std::string& path ) { file_ = path; }
+        File getFilePath() const                    { return file_; }
+        void storeFilePath() const;
 
         void setXml( XmlElement* xml )    { xml_ = xml; }
         XmlElement* getXml()              { return xml_; }
 
 
-        int id_           = -1;
         int presetId_     = 0;
         int numVoices_    = 1;
         int numUnison_    = 1;
@@ -78,15 +82,16 @@ namespace e3 {
         void createDefaultPreset();
         const Preset& setCurrentPreset( int id );
         std::string createParameterLabel( const Link& link );
+        void removeModuleParameters( int moduleId );
+        void removeLinkParameters( int linkId, int moduleId );
+
 
         ModuleList modules_;
         LinkSet links_;
         PresetSet presetSet_;
-		Preset currentPreset_;
+        Preset currentPreset_;
 
         ScopedPointer<XmlElement> xml_ = nullptr;
-
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( Instrument )
+        File file_;
     };
 }  // namespace e3

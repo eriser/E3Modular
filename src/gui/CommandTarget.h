@@ -13,14 +13,13 @@ namespace e3 {
 
         enum CommandIDs
         {
-            cmdShowEditor     = 0x2100,
-            cmdShowBrowser    = 0x2101,
-            cmdShowSetup      = 0x2102,
-            cmdOpen           = 0x2110,
-            cmdSave           = 0x2111,
-            cmdSaveAs         = 0x2112,
-            cmdNew            = 0x2113,
-            cmdLoadInstrument = 0x2120,
+            cmdShowEditor       = 0x2100,
+            cmdShowBrowser      = 0x2101,
+            cmdShowSetup        = 0x2102,
+            cmdOpenInstrument   = 0x2110,
+            cmdSaveInstrument   = 0x2111,
+            cmdSaveInstrumentAs = 0x2112,
+            cmdNewInstrument    = 0x2113,
         };
 
         ApplicationCommandTarget* getNextCommandTarget() override { return nullptr; }

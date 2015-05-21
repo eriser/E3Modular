@@ -191,18 +191,18 @@ namespace e3 {
     }
 
 
-	bool Settings::getAutosavePresets() const
-	{
-		XmlElement* e = getElement( "application" );
-		return e->getBoolAttribute( "autosave-presests" );
-	}
+    bool Settings::getAutosavePresets() const
+    {
+        XmlElement* e = getElement( "application" );
+        return e->getBoolAttribute( "autosave-presets" );
+    }
 
 
-	bool Settings::getAutosaveInstruments() const
-	{
-		XmlElement* e = getElement( "application" );
-		return e->getBoolAttribute( "autosave-instruments" );
-	}
+    bool Settings::getAutosaveInstruments() const
+    {
+        XmlElement* e = getElement( "application" );
+        return e->getBoolAttribute( "autosave-instruments" );
+    }
 
 
 #ifdef BUILD_TARGET_APP

@@ -571,6 +571,7 @@ copy $(OutDir)\$(TargetFileName) F:\Devices\Vstplugins\test\$(TargetFileName)
     <ClCompile Include="..\..\src\gui\MonitorComponent.cpp" />
     <ClCompile Include="..\..\src\gui\Resources.cpp" />
     <ClCompile Include="..\..\src\gui\Style.cpp" />
+    <ClCompile Include="..\..\src\gui\Widgets.cpp" />
     <ClCompile Include="..\..\src\gui\Wires.cpp" />
     <ClCompile Include="..\..\src\modules\Delay.cpp" />
     <ClCompile Include="..\..\src\modules\AdsrEnvelope.cpp" />

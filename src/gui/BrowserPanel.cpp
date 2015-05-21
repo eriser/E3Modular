@@ -1,6 +1,6 @@
 
 #include "gui/Style.h"
-#include "CommandTarget.h"
+#include "gui/CommandTarget.h"
 #include "gui/TabComponent.h"
 #include "gui/InstrumentBrowser.h"
 #include "gui/DatabaseBrowser.h"
@@ -12,7 +12,7 @@ namespace e3
     void BrowserPanel::setComponents( InstrumentBrowser* instrumentBrowser, DatabaseBrowser* browser )
     {
         instrumentBrowser_ = instrumentBrowser;
-		browser_           = browser;
+        browser_           = browser;
 
         instrumentBrowser_->addColumn( "Id", InstrumentBrowser::IdColumn, 20 );
         instrumentBrowser_->addColumn( "Name", InstrumentBrowser::NameColumn, 200 );
@@ -20,24 +20,24 @@ namespace e3
         instrumentBrowser_->addColumn( "Comment",  InstrumentBrowser::CommentColumn, 200 );
 
         tabPanel_ = new TabComponent( TabbedButtonBar::TabsAtTop, 10 );
-		tabPanel_->addTab( "Database", Colours::transparentBlack, browser_, false, 0 );
-		tabPanel_->addTab( "Instruments", Colours::transparentBlack, instrumentBrowser_, false, 1 );
+        tabPanel_->addTab( "Database", Colours::transparentBlack, browser_, false, 0 );
+        tabPanel_->addTab( "Instruments", Colours::transparentBlack, instrumentBrowser_, false, 1 );
         addAndMakeVisible( tabPanel_ );
 
         openButton_.setButtonText( "Open" );
-        openButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdOpen, true );
+        openButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdOpenInstrument, true );
         addAndMakeVisible( &openButton_ );
 
         saveButton_.setButtonText( "Save" );
-        saveButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdSave, true );
+        saveButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdSaveInstrument, true );
         addAndMakeVisible( &saveButton_ );
 
         saveAsButton_.setButtonText( "Save As" );
-        saveAsButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdSaveAs, true );
+        saveAsButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdSaveInstrumentAs, true );
         addAndMakeVisible( &saveAsButton_ );
 
         newButton_.setButtonText( "New" );
-        newButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdNew, true );
+        newButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdNewInstrument, true );
         addAndMakeVisible( &newButton_ );
     }
 

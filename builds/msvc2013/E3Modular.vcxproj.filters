@@ -302,5 +302,8 @@
     <ClCompile Include="..\..\src\core\InstrumentSerializer.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\gui\Widgets.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

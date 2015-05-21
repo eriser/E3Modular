@@ -4,20 +4,19 @@
 #include "core/Instrument.h"
 #include "core/Processor.h"
 #include "gui/Style.h"
+#include "gui/CommandTarget.h"
+
 #include "gui/ParameterPanel.h"
 
 
 namespace e3 {
 
-
-
-
     //--------------------------------------------------------------
     // class InstrumentParameterPanel
     //--------------------------------------------------------------
 
-	InstrumentParameterPanel::InstrumentParameterPanel( Processor* processor ) :
-		processor_(processor)
+    InstrumentParameterPanel::InstrumentParameterPanel( Processor* processor ) :
+        processor_(processor)
     {
         Style& style = Style::getInstance();
         Colour textColour = style.findColour( TextEditor::textColourId );
@@ -30,10 +29,11 @@ namespace e3 {
         headerLabel_.setText( "Instrument", dontSendNotification );
         addAndMakeVisible( &headerLabel_ );
 
-        nameLabel_.setText( "Name:", dontSendNotification );
-        voicesLabel_.setText( "Voices:", dontSendNotification );
-        unisonLabel_.setText( "Unison:", dontSendNotification );
-        spreadLabel_.setText( "Spread:", dontSendNotification );
+        nameLabel_.setText( "Name", dontSendNotification );
+        fileLabel_.setText( "File", dontSendNotification );
+        voicesLabel_.setText( "Voices", dontSendNotification );
+        unisonLabel_.setText( "Unison", dontSendNotification );
+        spreadLabel_.setText( "Spread", dontSendNotification );
         presetLabel_.setText( "Preset", dontSendNotification );
 
         nameEditor_.setName( "name" );
@@ -48,12 +48,22 @@ namespace e3 {
         spreadEditor_.setRange( 0, 1200 );
         spreadEditor_.setJustificationType( Justification::centredRight );
 
-		savePresetButton_.setName( "savePreset" );
-		savePresetButton_.setButtonText( "Save" );
-		addPresetButton_.setName( "addPreset" );
-		addPresetButton_.setButtonText( "+" );
-		deletePresetButton_.setName( "deletePreset" );
-		deletePresetButton_.setButtonText( "-" );
+        savePresetButton_.setName( "savePreset" );
+        savePresetButton_.setButtonText( "Save" );
+        addPresetButton_.setName( "addPreset" );
+        addPresetButton_.setButtonText( "Add" );
+        deletePresetButton_.setName( "deletePreset" );
+        deletePresetButton_.setButtonText( "Remove" );
+
+        openInstrumentButton_.setButtonText( "Open" );
+        newInstrumentButton_.setButtonText( "New" );
+        saveInstrumentButton_.setButtonText( "Save" );
+        saveInstrumentAsButton_.setButtonText( "Save As" );
+
+        openInstrumentButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdOpenInstrument, true );
+        newInstrumentButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdNewInstrument, true );
+        saveInstrumentButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdSaveInstrument, true );
+        saveInstrumentAsButton_.setCommandToTrigger( CommandTarget::getCommandManager(), CommandTarget::cmdSaveInstrumentAs, true );
 
         holdButton_.setName( "hold" );
         holdButton_.setButtonText( "Hold" );
@@ -62,14 +72,16 @@ namespace e3 {
         legatoButton_.setName( "legato" );
         legatoButton_.setButtonText( "Mono/Legato" );
 
-		Label* labels[]   = { &nameLabel_, &presetLabel_,	&voicesLabel_, &unisonLabel_, &spreadLabel_ };
-        Label* editors[]  = { &nameEditor_, &voicesEditor_, &unisonEditor_, &spreadEditor_ };
-        Button* buttons[] = { &holdButton_, &retriggerButton_, &legatoButton_,
-			                  &savePresetButton_, &addPresetButton_, &deletePresetButton_ };
+        Label* labels[]    = { &nameLabel_, &presetLabel_, &fileLabel_, &voicesLabel_, &unisonLabel_, &spreadLabel_ };
+        Label* editors[]   = { &nameEditor_, &voicesEditor_, &unisonEditor_, &spreadEditor_ };
+        Button* buttons1[] = { &holdButton_, &retriggerButton_, &legatoButton_,
+                               &savePresetButton_, &addPresetButton_, &deletePresetButton_ };
+        Button* buttons2[] = { &openInstrumentButton_, &newInstrumentButton_,
+                               &saveInstrumentButton_, &saveInstrumentAsButton_ };
 
         for (int i = 0; i < ARRAY_SIZE( labels ); i++)
         {
-            labels[i]->setFont( Font( 10, Font::plain ) );
+            labels[i]->setFont( Font( 11, Font::plain ) );
             labels[i]->setColour( Label::textColourId, textColour );
             labels[i]->setBorderSize( BorderSize<int>(0, 0, 0, 0) );
             addAndMakeVisible( labels[i] );
@@ -77,7 +89,7 @@ namespace e3 {
 
         for (int i = 0; i < ARRAY_SIZE( editors ); i++)
         {
-            editors[i]->setFont( Font( 12, Font::plain ) );
+            editors[i]->setFont( Font( 15, Font::plain ) );
             editors[i]->setColour( Label::textColourId, textColour );
             editors[i]->setColour( Label::outlineColourId, textColour );
             editors[i]->setEditable( true );
@@ -85,49 +97,66 @@ namespace e3 {
             addAndMakeVisible( editors[i] );
         }
 
-        for (int i = 0; i < ARRAY_SIZE( buttons ); i++)
+        for (int i = 0; i < ARRAY_SIZE( buttons1 ); i++)
         {
-            buttons[i]->addListener( this );
-            addAndMakeVisible( buttons[i] );
+            buttons1[i]->addListener( this );
+            addAndMakeVisible( buttons1[i] );
+        }
+        for (int i = 0; i < ARRAY_SIZE( buttons2 ); i++)
+        {
+            addAndMakeVisible( buttons2[i] );
         }
 
-		presetBox_.setName( "selectPreset" );
-        presetBox_.setEditableText( true );
-		presetBox_.addListener( this );
+        presetBox_.setName( "selectPreset" );
+        presetBox_.addListener( this );
 
-		addAndMakeVisible( &presetLabel_ );
+        addAndMakeVisible( &presetLabel_ );
         addAndMakeVisible( &presetBox_ );
     }
 
 
     void InstrumentParameterPanel::resized()
     {
-        int t = 40;
+        int h = getHeight();
+        bool large = h > 450;
+        int t = large ? 50 : 30;
+        int o = large ? 0 : 15;
         int l = 10;
         int w = 200 - 20;
+        typedef Rectangle<int> rect;
+
+        nameLabel_.setVisible( large );
+
         headerLabel_.setBounds( l, 0, w, 25 );
+        nameLabel_.setBounds(   l, t-10, w, 20 );
+        nameEditor_.setBounds(  l, t+10, w, 20 );
 
-        nameLabel_.setBounds( l, t, w, 20 );
-        nameEditor_.setBounds( l, t + 20, w, 20 );
-		presetLabel_.setBounds( l, t + 65, 50, 20 );
-		presetBox_.setBounds( l, t + 90, w, 20 );
+        presetLabel_.setBounds(            rect( l, 0, 54, 20 ).withY( t+50-o ) );
+        savePresetButton_.setBounds(       rect( l, 0, 54, 20 ).withY( t+70-o ) );
+        addPresetButton_.setBounds(        rect( l, 0, 54, 20 ).withY( t+70-o ).withX(l+63) );
+        deletePresetButton_.setBounds(     rect( l, 0, 54, 20 ).withY( t+70-o ).withX(l+126) );
+                                           
+        presetBox_.setBounds(              rect( l, 0, w, 20 ).withY( t+100-o ) );
 
-		savePresetButton_.setBounds( l + 50, t + 65, 50, 20 );
-		addPresetButton_.setBounds( l + 110, t + 65, 20, 20 );
-		deletePresetButton_.setBounds( l + 140, t + 65, 20, 20 );
-            
-        t = getHeight() - 150;
-        holdButton_.setBounds(      l, t, w, 20 );
+        o = large ? 0 : 40;
+        fileLabel_.setBounds(              rect( l,    0, 85, 20 ).withY( t+160-o ) );
+        openInstrumentButton_.setBounds(   rect( l,    0, 85, 20 ).withY( t+180-o ) );
+        saveInstrumentButton_.setBounds(   rect( l+95, 0, 85, 20 ).withY( t+180-o ));
+        newInstrumentButton_.setBounds(    rect( l,    0, 85, 20 ).withY( t+210-o ));
+        saveInstrumentAsButton_.setBounds( rect( l+95, 0, 85, 20 ).withY( t+210-o ));
+
+        t = large ? h - 160 : h - 140;
+        holdButton_.setBounds( l, t, w, 20 );
         retriggerButton_.setBounds( l, t + 30, w, 20 );
         legatoButton_.setBounds(    l, t + 60, w, 20 );
 
-        t = getHeight() - 40;
-        voicesLabel_.setBounds( l, t, 55, 20 );
-        unisonLabel_.setBounds( l + 65, t, 55, 20 );
+        t = h - 50;
+        voicesLabel_.setBounds( l,       t, 55, 20 );
+        unisonLabel_.setBounds( l + 65,  t, 55, 20 );
         spreadLabel_.setBounds( l + 130, t, 55, 20 );
 
-        voicesEditor_.setBounds( l, t + 20, 60, 20 );
-        unisonEditor_.setBounds( l + 65, t + 20, 60, 20 );
+        voicesEditor_.setBounds( l,       t + 20, 60, 20 );
+        unisonEditor_.setBounds( l + 65,  t + 20, 60, 20 );
         spreadEditor_.setBounds( l + 130, t + 20, 60, 20 );
     }
 
@@ -151,17 +180,23 @@ namespace e3 {
         unisonEditor_.setText( String( instrument->numUnison_), dontSendNotification );
         spreadEditor_.setText( String( instrument->unisonSpread_), dontSendNotification );
 
-        presetBox_.clear( dontSendNotification );
+        updatePresets( instrument );
+    }
+
+
+    void InstrumentParameterPanel::updatePresets( Instrument* instrument )
+    {
+        presetBox_.clear();
         const PresetSet& presets = instrument->getPresets();
         for (PresetSet::const_iterator it = presets.begin(); it != presets.end(); ++it)
         {
             const Preset& p = *it;
-            presetBox_.addItem( p.getName(), p.getId() + 1 );
+            presetBox_.addItem( p.getName(), p.getId() );
         }
 
-        int id = presets.getSelectedPresetId();
+        int id = presets.getCurrentPresetId();
         if (id >= 0) {
-            presetBox_.setSelectedId( id + 1, dontSendNotification );
+            presetBox_.setSelectedId( id );
         }
     }
 
@@ -175,50 +210,45 @@ namespace e3 {
     void InstrumentParameterPanel::buttonClicked( Button* button )
     {
         Instrument* instrument = processor_->getInstrument();
-        
         String name = button->getName();
-		if( name == "savePreset" )
-		{
-			instrument->saveCurrentPreset();
-		}
-		else if( name == "addPreset" )
-		{
-            const Preset& preset = instrument->addPreset();
 
-            int id = preset.getId() + 1;
-            presetBox_.addItem( preset.getName(), id );
-            presetBox_.setSelectedId( id, dontSendNotification );
+        if( name == "savePreset" )
+        {
+            instrument->saveCurrentPreset();
+        }
+        else if( name == "addPreset" )
+        {
+            instrument->addPreset();
+            updatePresets( instrument );
             presetBox_.showEditor();
-		}
-		else if( name == "deletePreset" )
-		{
-
-		}
-		else {
-			processor_->setInstrumentAttribute( button->getName().toStdString(), button->getToggleState() );
-		}
+        }
+        else if( name == "deletePreset" )
+        {
+            instrument->deleteCurrentPreset();
+            updatePresets( instrument );
+        }
+        else {
+            processor_->setInstrumentAttribute( button->getName().toStdString(), button->getToggleState() );
+        }
     }
 
 
-	void InstrumentParameterPanel::comboBoxChanged( ComboBox* comboBox )
-	{
-		if( comboBox->getName() == "selectPreset" )
-		{
-            Instrument* instrument = processor_->getInstrument();
-            int selectedId = presetBox_.getSelectedId();
+    void InstrumentParameterPanel::comboBoxChanged( CustomComboBox* )
+    {
+        Instrument* instrument = processor_->getInstrument();
+        int selectedId = presetBox_.getSelectedId();
+        instrument->loadPreset( selectedId, true );
+    }
 
-            if (selectedId == 0) // text was edited
-            {   
-                String editorText = presetBox_.getText();
-                instrument->renameCurrentPreset( editorText.toStdString() );
-                int id = instrument->getCurrentPreset().getId() + 1;
-                presetBox_.changeItemText( id, editorText );
-            }
-            else { // another preset was selected
-                instrument->loadPreset( comboBox->getSelectedId() - 1 );
-            }
-		}
-	}
+
+    void InstrumentParameterPanel::comboBoxTextChanged( CustomComboBox* )
+    {
+        std::string text = presetBox_.getText();
+
+        Instrument* instrument = processor_->getInstrument();
+        instrument->renameCurrentPreset( text );
+    }
+
 
 
 
@@ -263,7 +293,7 @@ namespace e3 {
     {
         headerLabel_.setText( module->getLabel(), dontSendNotification );
 
-        removeAllParameters();
+        parameters_.clear();
 
         Rectangle<int> r( 0, 50, 200, 25 );
         const Preset& preset = instrument->getCurrentPreset();
@@ -287,23 +317,12 @@ namespace e3 {
     }
 
 
-    void ModuleParameterPanel::removeAllParameters()
-    {
-        for( int i = 0; i < parameters_.size(); ++i )
-        {
-            ParameterStrip* strip = parameters_.getUnchecked( i );
-            removeChildComponent( strip );
-        }
-        parameters_.clear();
-    }
-
-
     void ModuleParameterPanel::labelTextChanged( Label* label )
     {
         // TODO: set module label
-		
-		UNUSED( label );
-		//TRACE( "ModuleParameterPanel::labelTextChanged, text=%s\n", label->getText().toRawUTF8() );
+        
+        UNUSED( label );
+        //TRACE( "ModuleParameterPanel::labelTextChanged, text=%s\n", label->getText().toRawUTF8() );
         //owner_->instrumentAttributesSignal( label->getName().toStdString(), label->getText() );
     }
 
@@ -378,7 +397,7 @@ namespace e3 {
     // class ParameterPanel
     //--------------------------------------------------------------
 
-	ParameterPanel::ParameterPanel( Processor* processor )
+    ParameterPanel::ParameterPanel( Processor* processor )
     {
         instrumentPanel_ = new InstrumentParameterPanel( processor );
         modulePanel_     = new ModuleParameterPanel();

@@ -9,31 +9,31 @@
 
 namespace e3 {
 
-	std::string InstrumentSerializer::defaultInstrumentXml =
-		"<instrument name='Empty Instrument' id='0' preset='0' voices='32'>"
-		"<modules />"
-		"<links />"
-		"<panels/>"
-		"<presets><preset id='0' /></presets>"
-		"</instrument>";
+    std::string InstrumentSerializer::defaultInstrumentXml =
+        "<instrument name='Empty Instrument' id='0' preset='0' voices='32'>"
+        "<modules />"
+        "<links />"
+        "<panels />"
+        "<presets id='0'><preset id='0' name='Default Preset' /></presets>"
+        "</instrument>";
 
 
     Instrument* InstrumentSerializer::loadInstrument( const std::string& path )
     {
-		XmlElement* root = nullptr;
-		if( path.empty() )
-		{
-			root = XmlDocument::parse( defaultInstrumentXml );
-		}
-		else {
-			File file = checkPath( path );
-			root = XmlDocument::parse( file );
-		}
+        XmlElement* root = nullptr;
+        if( path.empty() )
+        {
+            root = XmlDocument::parse( defaultInstrumentXml );
+        }
+        else {
+            File file = checkPath( path );
+            root = XmlDocument::parse( file );
+        }
 
         if (root != nullptr)
         {
-			checkRoot( root );
-			try {
+            checkRoot( root );
+            try {
                 Instrument* instrument = new Instrument( root, path );  // processor will be owner of the instrument
                 
                 readAttributes( root, instrument );
@@ -51,31 +51,34 @@ namespace e3 {
     }
 
 
-	void InstrumentSerializer::saveInstrument( Instrument* instrument )
-	{
-		XmlElement* root = instrument->getXml();
-		if( root != nullptr )
-		{
-			try {
-				writeAttributes( root, instrument );
-				writeModules( root, instrument );
-				writeLinks( root, instrument );
-				writePresets( root, instrument );
+    void InstrumentSerializer::saveInstrument( Instrument* instrument )
+    {
+        File file = instrument->getFilePath();
+        if (file == File()) return;
 
-				if( root->writeToFile( File( instrument->getFilePath() ), "", "UTF-8", 1000 ) == false ) {
-					THROW( std::runtime_error, "Error writing instrument file" );
-				}
-			}
-			catch( const std::exception& e ) {       // parse error
-				TRACE( e.what() );
-			}
-		}
-	}
+        XmlElement* root = instrument->getXml();
+        if( root != nullptr )
+        {
+            try {
+                writeAttributes( root, instrument );
+                writeModules( root, instrument );
+                writeLinks( root, instrument );
+                writePresets( root, instrument );
+
+                if( root->writeToFile( file , "", "UTF-8", 1000 ) == false ) {
+                    THROW( std::runtime_error, "Error writing instrument file" );
+                }
+            }
+            catch( const std::exception& e ) {       // parse error
+                TRACE( e.what() );
+            }
+        }
+    }
 
 
     void InstrumentSerializer::saveAttributes( Instrument* instrument )
     {
-		XmlElement* root = instrument->getXml();
+        XmlElement* root = instrument->getXml();
         if (root != nullptr)
         {
             try {
@@ -90,7 +93,7 @@ namespace e3 {
 
     void InstrumentSerializer::saveAttribute( Instrument* instrument, const std::string& attrName, const var value )
     {
-		XmlElement* root = instrument->getXml();
+        XmlElement* root = instrument->getXml();
         if (root != nullptr)
         {
             root->setAttribute( Identifier(attrName), value.toString() );
@@ -100,7 +103,7 @@ namespace e3 {
 
     void InstrumentSerializer::saveLinks( Instrument* instrument )
     {
-		XmlElement* root = instrument->getXml();
+        XmlElement* root = instrument->getXml();
         if (root != nullptr)
         {
             try {
@@ -115,7 +118,6 @@ namespace e3 {
 
     void InstrumentSerializer::readAttributes( XmlElement* e, Instrument* instrument )
     {
-        instrument->id_           = e->getIntAttribute( "id" );
         instrument->name_         = e->getStringAttribute( "name", "Unnamed Instrument" ).toStdString();
         instrument->hold_         = e->getBoolAttribute( "hold", instrument->hold_ );
         instrument->retrigger_    = e->getBoolAttribute( "retrigger", instrument->retrigger_ );
@@ -168,8 +170,7 @@ namespace e3 {
     void InstrumentSerializer::readPresets( XmlElement* parent, Instrument* instrument )
     {
         XmlElement* presetsXml = getChildElement( parent, "presets" );
-		PresetSet& presetSet   = const_cast<PresetSet&>(instrument->getPresets());
-		presetSet.selectPreset( presetsXml->getIntAttribute( "selected", -1 ) );
+        PresetSet& presetSet   = const_cast<PresetSet&>(instrument->getPresets());
 
         forEachXmlChildElementWithTagName( *presetsXml, presetXml, "preset" )
         {
@@ -208,6 +209,7 @@ namespace e3 {
                 }
             }
         }
+        presetSet.setCurrentPresetId( presetsXml->getIntAttribute( "selected", -1 ) );
     }
 
 
@@ -243,7 +245,6 @@ namespace e3 {
     {
         e->removeAllAttributes();
 
-        e->setAttribute( "id", instrument->id_ );
         e->setAttribute( "name", instrument->name_ );
         e->setAttribute( "voices", instrument->numVoices_ );
 
@@ -291,7 +292,7 @@ namespace e3 {
         XmlElement* presetsXml = getAndClearChildElement( e, "presets" );
 
         const PresetSet& presetSet = instrument->getPresets();
-		presetsXml->setAttribute( "selected", presetSet.getSelectedPresetId() );
+        presetsXml->setAttribute( "selected", presetSet.getCurrentPresetId() );
 
         for (PresetSet::const_iterator it = presetSet.begin(); it != presetSet.end(); ++it)
         {
@@ -403,48 +404,48 @@ namespace e3 {
     }
 
 
-	void InstrumentSerializer::saveModuleComponent( Instrument* instrument, int moduleId, Point<int> pos, bool isNewModule )
-	{
-		XmlElement* panelXml = getPanelXml( instrument );
-		if( panelXml == nullptr ) return;
+    void InstrumentSerializer::saveModuleComponent( Instrument* instrument, int moduleId, Point<int> pos, bool isNewModule )
+    {
+        XmlElement* panelXml = getPanelXml( instrument );
+        if( panelXml == nullptr ) return;
 
-		XmlElement* e = panelXml->getChildByAttribute( "id", String( moduleId ) );
-		ASSERT( ( isNewModule && e == nullptr ) || e != nullptr );
+        XmlElement* e = panelXml->getChildByAttribute( "id", String( moduleId ) );
+        ASSERT( ( isNewModule && e == nullptr ) || e != nullptr );
 
-		if( e == nullptr && isNewModule )
-		{
-			e = panelXml->createNewChildElement( "module" );
-			e->setAttribute( "id", moduleId );
-		}
-		if( e != nullptr ) {
-			e->setAttribute( "pos", pos.toString() );
-		}
-	}
-
-
-	void InstrumentSerializer::clearModuleComponent( Instrument* instrument, int moduleId )
-	{
-		XmlElement* panel = getPanelXml( instrument );
-		if( panel == nullptr ) return;
-
-		if( moduleId == -1 ) {
-			panel->deleteAllChildElements();
-		}
-		else {
-			XmlElement* e = panel->getChildByAttribute( "id", String(moduleId));
-			panel->removeChildElement( e, true );
-		}
-	}
+        if( e == nullptr && isNewModule )
+        {
+            e = panelXml->createNewChildElement( "module" );
+            e->setAttribute( "id", moduleId );
+        }
+        if( e != nullptr ) {
+            e->setAttribute( "pos", pos.toString() );
+        }
+    }
 
 
-	XmlElement* InstrumentSerializer::getPanelXml( Instrument* instrument )
-	{
-		XmlElement* root = instrument->getXml();
-		if( root == nullptr ) return nullptr;
+    void InstrumentSerializer::clearModuleComponent( Instrument* instrument, int moduleId )
+    {
+        XmlElement* panel = getPanelXml( instrument );
+        if( panel == nullptr ) return;
 
-		XmlElement* panel = root->getChildByName( "panel" );
-		return panel;
-	}
+        if( moduleId == -1 ) {
+            panel->deleteAllChildElements();
+        }
+        else {
+            XmlElement* e = panel->getChildByAttribute( "id", String(moduleId));
+            panel->removeChildElement( e, true );
+        }
+    }
+
+
+    XmlElement* InstrumentSerializer::getPanelXml( Instrument* instrument )
+    {
+        XmlElement* root = instrument->getXml();
+        if( root == nullptr ) return nullptr;
+
+        XmlElement* panel = root->getChildByName( "panel" );
+        return panel;
+    }
 
 
     XmlElement* InstrumentSerializer::getChildElement( XmlElement* e, const std::string& name )
@@ -478,13 +479,13 @@ namespace e3 {
     }
 
 
-	void InstrumentSerializer::checkRoot( XmlElement* root )
-	{
-		if( root == nullptr || root->hasTagName( "instrument" ) == false ) {
-			if( root ) delete root;
-			THROW( std::runtime_error, "Incompatible instrument file" );
-		}
-	}
+    void InstrumentSerializer::checkRoot( XmlElement* root )
+    {
+        if( root == nullptr || root->hasTagName( "instrument" ) == false ) {
+            if( root ) delete root;
+            THROW( std::runtime_error, "Incompatible instrument file" );
+        }
+    }
 
 
 } // namespace e3

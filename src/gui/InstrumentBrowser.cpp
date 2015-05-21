@@ -38,8 +38,9 @@ namespace e3 {
 
     void InstrumentBrowser::setActiveItem( int rowNumber )
     {
-        TableComponent::setActiveItem( rowNumber );
-        AudioEditor::getCommandManager()->invokeDirectly( AudioEditor::cmdLoadInstrument, false );
+        UNUSED( rowNumber );
+        //TableComponent::setActiveItem( rowNumber );
+        //AudioEditor::getCommandManager()->invokeDirectly( AudioEditor::cmdLoadInstrument, false );
     }
 
 

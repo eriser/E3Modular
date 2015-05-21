@@ -31,6 +31,7 @@ namespace e3 {
         removeAllChildren();
         modules_.clear();
         wires_->deleteAll();
+        repaint();
 
         processor_             = processor;
         Instrument* instrument = processor_->getInstrument();
@@ -379,7 +380,7 @@ namespace e3 {
 
     void ModulePanel::saveModulePosition( int moduleId, Point<int> pos, bool isNewModule )
     {
-		InstrumentSerializer::saveModuleComponent( getInstrument(), moduleId, pos, isNewModule );
+        InstrumentSerializer::saveModuleComponent( getInstrument(), moduleId, pos, isNewModule );
     }
 
 
@@ -442,22 +443,22 @@ namespace e3 {
     Processor* ModulePanel::getProcessor() const    { return processor_; }
 
 
-	Instrument* ModulePanel::getInstrument() const 
-	{
-		if( processor_ == nullptr ) return nullptr;
-		return processor_->getInstrument();
-	}
+    Instrument* ModulePanel::getInstrument() const 
+    {
+        if( processor_ == nullptr ) return nullptr;
+        return processor_->getInstrument();
+    }
 
 
     XmlElement* ModulePanel::getPanelXml() const
     {
-		Instrument* instrument = getInstrument();
-		if( instrument == nullptr )  return nullptr;
+        Instrument* instrument = getInstrument();
+        if( instrument == nullptr )  return nullptr;
 
-		XmlElement* xml = instrument->getXml();
-		if( xml == nullptr ) return nullptr;
+        XmlElement* xml = instrument->getXml();
+        if( xml == nullptr ) return nullptr;
 
-		return xml->getChildByName( "panel" );
+        return xml->getChildByName( "panel" );
     }
 
 

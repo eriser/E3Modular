@@ -34,13 +34,41 @@ namespace e3 {
     };
 
 
-    class EditableComboBox : public ComboBox
+    class CustomComboBox : public Component, public ComboBox::Listener
     {
     public:
-        void labelTextChanged( Label* label ) override
+
+        CustomComboBox();
+        ~CustomComboBox();
+
+        void comboBoxChanged( ComboBox* comboBox ) override;
+        void resized() override;
+
+        void clear();
+        void addItem( const std::string& text, int itemId );
+        const std::string getText() const;
+        void showEditor();
+
+        void setSelectedId( int itemId );
+        int getSelectedId() const;
+
+        void mouseDown( const MouseEvent& event ) override;
+
+        class Listener
         {
-            ComboBox::labelTextChanged( label );
-        }
+        public:
+            virtual ~Listener() {}
+            virtual void comboBoxChanged( CustomComboBox* comboBox ) = 0;
+            virtual void comboBoxTextChanged( CustomComboBox* comboBox ) = 0;
+        };
+
+        void addListener( Listener* listener )       { listeners_.add( listener ); }
+        void removeListener( Listener* listener )    { listeners_.remove( listener ); }
+
+    protected:
+        ComboBox comboBox_;
+        ListenerList <Listener> listeners_;
+        int selectedId_ = -1;
     };
 
 } // namespace e3
